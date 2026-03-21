@@ -9,7 +9,7 @@ import { JoyaChatWidget } from './components/JoyaChatWidget';
 /* ─── Navbar ─── */
 function Navbar() {
   const { t } = useTranslation();
-  const [deliveryMode, setDeliveryMode] = useState<'delivery' | 'pickup'>('delivery');
+  const [deliveryMode, setDeliveryMode] = useState<'delivery' | 'pickup' | 'reservation'>('delivery');
   const [location, setLocation] = useState('');
   useEffect(() => {
     if (navigator.geolocation) {
@@ -30,9 +30,9 @@ function Navbar() {
       </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
         <div style={{ display: 'flex', background: 'rgba(255,255,255,0.06)', borderRadius: 10, padding: 3 }}>
-          {(['delivery', 'pickup'] as const).map(m => (
+          {(['delivery', 'pickup', 'reservation'] as const).map(m => (
             <button key={m} onClick={() => setDeliveryMode(m)} style={{ padding: '8px 16px', border: 'none', borderRadius: 8, cursor: 'pointer', fontSize: 13, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 6, background: deliveryMode === m ? '#5A31F4' : 'transparent', color: deliveryMode === m ? '#fff' : 'rgba(255,255,255,0.5)', transition: 'all 0.2s' }}>
-              {m === 'delivery' ? '🚲' : '🏪'} {t(m)}
+              {m === 'delivery' ? '🚲' : m === 'pickup' ? '🏪' : '🍽️'} {m === 'reservation' ? 'Reserve' : t(m)}
             </button>
           ))}
         </div>
@@ -62,8 +62,8 @@ function HeroSection() {
         </h1>
         <p style={{ fontSize: 20, color: 'rgba(255,255,255,0.55)', marginBottom: 40, lineHeight: 1.6 }}>{t('hero_subtitle')}</p>
         <motion.form onSubmit={handleSearch} style={{ display: 'flex', gap: 8, background: 'rgba(255,255,255,0.05)', padding: 8, borderRadius: 50, border: '1px solid rgba(255,255,255,0.1)', maxWidth: 520, backdropFilter: 'blur(20px)', boxShadow: '0 20px 40px rgba(0,0,0,0.3)' }}>
-          <input type="text" placeholder={t('search_placeholder')} value={address} onChange={e => setAddress(e.target.value)} style={{ flex: 1, background: 'transparent', border: 'none', padding: '14px 24px', color: 'white', fontSize: 16, outline: 'none', fontFamily: 'inherit' }} />
-          <button type="submit" style={{ background: 'linear-gradient(135deg, #5A31F4, #FF0080, #FF6B35)', color: 'white', border: 'none', padding: '14px 36px', borderRadius: 40, fontSize: 16, fontWeight: 800, cursor: 'pointer', boxShadow: '0 8px 16px rgba(90,49,244,0.3)' }}>{t('search_button')}</button>
+          <input type="text" placeholder="Search delivery, pickup, or reservations..." value={address} onChange={e => setAddress(e.target.value)} style={{ flex: 1, background: 'transparent', border: 'none', padding: '14px 24px', color: 'white', fontSize: 16, outline: 'none', fontFamily: 'inherit' }} />
+          <button type="submit" style={{ background: 'linear-gradient(135deg, #5A31F4, #FF0080, #FF6B35)', color: 'white', border: 'none', padding: '14px 36px', borderRadius: 40, fontSize: 16, fontWeight: 800, cursor: 'pointer', boxShadow: '0 8px 16px rgba(90,49,244,0.3)' }}>Explore</button>
         </motion.form>
       </motion.div>
       {/* Couple eating in the restaurant hero image */}
@@ -131,20 +131,20 @@ function FoodCultureSection() {
 function HowItWorks() {
   const { t } = useTranslation();
   const steps = [
-    { icon: '📍', titleKey: 'step1_title', textKey: 'step1_text' },
-    { icon: '🍳', titleKey: 'step2_title', textKey: 'step2_text' },
-    { icon: '👑', titleKey: 'step3_title', textKey: 'step3_text' },
+    { icon: '📍', title: 'Find or Book', text: 'Discover local gems for delivery or reserve a table' },
+    { icon: '🍳', title: 'Savor the Moment', text: 'Browse curated menus with stunning AI photography' },
+    { icon: '👑', title: 'Royal Experience', text: 'Enjoy elite service, whether at home or dining in' },
   ];
   return (
     <section style={{ padding: '80px 60px', background: 'rgba(90,49,244,0.03)' }}>
-      <h2 style={{ textAlign: 'center', fontSize: 40, fontWeight: 900, marginBottom: 56 }}>{t('how_it_works')}</h2>
+      <h2 style={{ textAlign: 'center', fontSize: 40, fontWeight: 900, marginBottom: 56 }}>How EnJoy Works</h2>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 32, maxWidth: 960, margin: '0 auto' }}>
         {steps.map((s, i) => (
           <motion.div key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.15 }}
             style={{ textAlign: 'center', padding: '40px 24px', borderRadius: 20, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
             <div style={{ fontSize: 48, marginBottom: 20 }}>{s.icon}</div>
-            <h3 style={{ fontSize: 20, fontWeight: 800, marginBottom: 12 }}>{t(s.titleKey)}</h3>
-            <p style={{ color: 'rgba(255,255,255,0.5)', lineHeight: 1.6, fontSize: 15 }}>{t(s.textKey)}</p>
+            <h3 style={{ fontSize: 20, fontWeight: 800, marginBottom: 12 }}>{s.title}</h3>
+            <p style={{ color: 'rgba(255,255,255,0.5)', lineHeight: 1.6, fontSize: 15 }}>{s.text}</p>
           </motion.div>
         ))}
       </div>
