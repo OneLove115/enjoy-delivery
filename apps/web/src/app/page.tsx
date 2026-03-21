@@ -66,10 +66,10 @@ function HeroSection() {
           <button type="submit" style={{ background: 'linear-gradient(135deg, #5A31F4, #FF0080, #FF6B35)', color: 'white', border: 'none', padding: '14px 36px', borderRadius: 40, fontSize: 16, fontWeight: 800, cursor: 'pointer', boxShadow: '0 8px 16px rgba(90,49,244,0.3)' }}>{t('search_button')}</button>
         </motion.form>
       </motion.div>
-      {/* Couple + Purple Bag hero image */}
+      {/* Couple eating in the restaurant hero image */}
       <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.3 }} style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', position: 'relative', zIndex: 2 }}>
-        <div style={{ position: 'relative', width: '100%', maxWidth: 500 }}>
-          <img src="/food/couple-delivery.png" alt="Happy couple enjoying EnJoy delivery with purple branded bag" style={{ width: '100%', borderRadius: 24, boxShadow: '0 30px 80px rgba(90,49,244,0.25)', border: '2px solid rgba(90,49,244,0.2)' }} />
+        <div style={{ position: 'relative', width: '100%', maxWidth: 580 }}>
+          <img src="/food/hero-feast.png" alt="Couple enjoying a feast in a restaurant" style={{ width: '100%', borderRadius: 24, boxShadow: '0 30px 80px rgba(90,49,244,0.25)', border: '2px solid rgba(90,49,244,0.2)' }} />
           {/* Floating food badges */}
           <div style={{ position: 'absolute', top: -10, right: -10, width: 70, height: 70, borderRadius: '50%', overflow: 'hidden', border: '3px solid #5A31F4', boxShadow: '0 8px 20px rgba(0,0,0,0.4)' }}>
             <img src="/food/cat-pizza.png" alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
