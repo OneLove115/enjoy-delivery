@@ -15,6 +15,12 @@ type MenuItem = {
   category: string;
 };
 
+type MenuCategory = {
+  id: string;
+  name: string;
+  items: MenuItem[];
+};
+
 type Restaurant = {
   id: string;
   name: string;
@@ -22,6 +28,7 @@ type Restaurant = {
   rating: number;
   deliveryTime: string;
   imageUrl: string | null;
+  slug?: string;
 };
 
 /* ─── Helpers ─── */
@@ -29,22 +36,6 @@ function formatPrice(amount: number): string {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
 }
 
-/* ─── Mock data (replace with API calls) ─── */
-const MOCK_RESTAURANTS: Record<string, Restaurant> = {
-  'royal-kitchen': { id: '1', name: 'Royal Kitchen', cuisine: 'Indian · Curry', rating: 4.8, deliveryTime: '25-35 min', imageUrl: '/food/royal-kitchen.png' },
-  'burger-empire': { id: '2', name: 'Burger Empire', cuisine: 'Burgers · American', rating: 4.6, deliveryTime: '15-25 min', imageUrl: '/food/burger-empire.png' },
-  'sushi-palace': { id: '3', name: 'Sushi Palace', cuisine: 'Japanese · Sushi', rating: 4.9, deliveryTime: '30-40 min', imageUrl: '/food/sushi-palace.png' },
-  'pizza-throne': { id: '4', name: 'Pizza Throne', cuisine: 'Italian · Pizza', rating: 4.7, deliveryTime: '20-30 min', imageUrl: '/food/pizza-throne.png' },
-};
-
-const MOCK_MENU_ITEMS: MenuItem[] = [
-  { id: 'item-1', name: 'Butter Chicken', description: 'Tender chicken in a rich tomato-cream sauce', basePrice: '14.99', imageUrl: '/food/cat-curry.png', category: 'Mains' },
-  { id: 'item-2', name: 'Garlic Naan', description: 'Soft leavened bread with garlic and butter', basePrice: '3.99', imageUrl: null, category: 'Breads' },
-  { id: 'item-3', name: 'Samosa (2 pcs)', description: 'Crispy pastry filled with spiced potatoes', basePrice: '5.99', imageUrl: null, category: 'Starters' },
-  { id: 'item-4', name: 'Dal Makhani', description: 'Black lentils slow-cooked overnight with cream', basePrice: '12.99', imageUrl: null, category: 'Mains' },
-  { id: 'item-5', name: 'Mango Lassi', description: 'Chilled yogurt drink blended with fresh mango', basePrice: '4.99', imageUrl: null, category: 'Drinks' },
-  { id: 'item-6', name: 'Gulab Jamun', description: 'Soft milk-solid dumplings in rose syrup', basePrice: '6.99', imageUrl: null, category: 'Desserts' },
-];
 
 /* ─── Menu Item Card ─── */
 function MenuItemCard({ item, onAdd }: { item: MenuItem; onAdd: () => void }) {
@@ -101,8 +92,9 @@ export default function MenuPage() {
   const slug = typeof params?.slug === 'string' ? params.slug : Array.isArray(params?.slug) ? params.slug[0] : '';
 
   const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
-  const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
+  const [menu, setMenu] = useState<MenuCategory[]>([]);
   const [activeCategory, setActiveCategory] = useState<string>('');
+  const [loading, setLoading] = useState(true);
   const [cartOpen, setCartOpen] = useState(false);
 
   const { items: cart, addItem, total: cartTotal, itemCount } = useCartStore();
@@ -119,21 +111,28 @@ export default function MenuPage() {
   };
 
   useEffect(() => {
-    // In production, fetch from API using slug
-    const found = MOCK_RESTAURANTS[slug];
-    if (found) {
-      setRestaurant(found);
-    }
-    setMenuItems(MOCK_MENU_ITEMS);
-    if (MOCK_MENU_ITEMS.length > 0) {
-      setActiveCategory(MOCK_MENU_ITEMS[0].category);
-    }
+    if (!slug) return;
+
+    Promise.all([
+      fetch('/api/restaurants').then(r => r.json()),
+      fetch(`/api/restaurants/${slug}/menu`).then(r => r.json()),
+    ])
+      .then(([restaurantData, menuData]) => {
+        const found = (restaurantData.restaurants || []).find((r: Restaurant) => r.slug === slug);
+        setRestaurant(found || null);
+
+        const categories: MenuCategory[] = menuData?.data?.menu || [];
+        setMenu(categories);
+        if (categories.length > 0) setActiveCategory(categories[0].id);
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
   }, [slug]);
 
-  const categories = Array.from(new Set(menuItems.map(i => i.category)));
-  const filteredItems = menuItems.filter(i => i.category === activeCategory);
+  const activeMenuCategory = menu.find(c => c.id === activeCategory);
+  const filteredItems: MenuItem[] = activeMenuCategory?.items || [];
 
-  if (!restaurant) {
+  if (loading || !restaurant) {
     return (
       <div style={{ background: '#0A0A0F', minHeight: '100vh', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18 }}>
         Loading...
@@ -182,25 +181,25 @@ export default function MenuPage() {
       {/* Category Strip */}
       <div style={{ position: 'sticky', top: 70, zIndex: 50, background: 'rgba(10,10,15,0.95)', backdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(255,255,255,0.06)', padding: '0 32px' }}>
         <div style={{ display: 'flex', gap: 4, overflowX: 'auto', paddingBottom: 1 }}>
-          {categories.map(cat => (
+          {menu.map(cat => (
             <button
-              key={cat}
-              onClick={() => setActiveCategory(cat)}
+              key={cat.id}
+              onClick={() => setActiveCategory(cat.id)}
               style={{
                 padding: '16px 20px',
                 border: 'none',
                 background: 'transparent',
-                color: activeCategory === cat ? 'white' : 'rgba(255,255,255,0.4)',
-                fontWeight: activeCategory === cat ? 800 : 500,
+                color: activeCategory === cat.id ? 'white' : 'rgba(255,255,255,0.4)',
+                fontWeight: activeCategory === cat.id ? 800 : 500,
                 fontSize: 14,
                 cursor: 'pointer',
-                borderBottom: activeCategory === cat ? '2px solid #5A31F4' : '2px solid transparent',
+                borderBottom: activeCategory === cat.id ? '2px solid #5A31F4' : '2px solid transparent',
                 transition: 'all 0.2s',
                 whiteSpace: 'nowrap',
                 fontFamily: 'inherit',
               }}
             >
-              {cat}
+              {cat.name}
             </button>
           ))}
         </div>
@@ -210,7 +209,7 @@ export default function MenuPage() {
       <div style={{ display: 'flex', maxWidth: 1100, margin: '0 auto', padding: '32px 24px', gap: 32 }}>
         {/* Menu Items */}
         <div style={{ flex: 1, minWidth: 0 }}>
-          <h2 style={{ fontSize: 22, fontWeight: 900, marginBottom: 20 }}>{activeCategory}</h2>
+          <h2 style={{ fontSize: 22, fontWeight: 900, marginBottom: 20 }}>{activeMenuCategory?.name ?? ''}</h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             {filteredItems.map((item) => (
               <MenuItemCard
