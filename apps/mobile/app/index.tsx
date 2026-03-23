@@ -65,7 +65,7 @@ export default function HomeScreen() {
           <Text style={styles.logoText}>
             En<Text style={{ color: BRAND.purple }}>Joy</Text>
           </Text>
-          <TouchableOpacity style={styles.cartBtn}>
+          <TouchableOpacity style={styles.cartBtn} onPress={() => router.push('/cart')}>
             <Ionicons name="bag-outline" size={24} color={BRAND.textPrimary} />
           </TouchableOpacity>
         </View>
@@ -152,7 +152,14 @@ export default function HomeScreen() {
           { name: 'Sushi Palace', cuisine: 'Japanese · Sushi', rating: 4.9, time: '30-40 min', emoji: '🍣' },
           { name: 'Pizza Throne', cuisine: 'Italian · Pizza', rating: 4.7, time: '20-30 min', emoji: '🍕' },
         ].map((r, i) => (
-          <TouchableOpacity key={i} style={styles.restaurantCard}>
+          <TouchableOpacity
+            key={i}
+            style={styles.restaurantCard}
+            onPress={() => router.push({
+              pathname: '/restaurant/[id]',
+              params: { id: r.name.toLowerCase().replace(/\s+/g, '-'), name: r.name },
+            })}
+          >
             <View style={styles.restaurantImage}>
               <Text style={{ fontSize: 40 }}>{r.emoji}</Text>
             </View>
