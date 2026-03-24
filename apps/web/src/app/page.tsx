@@ -1,48 +1,12 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { TranslationProvider, useTranslation } from './context/TranslationContext';
 import { JoyaChatWidget } from './components/JoyaChatWidget';
-
-/* ─── Navbar ─── */
-function Navbar() {
-  const { t } = useTranslation();
-  const [deliveryMode, setDeliveryMode] = useState<'delivery' | 'pickup' | 'reservation'>('delivery');
-  const [location, setLocation] = useState('');
-  useEffect(() => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(async (pos) => {
-        try {
-          const res = await fetch(`/api/location?lat=${pos.coords.latitude}&lon=${pos.coords.longitude}`);
-          const data = await res.json();
-          setLocation(`${data.address?.road || ''}, ${data.address?.city || data.address?.town || ''}`);
-        } catch {}
-      });
-    }
-  }, []);
-  return (
-    <nav style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100, height: 70, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 40px', background: 'rgba(10,10,15,0.85)', backdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
-        <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 8, textDecoration: 'none' }}>
-          <span style={{ fontSize: 22, fontWeight: 900, color: 'white', lineHeight: 1 }}>En<span style={{ background: 'linear-gradient(135deg, #5A31F4, #FF0080)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Joy</span></span>
-        </Link>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'rgba(255,255,255,0.6)', fontSize: 14 }}>📍 <span>{location || 'Detecting...'}</span></div>
-      </div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-        <div style={{ display: 'flex', background: 'rgba(255,255,255,0.06)', borderRadius: 10, padding: 3 }}>
-          {(['delivery', 'pickup', 'reservation'] as const).map(m => (
-            <button key={m} onClick={() => setDeliveryMode(m)} style={{ padding: '8px 16px', border: 'none', borderRadius: 8, cursor: 'pointer', fontSize: 13, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 6, background: deliveryMode === m ? '#5A31F4' : 'transparent', color: deliveryMode === m ? '#fff' : 'rgba(255,255,255,0.5)', transition: 'all 0.2s' }}>
-              {m === 'delivery' ? '🚲' : m === 'pickup' ? '🏪' : '🍽️'} {m === 'reservation' ? 'Reserve' : t(m)}
-            </button>
-          ))}
-        </div>
-        <button style={{ width: 42, height: 42, borderRadius: 12, background: 'rgba(255,255,255,0.06)', border: 'none', cursor: 'pointer', fontSize: 18, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>🛒</button>
-      </div>
-    </nav>
-  );
-}
+import { Nav } from './components/Nav';
+import { Footer } from './components/Footer';
 
 /* ─── Hero Section with Couple & Purple Bag ─── */
 function HeroSection() {
@@ -188,40 +152,12 @@ function PopularRestaurants() {
   );
 }
 
-/* ─── Footer ─── */
-const footerLinks: Record<string, { label: string; href: string }[]> = {
-  Company: [{ label: 'About Us', href: '/about' }, { label: 'Careers', href: '/careers' }, { label: 'Blog', href: '/blog' }],
-  Support: [{ label: 'Help Center', href: '/help' }, { label: 'Contact', href: '/contact' }, { label: 'FAQ', href: '/faq' }],
-  Legal: [{ label: 'Privacy', href: '/privacy' }, { label: 'Terms', href: '/terms' }, { label: 'Cookies', href: '/cookies' }],
-};
-function Footer() {
-  return (
-    <footer style={{ padding: '60px 60px 32px', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 40, flexWrap: 'wrap', gap: 40 }}>
-        <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span style={{ fontSize: 22, fontWeight: 900, color: 'white', lineHeight: 1 }}>En<span style={{ background: 'linear-gradient(135deg, #5A31F4, #FF0080)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Joy</span></span>
-          </div>
-          <p style={{ color: 'rgba(255,255,255,0.4)', marginTop: 12, fontSize: 14, maxWidth: 280, lineHeight: 1.6 }}>Elite gourmet delivery. Royally crafted, impeccably delivered.</p>
-        </div>
-        {Object.entries(footerLinks).map(([title, links], i) => (
-          <div key={i}>
-            <h4 style={{ color: 'white', fontWeight: 800, marginBottom: 16, fontSize: 13, textTransform: 'uppercase', letterSpacing: 1 }}>{title}</h4>
-            {links.map(l => <Link key={l.label} href={l.href} style={{ display: 'block', color: 'rgba(255,255,255,0.35)', fontSize: 14, marginBottom: 10, transition: 'color 0.2s' }}>{l.label}</Link>)}
-          </div>
-        ))}
-      </div>
-      <div style={{ textAlign: 'center', color: 'rgba(255,255,255,0.2)', fontSize: 13, paddingTop: 24, borderTop: '1px solid rgba(255,255,255,0.04)' }}>© 2026 EnJoy. All rights reserved. Royal Delivery Worldwide.</div>
-    </footer>
-  );
-}
-
 /* ─── Main Page ─── */
 export default function LandingPage() {
   return (
     <TranslationProvider>
       <div style={{ background: '#0A0A0F', minHeight: '100vh', color: 'white', overflowX: 'hidden' }}>
-        <Navbar />
+        <Nav />
         <HeroSection />
         <FoodCultureSection />
         <PopularRestaurants />
