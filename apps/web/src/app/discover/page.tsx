@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { TranslationProvider } from '../context/TranslationContext';
@@ -34,17 +34,29 @@ const cuisines = [
   { bg: '#4A235A', img: '/food/cat-curry.png',   label: 'Vegetarisch' },
 ];
 
-/* ─── Restaurants ─── */
-const restaurants = [
-  { name: 'Royal Kitchen',   cuisine: 'Indian · Curry',       rating: 4.8, time: '25-35', img: '/food/royal-kitchen.png',  delivery: 'Gratis', min: 10,  open: true },
-  { name: 'Burger Empire',   cuisine: 'Burgers · American',   rating: 4.6, time: '15-25', img: '/food/burger-empire.png',  delivery: '€1,99',  min: 15,  open: true },
-  { name: 'Sushi Palace',    cuisine: 'Japanese · Sushi',     rating: 4.9, time: '30-40', img: '/food/sushi-palace.png',   delivery: 'Gratis', min: 20,  open: true },
-  { name: 'Pizza Throne',    cuisine: 'Italian · Pizza',      rating: 4.7, time: '20-30', img: '/food/pizza-throne.png',   delivery: '€0,99',  min: 12,  open: true },
-  { name: 'Taco Kingdom',    cuisine: 'Mexican · Street',     rating: 4.5, time: '20-30', img: '/food/taco-kingdom.png',   delivery: 'Gratis', min: 18,  open: false },
-  { name: 'Pho Dynasty',     cuisine: 'Vietnamese · Soups',   rating: 4.8, time: '25-35', img: '/food/hero-feast.png',     delivery: '€1,50',  min: 15,  open: true },
-  { name: 'Kebab Palace',    cuisine: 'Turkish · Shoarma',    rating: 4.4, time: '20-35', img: '/food/royal-kitchen.png',  delivery: 'Gratis', min: 8,   open: true },
-  { name: 'Dragon Wok',      cuisine: 'Chinese · Asian',      rating: 4.6, time: '25-40', img: '/food/sushi-palace.png',   delivery: '€2,00',  min: 20,  open: false },
-  { name: 'Mama Mia',        cuisine: 'Italian · Pasta',      rating: 4.7, time: '30-45', img: '/food/pizza-throne.png',   delivery: 'Gratis', min: 14,  open: true },
+/* ─── Restaurant type ─── */
+type RestaurantRow = {
+  name: string;
+  slug: string;
+  cuisine: string;
+  rating: number;
+  time: string;
+  img: string;
+  delivery: string;
+  min: number;
+  open: boolean;
+};
+
+const DEMO_RESTAURANTS: RestaurantRow[] = [
+  { name: 'Royal Kitchen',   slug: '', cuisine: 'Indian · Curry',       rating: 4.8, time: '25-35', img: '/food/royal-kitchen.png',  delivery: 'Gratis', min: 10,  open: true },
+  { name: 'Burger Empire',   slug: '', cuisine: 'Burgers · American',   rating: 4.6, time: '15-25', img: '/food/burger-empire.png',  delivery: '€1,99',  min: 15,  open: true },
+  { name: 'Sushi Palace',    slug: '', cuisine: 'Japanese · Sushi',     rating: 4.9, time: '30-40', img: '/food/sushi-palace.png',   delivery: 'Gratis', min: 20,  open: true },
+  { name: 'Pizza Throne',    slug: '', cuisine: 'Italian · Pizza',      rating: 4.7, time: '20-30', img: '/food/pizza-throne.png',   delivery: '€0,99',  min: 12,  open: true },
+  { name: 'Taco Kingdom',    slug: '', cuisine: 'Mexican · Street',     rating: 4.5, time: '20-30', img: '/food/taco-kingdom.png',   delivery: 'Gratis', min: 18,  open: false },
+  { name: 'Pho Dynasty',     slug: '', cuisine: 'Vietnamese · Soups',   rating: 4.8, time: '25-35', img: '/food/hero-feast.png',     delivery: '€1,50',  min: 15,  open: true },
+  { name: 'Kebab Palace',    slug: '', cuisine: 'Turkish · Shoarma',    rating: 4.4, time: '20-35', img: '/food/royal-kitchen.png',  delivery: 'Gratis', min: 8,   open: true },
+  { name: 'Dragon Wok',      slug: '', cuisine: 'Chinese · Asian',      rating: 4.6, time: '25-40', img: '/food/sushi-palace.png',   delivery: '€2,00',  min: 20,  open: false },
+  { name: 'Mama Mia',        slug: '', cuisine: 'Italian · Pasta',      rating: 4.7, time: '30-45', img: '/food/pizza-throne.png',   delivery: 'Gratis', min: 14,  open: true },
 ];
 
 /* ─── EnJoy Logo ─── */
@@ -144,6 +156,27 @@ function DiscoverContent() {
   const [activeCuisine, setActiveCuisine] = useState<string | null>(null);
   const [activeTopCat, setActiveTopCat]   = useState(0);
   const [showAll, setShowAll]             = useState(false);
+  const [restaurants, setRestaurants]     = useState<RestaurantRow[]>(DEMO_RESTAURANTS);
+
+  useEffect(() => {
+    fetch('/api/restaurants')
+      .then(r => r.json())
+      .then(data => {
+        const real: RestaurantRow[] = (data.restaurants || []).map((t: any) => ({
+          name: t.name,
+          slug: t.slug || '',
+          cuisine: t.tagline || 'Restaurant',
+          rating: 0,
+          time: '30–45',
+          img: t.logo || '/food/hero-feast.png',
+          delivery: 'Gratis',
+          min: 0,
+          open: true,
+        }));
+        if (real.length > 0) setRestaurants(real);
+      })
+      .catch(() => {/* keep demo data */});
+  }, []);
 
   const filtered = restaurants.filter(r => {
     if (search && !r.name.toLowerCase().includes(search.toLowerCase()) && !r.cuisine.toLowerCase().includes(search.toLowerCase())) return false;
@@ -348,7 +381,8 @@ function DiscoverContent() {
                 <p style={{ fontSize: 14, marginTop: 8 }}>Pas je filters aan</p>
               </div>
             ) : filtered.map((r, i) => (
-              <motion.div key={i}
+              <Link key={r.slug || r.name} href={r.slug ? `/menu/${r.slug}` : '#'} style={{ textDecoration: 'none', display: 'block' }}>
+              <motion.div
                 initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.04 }}
                 whileHover={{ y: -2, boxShadow: '0 8px 32px rgba(0,0,0,0.4)' }}
                 style={{ background: '#2A2A2A', borderRadius: 16, overflow: 'hidden', cursor: 'pointer', border: '1px solid rgba(255,255,255,0.07)', transition: 'box-shadow 0.2s' }}>
@@ -381,6 +415,7 @@ function DiscoverContent() {
                   </div>
                 </div>
               </motion.div>
+              </Link>
             ))}
           </div>
         </div>
