@@ -25,7 +25,10 @@ function Navbar() {
   return (
     <nav style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100, height: 70, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 40px', background: 'rgba(10,10,15,0.85)', backdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
-        <span style={{ fontSize: 28, fontWeight: 900 }}>En<span style={{ background: 'linear-gradient(135deg,#5A31F4,#FF0080)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Joy</span></span>
+        <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 8, textDecoration: 'none' }}>
+          <div style={{ width: 36, height: 36, background: 'linear-gradient(135deg, #E8703A, #FF4500)', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20 }}>🛵</div>
+          <span style={{ fontSize: 22, fontWeight: 900, color: 'white' }}>En<span style={{ color: '#E8703A' }}>Joy</span><span style={{ color: '#E8703A', fontSize: 13 }}>.nl</span></span>
+        </Link>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'rgba(255,255,255,0.6)', fontSize: 14 }}>📍 <span>{location || 'Detecting...'}</span></div>
       </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
@@ -197,7 +200,10 @@ function Footer() {
     <footer style={{ padding: '60px 60px 32px', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 40, flexWrap: 'wrap', gap: 40 }}>
         <div>
-          <span style={{ fontSize: 24, fontWeight: 900 }}>En<span style={{ background: 'linear-gradient(135deg,#5A31F4,#FF0080)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Joy</span></span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <div style={{ width: 32, height: 32, background: 'linear-gradient(135deg, #E8703A, #FF4500)', borderRadius: 7, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18 }}>🛵</div>
+            <span style={{ fontSize: 22, fontWeight: 900, color: 'white' }}>En<span style={{ color: '#E8703A' }}>Joy</span><span style={{ color: '#E8703A', fontSize: 12 }}>.nl</span></span>
+          </div>
           <p style={{ color: 'rgba(255,255,255,0.4)', marginTop: 12, fontSize: 14, maxWidth: 280, lineHeight: 1.6 }}>Elite gourmet delivery. Royally crafted, impeccably delivered.</p>
         </div>
         {Object.entries(footerLinks).map(([title, links], i) => (
