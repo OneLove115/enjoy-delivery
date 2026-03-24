@@ -8,46 +8,111 @@ import { JoyaChatWidget } from './components/JoyaChatWidget';
 import { Nav } from './components/Nav';
 import { Footer } from './components/Footer';
 
-/* ─── Hero Section with Couple & Purple Bag ─── */
+const PURPLE = '#5A31F4';
+const PINK   = '#FF0080';
+
+/* ─── Hero ─── */
 function HeroSection() {
   const { t } = useTranslation();
   const router = useRouter();
   const [address, setAddress] = useState('');
-  const handleSearch = (e?: React.FormEvent) => { e?.preventDefault(); router.push('/discover'); };
+  const [locating, setLocating] = useState(false);
+
+  const goDiscover = (addr: string) => {
+    if (addr.trim()) localStorage.setItem('enjoyAddress', addr.trim());
+    router.push('/discover');
+  };
+
+  const handleSearch = (e?: React.FormEvent) => {
+    e?.preventDefault();
+    goDiscover(address);
+  };
+
+  const handleGeolocate = () => {
+    if (!navigator.geolocation) return;
+    setLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      async pos => {
+        try {
+          const r = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?lat=${pos.coords.latitude}&lon=${pos.coords.longitude}&format=json`
+          );
+          const d = await r.json();
+          const addr = d.display_name?.split(',').slice(0, 3).join(',') || `${pos.coords.latitude.toFixed(4)}, ${pos.coords.longitude.toFixed(4)}`;
+          setAddress(addr);
+          goDiscover(addr);
+        } catch {
+          goDiscover('');
+        } finally {
+          setLocating(false);
+        }
+      },
+      () => setLocating(false)
+    );
+  };
+
   return (
-    <section style={{ minHeight: '95vh', display: 'flex', alignItems: 'center', padding: '0 60px', paddingTop: 70, position: 'relative', overflow: 'hidden' }}>
-      {/* Background glow */}
+    <section className="hero-section" style={{ display: 'flex', alignItems: 'center', position: 'relative', overflow: 'hidden' }}>
       <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at 30% 50%, rgba(90,49,244,0.15) 0%, transparent 60%)' }} />
-      {/* Text content */}
-      <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} style={{ maxWidth: 580, zIndex: 2, flex: '0 0 auto' }}>
-        <h1 style={{ fontSize: 62, fontWeight: 950, lineHeight: 1.05, marginBottom: 24, letterSpacing: -2 }}>
-          {t('hero_title').split(',')[0]},<br />
-          <span style={{ background: 'linear-gradient(135deg, #5A31F4, #FF0080, #FF6B35)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-            {t('hero_title').split(',')[1]}
-          </span>
-        </h1>
-        <p style={{ fontSize: 20, color: 'rgba(255,255,255,0.55)', marginBottom: 40, lineHeight: 1.6 }}>{t('hero_subtitle')}</p>
-        <motion.form onSubmit={handleSearch} style={{ display: 'flex', gap: 8, background: 'rgba(255,255,255,0.05)', padding: 8, borderRadius: 50, border: '1px solid rgba(255,255,255,0.1)', maxWidth: 520, backdropFilter: 'blur(20px)', boxShadow: '0 20px 40px rgba(0,0,0,0.3)' }}>
-          <input type="text" placeholder="Search delivery, pickup, or reservations..." value={address} onChange={e => setAddress(e.target.value)} style={{ flex: 1, background: 'transparent', border: 'none', padding: '14px 24px', color: 'white', fontSize: 16, outline: 'none', fontFamily: 'inherit' }} />
-          <button type="submit" style={{ background: 'linear-gradient(135deg, #5A31F4, #FF0080, #FF6B35)', color: 'white', border: 'none', padding: '14px 36px', borderRadius: 40, fontSize: 16, fontWeight: 800, cursor: 'pointer', boxShadow: '0 8px 16px rgba(90,49,244,0.3)' }}>Explore</button>
-        </motion.form>
-      </motion.div>
-      {/* Couple eating in the restaurant hero image */}
-      <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.3 }} style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', position: 'relative', zIndex: 2 }}>
-        <div style={{ position: 'relative', width: '100%', maxWidth: 580 }}>
-          <img src="/food/hero-feast.png" alt="Couple enjoying a feast in a restaurant" style={{ width: '100%', borderRadius: 24, boxShadow: '0 30px 80px rgba(90,49,244,0.25)', border: '2px solid rgba(90,49,244,0.2)' }} />
-          {/* Floating food badges */}
-          <div style={{ position: 'absolute', top: -10, right: -10, width: 70, height: 70, borderRadius: '50%', overflow: 'hidden', border: '3px solid #5A31F4', boxShadow: '0 8px 20px rgba(0,0,0,0.4)' }}>
-            <img src="/food/cat-pizza.png" alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+
+      <div className="hero-inner" style={{ width: '100%', zIndex: 2 }}>
+        {/* Text side */}
+        <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} style={{ maxWidth: 580, flex: '0 0 auto' }}>
+          <h1 className="hero-title" style={{ fontWeight: 950, lineHeight: 1.05, marginBottom: 20, letterSpacing: -2 }}>
+            {t('hero_title').split(',')[0]},<br />
+            <span style={{ background: `linear-gradient(135deg,${PURPLE},${PINK},#FF6B35)`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+              {t('hero_title').split(',')[1]}
+            </span>
+          </h1>
+          <p style={{ fontSize: 18, color: 'var(--text-secondary)', marginBottom: 32, lineHeight: 1.6 }}>{t('hero_subtitle')}</p>
+
+          <motion.form onSubmit={handleSearch} className="hero-form" style={{
+            display: 'flex', gap: 8, background: 'rgba(255,255,255,0.05)',
+            padding: 8, borderRadius: 50, border: '1px solid var(--border-strong)',
+            backdropFilter: 'blur(20px)', boxShadow: '0 20px 40px rgba(0,0,0,0.3)',
+          }}>
+            {/* Geo button */}
+            <button type="button" onClick={handleGeolocate} title="Use my location" style={{
+              flexShrink: 0, width: 46, height: 46, borderRadius: 40,
+              background: 'rgba(255,255,255,0.08)', border: 'none',
+              fontSize: 20, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>
+              {locating ? '⏳' : '📍'}
+            </button>
+
+            <input
+              type="text"
+              placeholder="Enter your address..."
+              value={address}
+              onChange={e => setAddress(e.target.value)}
+              style={{
+                flex: 1, background: 'transparent', border: 'none',
+                padding: '12px 8px', color: 'var(--text-primary)', fontSize: 15,
+                outline: 'none', fontFamily: 'inherit', minWidth: 0,
+              }}
+            />
+            <button type="submit" style={{
+              background: `linear-gradient(135deg,${PURPLE},${PINK},#FF6B35)`,
+              color: 'white', border: 'none', padding: '12px 28px',
+              borderRadius: 40, fontSize: 15, fontWeight: 800, cursor: 'pointer',
+              boxShadow: '0 8px 16px rgba(90,49,244,0.3)', whiteSpace: 'nowrap', flexShrink: 0,
+            }}>Zoeken</button>
+          </motion.form>
+        </motion.div>
+
+        {/* Hero image */}
+        <motion.div className="hero-image" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.3 }}>
+          <div style={{ position: 'relative', width: '100%', maxWidth: 520 }}>
+            <img src="/food/hero-feast.png" alt="Couple enjoying a feast" style={{ width: '100%', borderRadius: 24, boxShadow: '0 30px 80px rgba(90,49,244,0.25)', border: '2px solid rgba(90,49,244,0.2)' }} />
+            <div className="hide-mobile" style={{ position: 'absolute', top: -10, right: -10, width: 64, height: 64, borderRadius: '50%', overflow: 'hidden', border: '3px solid #5A31F4', boxShadow: '0 8px 20px rgba(0,0,0,0.4)' }}>
+              <img src="/food/cat-pizza.png" alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            </div>
+            <div className="hide-mobile" style={{ position: 'absolute', bottom: 20, left: -16, width: 58, height: 58, borderRadius: '50%', overflow: 'hidden', border: '3px solid #FF0080', boxShadow: '0 8px 20px rgba(0,0,0,0.4)' }}>
+              <img src="/food/cat-sushi.png" alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            </div>
           </div>
-          <div style={{ position: 'absolute', bottom: 20, left: -20, width: 65, height: 65, borderRadius: '50%', overflow: 'hidden', border: '3px solid #FF0080', boxShadow: '0 8px 20px rgba(0,0,0,0.4)' }}>
-            <img src="/food/cat-sushi.png" alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-          </div>
-          <div style={{ position: 'absolute', top: '40%', right: -25, width: 60, height: 60, borderRadius: '50%', overflow: 'hidden', border: '3px solid #FF6B35', boxShadow: '0 8px 20px rgba(0,0,0,0.4)' }}>
-            <img src="/food/cat-burger.png" alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-          </div>
-        </div>
-      </motion.div>
+        </motion.div>
+      </div>
     </section>
   );
 }
@@ -55,62 +120,54 @@ function HeroSection() {
 /* ─── Food Culture Gallery ─── */
 function FoodCultureSection() {
   const cuisines = [
-    { img: '/food/cat-pizza.png', name: 'Pizza' },
-    { img: '/food/cat-burger.png', name: 'Burgers' },
-    { img: '/food/cat-sushi.png', name: 'Sushi' },
-    { img: '/food/cat-curry.png', name: 'Curry' },
-    { img: '/food/cat-kebab.png', name: 'Kebab' },
-    { img: '/food/cat-dessert.png', name: 'Dessert' },
+    { img: '/food/cat-pizza.png',   name: 'Pizza',   href: '/discover' },
+    { img: '/food/cat-burger.png',  name: 'Burgers', href: '/discover' },
+    { img: '/food/cat-sushi.png',   name: 'Sushi',   href: '/discover' },
+    { img: '/food/cat-curry.png',   name: 'Curry',   href: '/discover' },
+    { img: '/food/cat-kebab.png',   name: 'Kebab',   href: '/discover' },
+    { img: '/food/cat-dessert.png', name: 'Dessert', href: '/discover' },
   ];
   return (
-    <section style={{ padding: '80px 60px' }}>
-      <h2 style={{ textAlign: 'center', fontSize: 40, fontWeight: 900, marginBottom: 16 }}>
-        A World of <span style={{ background: 'linear-gradient(135deg,#5A31F4,#FF0080)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Flavor</span>
+    <section className="section-pad" style={{ background: 'rgba(90,49,244,0.03)' }}>
+      <h2 style={{ textAlign: 'center', fontSize: 36, fontWeight: 900, marginBottom: 14 }}>
+        A World of <span style={{ background: `linear-gradient(135deg,${PURPLE},${PINK})`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Flavor</span>
       </h2>
-      <p style={{ textAlign: 'center', color: 'rgba(255,255,255,0.45)', fontSize: 18, marginBottom: 48, maxWidth: 600, margin: '0 auto 48px' }}>
+      <p style={{ textAlign: 'center', color: 'var(--text-secondary)', fontSize: 16, marginBottom: 40, maxWidth: 560, margin: '0 auto 40px' }}>
         From street food to fine dining — every culture, every craving, royally delivered.
       </p>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20, maxWidth: 900, margin: '0 auto' }}>
+      <div className="grid-3" style={{ gap: 16, maxWidth: 900, margin: '0 auto' }}>
         {cuisines.map((c, i) => (
-          <motion.div key={i} initial={{ opacity: 0, y: 15 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }}
-            style={{ position: 'relative', borderRadius: 20, overflow: 'hidden', aspectRatio: '4/3', cursor: 'pointer', border: '1px solid rgba(255,255,255,0.06)' }}>
-            <img src={c.img} alt={c.name} style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.4s' }} />
-            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 60%)' }} />
-            <span style={{ position: 'absolute', bottom: 16, left: 20, fontSize: 20, fontWeight: 800, color: 'white' }}>{c.name}</span>
-          </motion.div>
+          <Link key={i} href={c.href}>
+            <motion.div initial={{ opacity: 0, y: 15 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.08 }}
+              style={{ position: 'relative', borderRadius: 18, overflow: 'hidden', aspectRatio: '4/3', cursor: 'pointer', border: '1px solid var(--border)' }}>
+              <img src={c.img} alt={c.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 60%)' }} />
+              <span style={{ position: 'absolute', bottom: 14, left: 18, fontSize: 18, fontWeight: 800, color: 'white' }}>{c.name}</span>
+            </motion.div>
+          </Link>
         ))}
       </div>
-      {/* Full width world cuisines banner */}
-      <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} style={{ marginTop: 40, borderRadius: 24, overflow: 'hidden', position: 'relative', maxWidth: 900, margin: '40px auto 0' }}>
-        <img src="/food/world-cuisines.png" alt="Diverse world cuisines" style={{ width: '100%', borderRadius: 24, border: '1px solid rgba(90,49,244,0.15)' }} />
-        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, rgba(10,10,15,0.8) 0%, transparent 50%, rgba(10,10,15,0.8) 100%)', borderRadius: 24 }} />
-        <div style={{ position: 'absolute', bottom: 30, left: 40 }}>
-          <p style={{ fontSize: 28, fontWeight: 900 }}>Every Culture. Every Craving.</p>
-          <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: 16 }}>1000+ restaurants. One royal experience.</p>
-        </div>
-      </motion.div>
     </section>
   );
 }
 
 /* ─── How It Works ─── */
 function HowItWorks() {
-  const { t } = useTranslation();
   const steps = [
-    { icon: '📍', title: 'Find or Book', text: 'Discover local gems for delivery or reserve a table' },
-    { icon: '🍳', title: 'Savor the Moment', text: 'Browse curated menus with stunning AI photography' },
-    { icon: '👑', title: 'Royal Experience', text: 'Enjoy elite service, whether at home or dining in' },
+    { icon: '📍', title: 'Find or Book', text: 'Enter your address or let us detect your location to discover nearby restaurants.' },
+    { icon: '🍳', title: 'Browse & Order', text: 'Browse curated menus, add items to your cart, and place your order in seconds.' },
+    { icon: '👑', title: 'Royal Delivery', text: 'Our dedicated fleet delivers hot and fresh — typically in 30 minutes or less.' },
   ];
   return (
-    <section style={{ padding: '80px 60px', background: 'rgba(90,49,244,0.03)' }}>
-      <h2 style={{ textAlign: 'center', fontSize: 40, fontWeight: 900, marginBottom: 56 }}>How EnJoy Works</h2>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 32, maxWidth: 960, margin: '0 auto' }}>
+    <section className="section-pad">
+      <h2 style={{ textAlign: 'center', fontSize: 36, fontWeight: 900, marginBottom: 48 }}>How EnJoy Works</h2>
+      <div className="grid-3" style={{ gap: 24, maxWidth: 960, margin: '0 auto' }}>
         {steps.map((s, i) => (
           <motion.div key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.15 }}
-            style={{ textAlign: 'center', padding: '40px 24px', borderRadius: 20, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
-            <div style={{ fontSize: 48, marginBottom: 20 }}>{s.icon}</div>
-            <h3 style={{ fontSize: 20, fontWeight: 800, marginBottom: 12 }}>{s.title}</h3>
-            <p style={{ color: 'rgba(255,255,255,0.5)', lineHeight: 1.6, fontSize: 15 }}>{s.text}</p>
+            style={{ textAlign: 'center', padding: '36px 24px', borderRadius: 20, background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
+            <div style={{ fontSize: 44, marginBottom: 18 }}>{s.icon}</div>
+            <h3 style={{ fontSize: 19, fontWeight: 800, marginBottom: 10 }}>{s.title}</h3>
+            <p style={{ color: 'var(--text-secondary)', lineHeight: 1.6, fontSize: 14 }}>{s.text}</p>
           </motion.div>
         ))}
       </div>
@@ -122,41 +179,50 @@ function HowItWorks() {
 function PopularRestaurants() {
   const { t } = useTranslation();
   const restaurants = [
-    { name: 'Royal Kitchen', cuisine: 'Indian · Curry', rating: 4.8, time: '25-35 min', img: '/food/royal-kitchen.png' },
-    { name: 'Burger Empire', cuisine: 'Burgers · American', rating: 4.6, time: '15-25 min', img: '/food/burger-empire.png' },
-    { name: 'Sushi Palace', cuisine: 'Japanese · Sushi', rating: 4.9, time: '30-40 min', img: '/food/sushi-palace.png' },
-    { name: 'Pizza Throne', cuisine: 'Italian · Pizza', rating: 4.7, time: '20-30 min', img: '/food/pizza-throne.png' },
+    { name: 'Royal Kitchen', cuisine: 'Indian · Curry',     rating: 4.8, time: '25-35 min', img: '/food/royal-kitchen.png',  slug: '' },
+    { name: 'Burger Empire', cuisine: 'Burgers · American', rating: 4.6, time: '15-25 min', img: '/food/burger-empire.png', slug: '' },
+    { name: 'Sushi Palace',  cuisine: 'Japanese · Sushi',   rating: 4.9, time: '30-40 min', img: '/food/sushi-palace.png',  slug: '' },
+    { name: 'Pizza Throne',  cuisine: 'Italian · Pizza',    rating: 4.7, time: '20-30 min', img: '/food/pizza-throne.png',  slug: '' },
   ];
   return (
-    <section style={{ padding: '80px 60px' }}>
-      <h2 style={{ textAlign: 'center', fontSize: 40, fontWeight: 900, marginBottom: 48 }}>{t('popular_near')}</h2>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 24, maxWidth: 960, margin: '0 auto' }}>
+    <section className="section-pad" style={{ background: 'rgba(90,49,244,0.02)' }}>
+      <h2 style={{ textAlign: 'center', fontSize: 36, fontWeight: 900, marginBottom: 40 }}>{t('popular_near')}</h2>
+      <div className="grid-2" style={{ gap: 20, maxWidth: 960, margin: '0 auto' }}>
         {restaurants.map((r, i) => (
-          <motion.div key={i} initial={{ opacity: 0, y: 15 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }}
-            style={{ display: 'flex', background: 'rgba(255,255,255,0.03)', borderRadius: 20, border: '1px solid rgba(255,255,255,0.06)', overflow: 'hidden', cursor: 'pointer' }}>
-            <div style={{ width: 160, height: 140, position: 'relative', overflow: 'hidden', flexShrink: 0 }}>
-              <img src={r.img} alt={r.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-            </div>
-            <div style={{ flex: 1, padding: '18px 20px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-              <h3 style={{ fontSize: 18, fontWeight: 800, marginBottom: 4 }}>{r.name}</h3>
-              <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: 14, marginBottom: 12 }}>{r.cuisine}</p>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-                <span style={{ background: 'rgba(255,215,0,0.1)', color: '#FFD700', padding: '4px 10px', borderRadius: 8, fontSize: 13, fontWeight: 700 }}>⭐ {r.rating}</span>
-                <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: 13 }}>{r.time}</span>
+          <Link key={i} href={r.slug ? `/menu/${r.slug}` : '/discover'} style={{ display: 'block' }}>
+            <motion.div initial={{ opacity: 0, y: 15 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.08 }}
+              style={{ display: 'flex', background: 'var(--bg-card)', borderRadius: 18, border: '1px solid var(--border)', overflow: 'hidden', cursor: 'pointer' }}>
+              <div style={{ width: 140, height: 120, position: 'relative', overflow: 'hidden', flexShrink: 0 }}>
+                <img src={r.img} alt={r.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               </div>
-            </div>
-          </motion.div>
+              <div style={{ flex: 1, padding: '16px 18px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                <h3 style={{ fontSize: 16, fontWeight: 800, marginBottom: 3, color: 'var(--text-primary)' }}>{r.name}</h3>
+                <p style={{ color: 'var(--text-muted)', fontSize: 13, marginBottom: 10 }}>{r.cuisine}</p>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <span style={{ background: 'rgba(255,215,0,0.12)', color: '#FFD700', padding: '3px 9px', borderRadius: 8, fontSize: 12, fontWeight: 700 }}>⭐ {r.rating}</span>
+                  <span style={{ color: 'var(--text-muted)', fontSize: 12 }}>{r.time}</span>
+                </div>
+              </div>
+            </motion.div>
+          </Link>
         ))}
+      </div>
+      <div style={{ textAlign: 'center', marginTop: 32 }}>
+        <Link href="/discover" style={{
+          display: 'inline-block', padding: '14px 36px', borderRadius: 50,
+          background: `linear-gradient(135deg,${PURPLE},${PINK})`,
+          color: 'white', fontWeight: 800, fontSize: 16,
+        }}>View all restaurants →</Link>
       </div>
     </section>
   );
 }
 
-/* ─── Main Page ─── */
+/* ─── Main ─── */
 export default function LandingPage() {
   return (
     <TranslationProvider>
-      <div style={{ background: '#0A0A0F', minHeight: '100vh', color: 'white', overflowX: 'hidden' }}>
+      <div style={{ background: 'var(--bg-page)', minHeight: '100vh', color: 'var(--text-primary)', overflowX: 'hidden' }}>
         <Nav />
         <HeroSection />
         <FoodCultureSection />
