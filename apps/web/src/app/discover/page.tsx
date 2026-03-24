@@ -52,13 +52,7 @@ function Logo({ size = 22 }: { size?: number }) {
   return (
     <Link href="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', flexShrink: 0 }}>
       <span style={{ fontSize: size, fontWeight: 900, color: 'white', lineHeight: 1 }}>
-        En
-        <span style={{ background: LOGO_GRADIENT, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-          Joy
-        </span>
-        <span style={{ background: LOGO_GRADIENT, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', fontSize: size * 0.65 }}>
-          .nl
-        </span>
+        En<span style={{ background: LOGO_GRADIENT, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Joy</span>
       </span>
     </Link>
   );
