@@ -62,24 +62,24 @@ function Logo({ size = 22 }: { size?: number }) {
 function CatIcon({ cat, active, onClick }: { cat: typeof topCats[0]; active: boolean; onClick: () => void }) {
   return (
     <button onClick={onClick} style={{
-      display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8,
-      padding: '14px 14px 10px', background: 'transparent', border: 'none', cursor: 'pointer',
+      display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10,
+      padding: '14px 18px 10px', background: 'transparent', border: 'none', cursor: 'pointer',
       borderBottom: active ? `3px solid ${PINK}` : '3px solid transparent',
-      transition: 'border-color 0.2s', minWidth: 96, flexShrink: 0,
+      transition: 'border-color 0.2s', minWidth: 110, flexShrink: 0,
     }}>
-      <div style={{
-        width: 90, height: 80, borderRadius: 10, overflow: 'hidden',
-        boxShadow: '0 4px 20px rgba(0,0,0,0.5)',
-        position: 'relative',
-      }}>
+      <div style={{ width: 120, height: 110, position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <img src={cat.img} alt={cat.label} style={{
-          width: '100%', height: '100%', objectFit: 'cover',
-          filter: 'brightness(1.05) saturate(1.15)',
+          width: '100%', height: '100%', objectFit: 'cover', borderRadius: 14,
+          filter: 'drop-shadow(0 6px 16px rgba(0,0,0,0.7)) brightness(1.05) saturate(1.2)',
+          outline: active ? `3px solid ${PINK}` : '3px solid transparent',
+          outlineOffset: 2,
+          transition: 'outline 0.2s, transform 0.15s',
+          transform: active ? 'scale(1.05)' : 'scale(1)',
         }} />
       </div>
       <span style={{
-        fontSize: 12, fontWeight: 600, color: active ? 'white' : 'rgba(255,255,255,0.65)',
-        textAlign: 'center', lineHeight: 1.3, maxWidth: 90,
+        fontSize: 12, fontWeight: 700, color: active ? 'white' : 'rgba(255,255,255,0.7)',
+        textAlign: 'center', lineHeight: 1.3, maxWidth: 110,
       }}>
         {cat.label}
       </span>
