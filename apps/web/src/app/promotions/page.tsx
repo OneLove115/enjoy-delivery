@@ -18,7 +18,7 @@ export default function PromotionsPage() {
   return (
     <div style={{ background: '#0A0A0F', minHeight: '100vh', color: 'white', fontFamily: 'Outfit, sans-serif' }}>
       <Nav />
-      <section style={{ padding: '120px 60px 80px', textAlign: 'center' }}>
+      <section style={{ padding: '40px 60px 80px', textAlign: 'center' }}>
         <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }}>
           <h1 style={{ fontSize: 52, fontWeight: 950, marginBottom: 16, letterSpacing: -2 }}>
             Royal <span style={{ background: `linear-gradient(135deg,${PURPLE},${PINK})`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>deals</span>

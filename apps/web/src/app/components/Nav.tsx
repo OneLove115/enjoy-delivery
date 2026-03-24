@@ -36,10 +36,10 @@ export function Nav() {
   return (
     <>
       <nav style={{
-        position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100, height: 70,
+        position: 'relative', height: 70,
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        padding: '0 32px', background: 'var(--bg-nav)',
-        backdropFilter: 'blur(20px)', borderBottom: '1px solid var(--border)',
+        padding: '0 32px', background: 'var(--bg-page)',
+        borderBottom: '1px solid var(--border)',
       }}>
         {/* Logo */}
         <Link href="/" style={{ textDecoration: 'none', flexShrink: 0 }}>

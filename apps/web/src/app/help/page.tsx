@@ -1,7 +1,9 @@
 'use client';
 import Link from 'next/link';
+import { Nav } from '../components/Nav';
+import { Footer } from '../components/Footer';
 
-const S = { page: { background: '#0A0A0F', minHeight: '100vh', color: 'white', fontFamily: 'Outfit, sans-serif' } as const, container: { maxWidth: 800, margin: '0 auto', padding: '120px 40px 60px' } as const, h1: { fontSize: 42, fontWeight: 900, marginBottom: 32, background: 'linear-gradient(135deg,#5A31F4,#FF0080)', WebkitBackgroundClip: 'text' as const, WebkitTextFillColor: 'transparent' as const } as const, h2: { fontSize: 24, fontWeight: 800, marginTop: 40, marginBottom: 16, color: '#fff' } as const, p: { color: 'rgba(255,255,255,0.6)', lineHeight: 1.8, fontSize: 16, marginBottom: 16 } as const, back: { display: 'inline-block', marginBottom: 32, color: '#5A31F4', fontWeight: 700, fontSize: 14 } as const };
+const S = { page: { background: '#0A0A0F', minHeight: '100vh', color: 'white', fontFamily: 'Outfit, sans-serif' } as const, container: { maxWidth: 800, margin: '0 auto', padding: '40px 40px 60px' } as const, h1: { fontSize: 42, fontWeight: 900, marginBottom: 32, background: 'linear-gradient(135deg,#5A31F4,#FF0080)', WebkitBackgroundClip: 'text' as const, WebkitTextFillColor: 'transparent' as const } as const, h2: { fontSize: 24, fontWeight: 800, marginTop: 40, marginBottom: 16, color: '#fff' } as const, p: { color: 'rgba(255,255,255,0.6)', lineHeight: 1.8, fontSize: 16, marginBottom: 16 } as const, back: { display: 'inline-block', marginBottom: 32, color: '#5A31F4', fontWeight: 700, fontSize: 14 } as const };
 
 const categories = [
   { icon: '📦', title: 'Orders & Delivery', items: ['Track your order', 'Missing or wrong items', 'Late delivery', 'Cancel an order', 'Reorder a previous meal'] },
@@ -12,8 +14,9 @@ const categories = [
 
 export default function HelpCenterPage() {
   return (
-    <div style={S.page}><div style={S.container}>
-      <Link href="/" style={S.back}>← Back to EnJoy</Link>
+    <div style={S.page}>
+      <Nav />
+      <div style={S.container}>
       <h1 style={S.h1}>Help Center</h1>
       <p style={{ ...S.p, marginBottom: 40 }}>Need a hand? Find answers below or chat with Joya, our AI concierge, for instant help.</p>
 
@@ -34,6 +37,8 @@ export default function HelpCenterPage() {
         <p style={{ ...S.p, marginBottom: 20 }}>Our support team is available 24/7.</p>
         <Link href="/contact" style={{ display: 'inline-block', padding: '14px 36px', background: 'linear-gradient(135deg,#5A31F4,#FF0080)', borderRadius: 40, color: 'white', fontWeight: 800, fontSize: 16 }}>Contact Support</Link>
       </div>
-    </div></div>
+    </div>
+      <Footer />
+    </div>
   );
 }

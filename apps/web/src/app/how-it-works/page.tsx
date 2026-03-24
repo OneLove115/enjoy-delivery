@@ -26,7 +26,7 @@ export default function HowItWorksPage() {
   return (
     <div style={{ background: '#0A0A0F', minHeight: '100vh', color: 'white', fontFamily: 'Outfit, sans-serif' }}>
       <Nav />
-      <section style={{ padding: '120px 60px 60px', textAlign: 'center' }}>
+      <section style={{ padding: '40px 60px 60px', textAlign: 'center' }}>
         <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }}>
           <h1 style={{ fontSize: 56, fontWeight: 950, marginBottom: 20, letterSpacing: -2 }}>
             How <span style={{ background: `linear-gradient(135deg,${PURPLE},${PINK})`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>EnJoy</span> works

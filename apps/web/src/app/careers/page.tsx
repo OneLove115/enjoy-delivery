@@ -1,7 +1,9 @@
 'use client';
 import Link from 'next/link';
+import { Nav } from '../components/Nav';
+import { Footer } from '../components/Footer';
 
-const S = { page: { background: '#0A0A0F', minHeight: '100vh', color: 'white', fontFamily: 'Outfit, sans-serif' } as const, container: { maxWidth: 900, margin: '0 auto', padding: '120px 40px 60px' } as const, h1: { fontSize: 42, fontWeight: 900, marginBottom: 16, background: 'linear-gradient(135deg,#5A31F4,#FF0080)', WebkitBackgroundClip: 'text' as const, WebkitTextFillColor: 'transparent' as const } as const, p: { color: 'rgba(255,255,255,0.6)', lineHeight: 1.8, fontSize: 16, marginBottom: 16 } as const, back: { display: 'inline-block', marginBottom: 32, color: '#5A31F4', fontWeight: 700, fontSize: 14 } as const };
+const S = { page: { background: '#0A0A0F', minHeight: '100vh', color: 'white', fontFamily: 'Outfit, sans-serif' } as const, container: { maxWidth: 900, margin: '0 auto', padding: '40px 40px 60px' } as const, h1: { fontSize: 42, fontWeight: 900, marginBottom: 16, background: 'linear-gradient(135deg,#5A31F4,#FF0080)', WebkitBackgroundClip: 'text' as const, WebkitTextFillColor: 'transparent' as const } as const, p: { color: 'rgba(255,255,255,0.6)', lineHeight: 1.8, fontSize: 16, marginBottom: 16 } as const, back: { display: 'inline-block', marginBottom: 32, color: '#5A31F4', fontWeight: 700, fontSize: 14 } as const };
 
 const jobs = [
   { dept: 'Engineering', title: 'Senior Full-Stack Developer', loc: 'Den Haag / Remote', type: 'Full-Time', desc: 'Build the next generation of food delivery with React, Next.js, and AI integrations.' },
@@ -14,8 +16,9 @@ const jobs = [
 
 export default function CareersPage() {
   return (
-    <div style={S.page}><div style={S.container}>
-      <Link href="/" style={S.back}>← Back to EnJoy</Link>
+    <div style={S.page}>
+      <Nav />
+      <div style={S.container}>
       <h1 style={S.h1}>Careers at EnJoy</h1>
       <p style={{ ...S.p, fontSize: 20, marginBottom: 48 }}>Join the royal court. Build the future of food delivery with a team that believes great technology serves great food.</p>
 
@@ -47,6 +50,8 @@ export default function CareersPage() {
       <div style={{ textAlign: 'center', marginTop: 40 }}>
         <Link href="/contact" style={{ display: 'inline-block', padding: '14px 36px', background: 'linear-gradient(135deg,#5A31F4,#FF0080)', borderRadius: 40, color: 'white', fontWeight: 800, fontSize: 16 }}>Apply Now</Link>
       </div>
-    </div></div>
+    </div>
+      <Footer />
+    </div>
   );
 }

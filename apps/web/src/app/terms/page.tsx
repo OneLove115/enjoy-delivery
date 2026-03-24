@@ -1,12 +1,15 @@
 'use client';
 import Link from 'next/link';
+import { Nav } from '../components/Nav';
+import { Footer } from '../components/Footer';
 
-const S = { page: { background: '#0A0A0F', minHeight: '100vh', color: 'white', fontFamily: 'Outfit, sans-serif' } as const, container: { maxWidth: 800, margin: '0 auto', padding: '120px 40px 60px' } as const, h1: { fontSize: 42, fontWeight: 900, marginBottom: 32, background: 'linear-gradient(135deg,#5A31F4,#FF0080)', WebkitBackgroundClip: 'text' as const, WebkitTextFillColor: 'transparent' as const } as const, h2: { fontSize: 24, fontWeight: 800, marginTop: 40, marginBottom: 16, color: '#fff' } as const, p: { color: 'rgba(255,255,255,0.6)', lineHeight: 1.8, fontSize: 16, marginBottom: 16 } as const, back: { display: 'inline-block', marginBottom: 32, color: '#5A31F4', fontWeight: 700, fontSize: 14 } as const };
+const S = { page: { background: '#0A0A0F', minHeight: '100vh', color: 'white', fontFamily: 'Outfit, sans-serif' } as const, container: { maxWidth: 800, margin: '0 auto', padding: '40px 40px 60px' } as const, h1: { fontSize: 42, fontWeight: 900, marginBottom: 32, background: 'linear-gradient(135deg,#5A31F4,#FF0080)', WebkitBackgroundClip: 'text' as const, WebkitTextFillColor: 'transparent' as const } as const, h2: { fontSize: 24, fontWeight: 800, marginTop: 40, marginBottom: 16, color: '#fff' } as const, p: { color: 'rgba(255,255,255,0.6)', lineHeight: 1.8, fontSize: 16, marginBottom: 16 } as const, back: { display: 'inline-block', marginBottom: 32, color: '#5A31F4', fontWeight: 700, fontSize: 14 } as const };
 
 export default function TermsPage() {
   return (
-    <div style={S.page}><div style={S.container}>
-      <Link href="/" style={S.back}>← Back to EnJoy</Link>
+    <div style={S.page}>
+      <Nav />
+      <div style={S.container}>
       <h1 style={S.h1}>Terms of Service</h1>
       <p style={S.p}><strong>Effective Date:</strong> March 20, 2026</p>
       <p style={S.p}>Welcome to EnJoy. By accessing or using our platform, you agree to these Terms of Service. Please read them carefully.</p>
@@ -34,6 +37,8 @@ export default function TermsPage() {
 
       <h2 style={S.h2}>8. Governing Law</h2>
       <p style={S.p}>These terms are governed by the laws of The Netherlands. Disputes will be settled in the courts of Den Haag.</p>
-    </div></div>
+    </div>
+      <Footer />
+    </div>
   );
 }

@@ -1,7 +1,9 @@
 'use client';
 import Link from 'next/link';
+import { Nav } from '../components/Nav';
+import { Footer } from '../components/Footer';
 
-const S = { page: { background: '#0A0A0F', minHeight: '100vh', color: 'white', fontFamily: 'Outfit, sans-serif' } as const, container: { maxWidth: 900, margin: '0 auto', padding: '120px 40px 60px' } as const, h1: { fontSize: 42, fontWeight: 900, marginBottom: 16, background: 'linear-gradient(135deg,#5A31F4,#FF0080)', WebkitBackgroundClip: 'text' as const, WebkitTextFillColor: 'transparent' as const } as const, p: { color: 'rgba(255,255,255,0.6)', lineHeight: 1.8, fontSize: 16, marginBottom: 16 } as const, back: { display: 'inline-block', marginBottom: 32, color: '#5A31F4', fontWeight: 700, fontSize: 14 } as const };
+const S = { page: { background: '#0A0A0F', minHeight: '100vh', color: 'white', fontFamily: 'Outfit, sans-serif' } as const, container: { maxWidth: 900, margin: '0 auto', padding: '40px 40px 60px' } as const, h1: { fontSize: 42, fontWeight: 900, marginBottom: 16, background: 'linear-gradient(135deg,#5A31F4,#FF0080)', WebkitBackgroundClip: 'text' as const, WebkitTextFillColor: 'transparent' as const } as const, p: { color: 'rgba(255,255,255,0.6)', lineHeight: 1.8, fontSize: 16, marginBottom: 16 } as const, back: { display: 'inline-block', marginBottom: 32, color: '#5A31F4', fontWeight: 700, fontSize: 14 } as const };
 
 const posts = [
   { title: 'The Rise of AI-Powered Food Photography', date: 'March 20, 2026', excerpt: 'How EnJoy uses artificial intelligence to generate ultra-realistic food images that make your mouth water before you even order.', tag: 'Technology', img: '/food/cat-pizza.png' },
@@ -14,8 +16,9 @@ const posts = [
 
 export default function BlogPage() {
   return (
-    <div style={S.page}><div style={S.container}>
-      <Link href="/" style={S.back}>← Back to EnJoy</Link>
+    <div style={S.page}>
+      <Nav />
+      <div style={S.container}>
       <h1 style={S.h1}>The EnJoy Journal</h1>
       <p style={{ ...S.p, fontSize: 20, marginBottom: 48 }}>Food culture, technology, and the royal treatment — stories from the EnJoy kitchen.</p>
 
@@ -38,6 +41,8 @@ export default function BlogPage() {
       <div style={{ textAlign: 'center', marginTop: 48, padding: '32px', background: 'rgba(90,49,244,0.04)', borderRadius: 16 }}>
         <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 15 }}>Full articles are published on our external blog platform and syndicated here automatically.</p>
       </div>
-    </div></div>
+    </div>
+      <Footer />
+    </div>
   );
 }
