@@ -162,7 +162,29 @@ function MicIcon({ active }: { active: boolean }) {
   );
 }
 
-/* ─── ElevenLabs TTS ─── */
+/* ─── Browser speechSynthesis fallback ─── */
+function speakBrowser(text: string, onStart: () => void, onEnd: () => void) {
+  const synth = window.speechSynthesis;
+  if (!synth) { onEnd(); return; }
+  synth.cancel();
+  const clean = text.replace(/[\u{1F000}-\u{1FFFF}]/gu, '').replace(/[·•\n]/g, ' ').trim().slice(0, 450);
+  const utt = new SpeechSynthesisUtterance(clean);
+  utt.lang = 'nl-NL';
+  utt.rate = 1.05;
+  utt.pitch = 1.05;
+  // Pick a female voice if available
+  const voices = synth.getVoices();
+  const female = voices.find(v => v.lang.startsWith('nl') && /female|woman|vrouw/i.test(v.name))
+    ?? voices.find(v => v.lang.startsWith('nl'))
+    ?? voices.find(v => v.lang.startsWith('en'));
+  if (female) utt.voice = female;
+  utt.onstart = onStart;
+  utt.onend = onEnd;
+  utt.onerror = onEnd;
+  synth.speak(utt);
+}
+
+/* ─── ElevenLabs TTS (with browser fallback) ─── */
 async function speakElevenLabs(
   text: string,
   audioRef: React.MutableRefObject<HTMLAudioElement | null>,
@@ -176,7 +198,7 @@ async function speakElevenLabs(
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ text: clean }),
     });
-    if (!res.ok) { onEnd(); return; }
+    if (!res.ok) { speakBrowser(clean, onStart, onEnd); return; }
     const blob = await res.blob();
     const url = URL.createObjectURL(blob);
     if (audioRef.current) { audioRef.current.pause(); URL.revokeObjectURL(audioRef.current.src || ''); }
@@ -184,9 +206,9 @@ async function speakElevenLabs(
     audioRef.current = audio;
     audio.onplay  = onStart;
     audio.onended = () => { onEnd(); URL.revokeObjectURL(url); };
-    audio.onerror = onEnd;
-    audio.play().catch(onEnd);
-  } catch { onEnd(); }
+    audio.onerror = () => { speakBrowser(clean, onStart, onEnd); };
+    audio.play().catch(() => speakBrowser(clean, onStart, onEnd));
+  } catch { speakBrowser(clean, onStart, onEnd); }
 }
 
 /* ─── Main component ─── */
