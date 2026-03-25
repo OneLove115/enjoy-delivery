@@ -140,7 +140,11 @@ const KNOWLEDGE_BASE: RestaurantEntry[] = [
 
 /* ─── RAG: Retrieve relevant context ───────────────────────────────────── */
 function retrieveContext(messages: Array<{ role: string; text: string }>): RestaurantEntry[] {
-  const text = messages.map(m => m.text).join(' ').toLowerCase();
+  // Prioritise the last user message, then fall back to full conversation
+  const lastUser = [...messages].reverse().find(m => m.role === 'user');
+  const primary = (lastUser?.text ?? '').toLowerCase();
+  const full = messages.map(m => m.text).join(' ').toLowerCase();
+  const text = primary || full;
 
   // Exact restaurant name match (highest priority)
   const byName = KNOWLEDGE_BASE.filter(r =>
@@ -203,33 +207,31 @@ function formatContext(restaurants: RestaurantEntry[]): string {
 
 /* ─── System prompt builder ─────────────────────────────────────────────── */
 function buildSystemPrompt(context: string): string {
-  const hour = new Date().getHours();
-  const timeGreeting = hour < 11 ? 'goedemorgen' : hour < 15 ? 'goedemiddag' : hour < 22 ? 'goedenavond' : 'goedenacht';
+  return `Je bent Joya, de persoonlijke eet-concierge van EnJoy. Je bent warm, natuurlijk en direct.
 
-  return `Je bent Joya, de enthousiaste en persoonlijke AI-concierge van EnJoy — een premium gourmet bezorgplatform.
+KRITIEKE GEDRAGSREGELS:
+1. LUISTER naar wat de klant PRECIES vraagt en beantwoord DAT — niet iets anders.
+2. Herhaal jezelf NOOIT. Zeg iets nieuws of stel een vraag als je niet verder kunt.
+3. Begroet NIET opnieuw — de klant is al welkom geheten.
+4. Houd antwoorden kort: max 2 zinnen. Geen lange lijsten tenzij gevraagd.
+5. Gebruik ALLEEN informatie uit de RESTAURANTCONTEXT hieronder. Verzin niets.
+6. Dring niet aan. Als de klant iets niet wil, accepteer dat en ga verder.
+7. Antwoord in de taal van de klant (NL/EN/DE/AR).
+8. Gebruik max 1 emoji per bericht.
 
-JOUW ROL: Je begeleidt de klant van eerste wens tot bestelling. Je beveelt aan, beantwoordt vragen over gerechten en bezorging, en stuurt de klant richting bestellen. De klant betaalt zelf via de checkout.
+WANNEER JE EEN RESTAURANT AANBEVEELT:
+- Noem naam + 1 specifiek populair gerecht + prijs uit de context
+- Vraag daarna: wil je hiernaartoe? (eenmalig, niet herhalen)
 
-KRITIEKE REGEL: Gebruik UITSLUITEND informatie uit de CONTEXT hieronder. Verzin NOOIT menu-items, prijzen of details die er niet instaan.
+WANNEER DE KLANT EEN VRAAG STELT:
+- Beantwoord de vraag direct en bondig
+- Stel daarna hooguit 1 vervolgvraag
 
-BESTELPROCEDURE:
-1. Luister naar wat de klant wil eten of stel een vraag als het niet duidelijk is
-2. Beveel 1-2 specifieke restaurants aan met gerechtnaam én prijs uit de context
-3. Stel voor: "Wil je hiermee bestellen? Ik zet je direct door naar het menu!"
-4. Na bevestiging: stuur klant naar het restaurant (de restaurant-kaart verschijnt automatisch)
-5. Stel altijd een bijgerecht, drankje of dessert voor als upsell
+WANNEER HET ONDUIDELIJK IS WAT DE KLANT WIL:
+- Vraag simpelweg: "Waar heb je trek in?" — niets meer
 
-CONTEXT (gebruik ALLEEN deze informatie):
-${context}
-
-Stijlregels:
-- Begroet met "${timeGreeting}!" als het de eerste boodschap is
-- Houd antwoorden kort: max 2-3 zinnen + concrete aanbeveling
-- Noem altijd naam + prijs van een aanbevolen gerecht
-- Sluit altijd af met een actievraag ("Zal ik je doorsturen?", "Wil je dit bestellen?")
-- Gebruik 1-2 emoji's per bericht
-- Antwoord in de taal van de klant (NL, EN, DE, AR)
-- Bij onduidelijkheid: vraag "Waar heb je trek in?" i.p.v. lange uitleg`;
+RESTAURANTCONTEXT (gebruik ALLEEN dit):
+${context}`;
 }
 
 interface ChatMessage {
@@ -251,9 +253,13 @@ export async function POST(req: NextRequest) {
     const context = formatContext(relevantRestaurants);
     const systemPrompt = buildSystemPrompt(context);
 
-    const anthropicMessages = messages
+    // Anthropic requires conversation to start with a 'user' message.
+    // Strip the welcome assistant message that leads the history.
+    const filtered = messages
       .filter(m => m.role === 'user' || m.role === 'assistant')
-      .slice(-10)
+      .slice(-10);
+    const firstUserIdx = filtered.findIndex(m => m.role === 'user');
+    const anthropicMessages = (firstUserIdx >= 0 ? filtered.slice(firstUserIdx) : filtered)
       .map(m => ({ role: m.role, content: m.text }));
 
     const response = await fetch('https://api.anthropic.com/v1/messages', {
