@@ -300,9 +300,9 @@ function AccountDrawer({ open, onClose }: { open: boolean; onClose: () => void }
   const menuItems = [
     { icon: '🛍', label: 'Bestellingen',    href: '/account/orders'  },
     { icon: '⭐', label: 'Beloningen',      href: '/rewards'         },
-    { icon: '🎟', label: 'Stempelkaarten',  href: '/account'         },
-    { icon: 'ℹ', label: 'Hulp nodig?',     href: '/help'            },
-    { icon: '🎁', label: 'Cadeaukaarten',   href: '/account'         },
+    { icon: '🎟', label: 'Stempelkaarten',  href: '/account/stamp-card' },
+    { icon: 'ℹ', label: 'Hulp nodig?',     href: '/help'               },
+    { icon: '🎁', label: 'Cadeaukaarten',   href: '/account/gift-card'  },
   ];
   const footerItems = [
     { icon: '🛵', label: 'Word bezorger',          href: '/riders'   },

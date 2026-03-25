@@ -115,40 +115,14 @@ function getResponse(msg: string, lang: Lang): Message {
   return { role: 'assistant', text: R.fallback[lang], chips: ['🍕 Pizza', '🍔 Burger', '⚡ Zo snel mogelijk', '🎲 Verras me'] };
 }
 
-/* ─── Joya Avatar (call center girl with headset) ─── */
+/* ─── Joya Avatar ─── */
 function JoyaAvatar({ size = 40 }: { size?: number }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 40 40" fill="none" style={{ flexShrink: 0 }}>
-      <defs>
-        <linearGradient id="jg1" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stopColor="#5A31F4"/>
-          <stop offset="100%" stopColor="#FF0080"/>
-        </linearGradient>
-      </defs>
-      {/* Background circle */}
-      <circle cx="20" cy="20" r="20" fill="url(#jg1)"/>
-      {/* Hair */}
-      <ellipse cx="20" cy="12" rx="8" ry="5.5" fill="#3D2314"/>
-      <rect x="12" y="12" width="16" height="6" fill="#3D2314"/>
-      {/* Face */}
-      <ellipse cx="20" cy="17" rx="6.5" ry="7" fill="#FDDBB4"/>
-      {/* Eyes */}
-      <circle cx="17.5" cy="16" r="1" fill="#2C1810"/>
-      <circle cx="22.5" cy="16" r="1" fill="#2C1810"/>
-      {/* Smile */}
-      <path d="M17.5 19.5 Q20 21.5 22.5 19.5" stroke="#C47B5A" strokeWidth="1" fill="none" strokeLinecap="round"/>
-      {/* Body / uniform */}
-      <ellipse cx="20" cy="33" rx="10" ry="8" fill="#4A2DA0"/>
-      <rect x="18" y="24" width="4" height="4" fill="#FDDBB4"/>
-      {/* Headset arc */}
-      <path d="M13 15 Q13 7 20 7 Q27 7 27 15" stroke="rgba(255,255,255,0.9)" strokeWidth="2.2" fill="none" strokeLinecap="round"/>
-      {/* Ear cups */}
-      <rect x="10.5" y="13.5" width="4" height="6" rx="2" fill="rgba(255,255,255,0.9)"/>
-      <rect x="25.5" y="13.5" width="4" height="6" rx="2" fill="rgba(255,255,255,0.9)"/>
-      {/* Mic boom */}
-      <path d="M29.5 16.5 Q31 20 28 22" stroke="rgba(255,255,255,0.9)" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
-      <circle cx="27.5" cy="22.5" r="1.2" fill="rgba(255,255,255,0.9)"/>
-    </svg>
+    <img
+      src="/joya.jpg"
+      alt="Joya"
+      style={{ width: size, height: size, borderRadius: '50%', objectFit: 'cover', objectPosition: 'center top', flexShrink: 0 }}
+    />
   );
 }
 
@@ -228,10 +202,11 @@ export function JoyaChatWidget({ triggerOpen = 0 }: { triggerOpen?: number }) {
   const [ttsOn, setTtsOn]         = useState(true);
   const [isMobile, setIsMobile]   = useState(false);
   const [barHidden, setBarHidden] = useState(false);
-  const endRef   = useRef<HTMLDivElement>(null);
-  const recRef   = useRef<any>(null);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const endRef             = useRef<HTMLDivElement>(null);
+  const recRef             = useRef<any>(null);
+  const audioRef           = useRef<HTMLAudioElement | null>(null);
+  const inputRef           = useRef<HTMLInputElement>(null);
+  const hasSpokenWelcome   = useRef(false);
 
   /* Detect mobile */
   useEffect(() => {
@@ -249,6 +224,25 @@ export function JoyaChatWidget({ triggerOpen = 0 }: { triggerOpen?: number }) {
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [triggerOpen]);
+
+  /* Auto-speak welcome message when chat opens for the first time */
+  useEffect(() => {
+    if (!open) return;
+    if (hasSpokenWelcome.current) return;
+    hasSpokenWelcome.current = true;
+    // Small delay so the panel is mounted and audio context can start
+    const t = setTimeout(() => {
+      setMessages(current => {
+        const welcome = current[0];
+        if (welcome && ttsOn) {
+          speakElevenLabs(welcome.text, audioRef, () => setSpeaking(true), () => setSpeaking(false));
+        }
+        return current;
+      });
+    }, 600);
+    return () => clearTimeout(t);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
 
   /* Welcome message + auto-open on first visit */
   useEffect(() => {

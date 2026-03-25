@@ -27,9 +27,9 @@ export async function POST(req: NextRequest) {
       text: clean,
       model_id: 'eleven_multilingual_v2',
       voice_settings: {
-        stability: 0.5,
+        stability: 0.68,
         similarity_boost: 0.75,
-        style: 0.3,
+        style: 0.12,
         use_speaker_boost: true,
       },
     }),
