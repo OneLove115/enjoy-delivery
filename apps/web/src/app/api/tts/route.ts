@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-// Rachel voice – calm, warm, natural lady voice
-const VOICE_ID = '21m00Tcm4TlvDq8ikWAM';
+// Bella voice – warm, natural female voice (premade, works on all plans)
+const VOICE_ID = 'EXAVITQu4vr4xnSDxMaL';
 
 export async function POST(req: NextRequest) {
   const { text } = await req.json();
