@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -61,6 +61,9 @@ function AddressBar() {
   const [locating, setLocating] = useState(false);
   const [error, setError] = useState('');
   const [locationDenied, setLocationDenied] = useState(false);
+  const [suggestions, setSuggestions] = useState<{ display_name: string; place_id: number }[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   /** Build a clean full address from Nominatim structured data */
   const formatAddress = (d: Record<string, unknown>): string => {
@@ -131,10 +134,34 @@ function AddressBar() {
 
   const handleSearch = (e?: React.FormEvent) => {
     e?.preventDefault();
+    setShowSuggestions(false);
     goDiscover(address);
   };
 
   const handleGeolocate = () => detectLocation();
+
+  /** Fetch address suggestions from Nominatim as user types */
+  const fetchSuggestions = (query: string) => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    if (query.length < 3) { setSuggestions([]); setShowSuggestions(false); return; }
+    debounceRef.current = setTimeout(async () => {
+      try {
+        const r = await fetch(
+          `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=jsonv2&addressdetails=1&limit=5&countrycodes=nl,be,de`
+        );
+        const data = await r.json() as { display_name: string; place_id: number }[];
+        setSuggestions(data);
+        setShowSuggestions(data.length > 0);
+      } catch { /* ignore */ }
+    }, 320);
+  };
+
+  const selectSuggestion = (s: { display_name: string; place_id: number }) => {
+    setAddress(s.display_name);
+    localStorage.setItem('enjoyAddress', s.display_name);
+    setSuggestions([]);
+    setShowSuggestions(false);
+  };
 
   return (
     <section id="address-section" style={{ background: 'var(--bg-page)', padding: '32px 16px 48px' }}>
@@ -176,72 +203,117 @@ function AddressBar() {
           )}
         </AnimatePresence>
 
-        {/* Search form */}
-        <motion.form
-          onSubmit={handleSearch}
-          initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
-          style={{
-            display: 'flex', gap: 8, alignItems: 'center',
-            background: 'var(--bg-card)',
-            padding: 8, borderRadius: 50,
-            border: `1px solid ${error ? 'rgba(255,60,60,0.5)' : 'var(--border-strong)'}`,
-            backdropFilter: 'blur(20px)',
-            boxShadow: error
-              ? '0 0 0 3px rgba(255,60,60,0.1), 0 16px 32px rgba(0,0,0,0.2)'
-              : '0 16px 32px rgba(0,0,0,0.2)',
-            transition: 'border-color 0.2s, box-shadow 0.2s',
-          }}
-        >
-          {/* Geo button — always visible */}
-          <button
-            type="button"
-            onClick={handleGeolocate}
-            title="Gebruik mijn locatie"
+        {/* Search form + autocomplete wrapper */}
+        <div style={{ position: 'relative' }}>
+          <motion.form
+            onSubmit={handleSearch}
+            initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
             style={{
-              flexShrink: 0, width: 46, height: 46, borderRadius: 40,
-              background: locating ? 'rgba(90,49,244,0.2)' : 'rgba(255,255,255,0.08)',
-              border: 'none', fontSize: 20, cursor: 'pointer',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              transition: 'background 0.2s', minWidth: 46,
+              display: 'flex', gap: 8, alignItems: 'center',
+              background: 'var(--bg-card)',
+              padding: 8, borderRadius: 50,
+              border: `1px solid ${error ? 'rgba(255,60,60,0.5)' : 'var(--border-strong)'}`,
+              backdropFilter: 'blur(20px)',
+              boxShadow: error
+                ? '0 0 0 3px rgba(255,60,60,0.1), 0 16px 32px rgba(0,0,0,0.2)'
+                : '0 16px 32px rgba(0,0,0,0.2)',
+              transition: 'border-color 0.2s, box-shadow 0.2s',
             }}
           >
-            {locating ? '⏳' : '📍'}
-          </button>
+            {/* Geo button — always visible */}
+            <button
+              type="button"
+              onClick={handleGeolocate}
+              title="Gebruik mijn locatie"
+              style={{
+                flexShrink: 0, width: 46, height: 46, borderRadius: 40,
+                background: locating ? 'rgba(90,49,244,0.2)' : 'rgba(255,255,255,0.08)',
+                border: 'none', fontSize: 20, cursor: 'pointer',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                transition: 'background 0.2s', minWidth: 46,
+              }}
+            >
+              {locating ? '⏳' : '📍'}
+            </button>
 
-          {/* Input — font-size 16px prevents iOS auto-zoom */}
-          <input
-            id="address-input"
-            type="text"
-            placeholder="Jouw bezorgadres... (verplicht)"
-            value={address}
-            onChange={e => { setAddress(e.target.value); if (e.target.value.trim()) setError(''); }}
-            style={{
-              flex: 1, background: 'transparent', border: 'none',
-              padding: '10px 4px', color: 'var(--text-primary)', fontSize: 16,
-              outline: 'none', fontFamily: 'inherit', minWidth: 0,
-            }}
-          />
+            {/* Input — font-size 16px prevents iOS auto-zoom */}
+            <input
+              id="address-input"
+              type="text"
+              placeholder="Jouw bezorgadres... (verplicht)"
+              value={address}
+              onChange={e => {
+                const val = e.target.value;
+                setAddress(val);
+                if (val.trim()) setError('');
+                fetchSuggestions(val);
+              }}
+              onBlur={() => setTimeout(() => setShowSuggestions(false), 180)}
+              onFocus={() => { if (suggestions.length > 0) setShowSuggestions(true); }}
+              style={{
+                flex: 1, background: 'transparent', border: 'none',
+                padding: '10px 4px', color: 'var(--text-primary)', fontSize: 16,
+                outline: 'none', fontFamily: 'inherit', minWidth: 0,
+              }}
+              autoComplete="off"
+            />
 
-          {/* Submit — short on mobile, full label on desktop */}
-          <button
-            type="submit"
-            style={{
-              background: address.trim()
-                ? `linear-gradient(135deg,${PURPLE},${PINK},#FF6B35)`
-                : 'rgba(255,255,255,0.1)',
-              color: address.trim() ? 'white' : 'var(--text-muted)',
-              border: 'none', padding: '11px 20px',
-              borderRadius: 40, fontSize: 15, fontWeight: 800, cursor: 'pointer',
-              boxShadow: address.trim() ? '0 6px 14px rgba(90,49,244,0.3)' : 'none',
-              whiteSpace: 'nowrap', flexShrink: 0,
-              transition: 'background 0.2s, box-shadow 0.2s, color 0.2s',
-              minHeight: 46,
-            }}
-          >
-            <span className="address-btn-label">Ontdek →</span>
-            <span className="address-btn-icon">→</span>
-          </button>
-        </motion.form>
+            {/* Submit — short on mobile, full label on desktop */}
+            <button
+              type="submit"
+              style={{
+                background: address.trim()
+                  ? `linear-gradient(135deg,${PURPLE},${PINK},#FF6B35)`
+                  : 'rgba(255,255,255,0.1)',
+                color: address.trim() ? 'white' : 'var(--text-muted)',
+                border: 'none', padding: '11px 20px',
+                borderRadius: 40, fontSize: 15, fontWeight: 800, cursor: 'pointer',
+                boxShadow: address.trim() ? '0 6px 14px rgba(90,49,244,0.3)' : 'none',
+                whiteSpace: 'nowrap', flexShrink: 0,
+                transition: 'background 0.2s, box-shadow 0.2s, color 0.2s',
+                minHeight: 46,
+              }}
+            >
+              <span className="address-btn-label">Ontdek →</span>
+              <span className="address-btn-icon">→</span>
+            </button>
+          </motion.form>
+
+          {/* Address suggestions dropdown */}
+          {showSuggestions && suggestions.length > 0 && (
+            <div style={{
+              position: 'absolute', top: 'calc(100% + 8px)', left: 0, right: 0, zIndex: 50,
+              background: 'var(--bg-card)', borderRadius: 16,
+              border: '1px solid var(--border-strong)',
+              boxShadow: '0 12px 40px rgba(0,0,0,0.25)',
+              overflow: 'hidden',
+            }}>
+              {suggestions.map((s, i) => (
+                <button
+                  key={s.place_id}
+                  type="button"
+                  onMouseDown={() => selectSuggestion(s)}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: 12,
+                    width: '100%', padding: '13px 16px',
+                    background: 'transparent', border: 'none',
+                    borderBottom: i < suggestions.length - 1 ? '1px solid var(--border)' : 'none',
+                    cursor: 'pointer', textAlign: 'left',
+                    transition: 'background 0.15s',
+                  }}
+                  onMouseEnter={e => (e.currentTarget.style.background = 'var(--bg-page)')}
+                  onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+                >
+                  <span style={{ fontSize: 16, flexShrink: 0 }}>📍</span>
+                  <span style={{
+                    fontSize: 14, color: 'var(--text-primary)', lineHeight: 1.4,
+                    overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                  }}>{s.display_name}</span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
 
         {/* Error message */}
         <AnimatePresence>

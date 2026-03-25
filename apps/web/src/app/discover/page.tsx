@@ -932,11 +932,18 @@ function DiscoverContent() {
               onClick={() => { setAllCatsOpen(false); setCatSearch(''); }}
               style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex: 400 }} />
             <motion.div key="ac-panel"
-              initial={{ opacity: 0, scale: 0.96, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.96, y: 20 }}
-              transition={{ type: 'spring', damping: 28, stiffness: 320 }}
-              style={{
-                position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%,-50%)',
-                width: '92vw', maxWidth: 700, maxHeight: '82vh',
+              initial={isMobile ? { y: '100%' } : { opacity: 0, y: 20 }}
+              animate={isMobile ? { y: 0 } : { opacity: 1, y: 0 }}
+              exit={isMobile ? { y: '100%' } : { opacity: 0, y: 20 }}
+              transition={{ type: 'spring', damping: 30, stiffness: 320 }}
+              style={isMobile ? {
+                position: 'fixed', inset: 0, zIndex: 401,
+                background: 'var(--discover-card)', borderRadius: 0,
+                display: 'flex', flexDirection: 'column', overflow: 'hidden',
+              } : {
+                position: 'fixed', top: '50%', left: '50%',
+                marginLeft: '-46vw', marginTop: '-41vh',
+                width: '92vw', maxWidth: 700, height: '82vh',
                 background: 'var(--discover-card)', borderRadius: 20, zIndex: 401,
                 display: 'flex', flexDirection: 'column', overflow: 'hidden',
                 boxShadow: '0 24px 80px rgba(0,0,0,0.7)',

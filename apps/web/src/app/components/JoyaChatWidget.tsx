@@ -227,6 +227,7 @@ export function JoyaChatWidget({ triggerOpen = 0 }: { triggerOpen?: number }) {
   const [speaking, setSpeaking]   = useState(false);
   const [ttsOn, setTtsOn]         = useState(true);
   const [isMobile, setIsMobile]   = useState(false);
+  const [barHidden, setBarHidden] = useState(false);
   const endRef   = useRef<HTMLDivElement>(null);
   const recRef   = useRef<any>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -486,36 +487,37 @@ export function JoyaChatWidget({ triggerOpen = 0 }: { triggerOpen?: number }) {
 
   return (
     <>
-      {/* ── Mobile voice bar (bottom, always visible on mobile when closed) ── */}
-      {isMobile && !open && (
-        <div
-          onClick={() => { setOpen(true); setTimeout(() => inputRef.current?.focus(), 300); }}
-          style={{
-            position: 'fixed', bottom: 66, left: 0, right: 0, zIndex: 9990,
-            background: 'rgba(8,8,16,0.97)',
-            backdropFilter: 'blur(24px)',
-            WebkitBackdropFilter: 'blur(24px)',
-            borderTop: `1px solid rgba(90,49,244,0.35)`,
-            padding: '12px 20px 24px',
-            display: 'flex', alignItems: 'center', gap: 14,
-            cursor: 'pointer',
-          }}
-        >
-          <JoyaAvatar size={46} />
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ color: 'white', fontWeight: 800, fontSize: 15, marginBottom: 2 }}>Joya AI</div>
-            <div style={{ color: 'rgba(255,255,255,0.48)', fontSize: 12, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-              {listening ? 'Luisteren...' : speaking ? 'Joya spreekt...' : 'Zeg: "Hé Joya, ik wil..."'}
+      {/* ── Mobile voice bar (bottom, visible on mobile when closed and not dismissed) ── */}
+      {isMobile && !open && !barHidden && (
+        <div style={{
+          position: 'fixed', bottom: 66, left: 0, right: 0, zIndex: 9990,
+          background: 'rgba(8,8,16,0.97)',
+          backdropFilter: 'blur(24px)',
+          WebkitBackdropFilter: 'blur(24px)',
+          borderTop: `1px solid rgba(90,49,244,0.35)`,
+          padding: '12px 20px 24px',
+          display: 'flex', alignItems: 'center', gap: 14,
+        }}>
+          {/* Clickable area opens chat */}
+          <div
+            onClick={() => { setOpen(true); setTimeout(() => inputRef.current?.focus(), 300); }}
+            style={{ display: 'flex', alignItems: 'center', gap: 14, flex: 1, minWidth: 0, cursor: 'pointer' }}
+          >
+            <JoyaAvatar size={46} />
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ color: 'white', fontWeight: 800, fontSize: 15, marginBottom: 2 }}>Joya AI</div>
+              <div style={{ color: 'rgba(255,255,255,0.48)', fontSize: 12, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {listening ? 'Luisteren...' : speaking ? 'Joya spreekt...' : 'Zeg: "Hé Joya, ik wil..."'}
+              </div>
             </div>
+            <WaveformBars active={isActive} />
           </div>
-          <WaveformBars active={isActive} />
+          {/* Mic button */}
           <button
             onClick={e => { e.stopPropagation(); toggleVoice(); }}
             style={{
               width: 50, height: 50, borderRadius: '50%', flexShrink: 0,
-              background: listening
-                ? `linear-gradient(135deg, ${PURPLE}, ${PINK})`
-                : 'rgba(255,255,255,0.08)',
+              background: listening ? `linear-gradient(135deg, ${PURPLE}, ${PINK})` : 'rgba(255,255,255,0.08)',
               border: listening ? 'none' : '1px solid rgba(255,255,255,0.15)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               cursor: 'pointer',
@@ -525,6 +527,18 @@ export function JoyaChatWidget({ triggerOpen = 0 }: { triggerOpen?: number }) {
           >
             <MicIcon active={listening} />
           </button>
+          {/* X dismiss button */}
+          <button
+            onClick={e => { e.stopPropagation(); setBarHidden(true); }}
+            style={{
+              width: 32, height: 32, borderRadius: '50%', flexShrink: 0,
+              background: 'rgba(255,255,255,0.08)',
+              border: '1px solid rgba(255,255,255,0.12)',
+              color: 'rgba(255,255,255,0.5)', fontSize: 16, cursor: 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              lineHeight: 1,
+            }}
+          >✕</button>
         </div>
       )}
 
