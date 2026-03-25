@@ -1,34 +1,25 @@
 /**
  * POST /api/consumer/orders
- * Proxies order submission to VelociPizza's order endpoint.
+ * Proxies order submission to VelociPizza's consumer order endpoint.
  * Body: { items: { menuItemId: string; quantity: number; unitPrice: string }[] }
  */
 import { NextRequest, NextResponse } from 'next/server';
-
-const VELOCIPIZZA_API = process.env.VELOCIPIZZA_API_URL || 'http://localhost:3000';
+import { vpFetch } from '@/lib/velocipizza';
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
+    const token = req.cookies.get('enjoy_session')?.value;
 
-    const res = await fetch(`${VELOCIPIZZA_API}/api/orders`, {
+    const data = await vpFetch<unknown>('/api/consumer/orders', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
+      body,
+      token,
     });
 
-    const data = await res.json().catch(() => ({}));
-
-    if (!res.ok) {
-      return NextResponse.json(
-        { error: data?.message || 'Order failed' },
-        { status: res.status }
-      );
-    }
-
     return NextResponse.json(data, { status: 201 });
-  } catch (error) {
+  } catch (error: any) {
     console.error('[EnJoy /api/consumer/orders] Error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json({ error: error.message ?? 'Internal server error' }, { status: error.status ?? 500 });
   }
 }
