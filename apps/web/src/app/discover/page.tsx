@@ -431,7 +431,7 @@ function DiscoverContent() {
   const [accountOpen, setAccountOpen]       = useState(false);
   const [allCatsOpen, setAllCatsOpen]       = useState(false);
   const [catSearch, setCatSearch]           = useState('');
-  const [isMobile, setIsMobile]             = useState(false);
+  const [isMobile, setIsMobile]             = useState(true);
   const [canScrollL, setCanScrollL]         = useState(false);
   const [canScrollR, setCanScrollR]         = useState(true);
   const cuisineRef = useRef<HTMLDivElement>(null);
@@ -612,43 +612,56 @@ function DiscoverContent() {
       {/* ══ MOBILE HEADER ══ */}
       {isMobile && (
         <header style={{ background: 'var(--discover-nav)', borderBottom: '1px solid var(--border)' }}>
-          {/* Row 1: Address + Delivery mode */}
-          <div style={{ padding: '16px 16px 12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
-            <Link href="/" style={{ textDecoration: 'none', flex: 1, minWidth: 0 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-                <span style={{ fontSize: 17, fontWeight: 900, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                  {address || 'Voeg adres toe'}
-                </span>
-                <span style={{ fontSize: 11, color: 'var(--t45)', flexShrink: 0, marginTop: 2 }}>▼</span>
+          {/* Row 1: Logo + Address pill + Hamburger */}
+          <div style={{ padding: '12px 16px 10px', display: 'flex', alignItems: 'center', gap: 10 }}>
+            <Link href="/" style={{ textDecoration: 'none', flexShrink: 0 }}>
+              <span style={{ fontSize: 20, fontWeight: 900, color: 'var(--text-primary)' }}>
+                En<span style={{ background: LOGO, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Joy</span>
+              </span>
+            </Link>
+            <Link href="/" style={{ flex: 1, minWidth: 0, textDecoration: 'none' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 5, background: 'var(--discover-input)', borderRadius: 22, padding: '7px 12px', border: '1px solid var(--border-strong)' }}>
+                <span style={{ fontSize: 13, flexShrink: 0 }}>📍</span>
+                <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{address || 'Voeg adres toe'}</span>
+                <span style={{ fontSize: 10, color: 'var(--t40)', flexShrink: 0, marginLeft: 2 }}>▼</span>
               </div>
             </Link>
-            <div style={{ display: 'flex', alignItems: 'center', background: 'var(--discover-input)', borderRadius: 22, border: '1px solid var(--border-strong)', padding: 4, gap: 2, flexShrink: 0 }}>
-              <button onClick={() => setDeliveryMode('bezorgen')} style={{ width: 36, height: 30, borderRadius: 16, border: 'none', cursor: 'pointer', background: deliveryMode === 'bezorgen' ? 'var(--b10)' : 'transparent', fontSize: 17, display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background 0.2s' }} title="Bezorgen">🚲</button>
-              <button onClick={() => setDeliveryMode('afhalen')} style={{ padding: '6px 13px', borderRadius: 16, border: 'none', cursor: 'pointer', background: deliveryMode === 'afhalen' ? 'var(--text-primary)' : 'transparent', color: deliveryMode === 'afhalen' ? 'var(--discover-bg)' : 'var(--t45)', fontSize: 13, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 5, transition: 'all 0.2s' }}>🥡 Afhalen</button>
+            <button onClick={() => setAccountOpen(true)} style={{ width: 36, height: 36, borderRadius: '50%', background: 'var(--discover-input)', border: '1px solid var(--border-strong)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0, position: 'relative' }}>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--text-primary)" strokeWidth="2.5" strokeLinecap="round">
+                <line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/>
+              </svg>
+              <div style={{ position: 'absolute', top: 6, right: 6, width: 8, height: 8, borderRadius: '50%', background: ORANGE, border: '2px solid var(--discover-nav)' }} />
+            </button>
+          </div>
+
+          {/* Row 2: Bezorgen / Afhalen full-width toggle */}
+          <div style={{ padding: '0 16px 10px' }}>
+            <div style={{ display: 'flex', background: 'var(--discover-input)', borderRadius: 24, border: '1px solid var(--border-strong)', padding: 3 }}>
+              <button onClick={() => setDeliveryMode('bezorgen')} style={{ flex: 1, padding: '9px 0', borderRadius: 20, border: 'none', cursor: 'pointer', background: deliveryMode === 'bezorgen' ? 'var(--text-primary)' : 'transparent', color: deliveryMode === 'bezorgen' ? 'var(--discover-bg)' : 'var(--t55)', fontSize: 13, fontWeight: 700, transition: 'all 0.2s', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>🚲 Bezorgen</button>
+              <button onClick={() => setDeliveryMode('afhalen')} style={{ flex: 1, padding: '9px 0', borderRadius: 20, border: 'none', cursor: 'pointer', background: deliveryMode === 'afhalen' ? 'var(--text-primary)' : 'transparent', color: deliveryMode === 'afhalen' ? 'var(--discover-bg)' : 'var(--t55)', fontSize: 13, fontWeight: 700, transition: 'all 0.2s', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>🥡 Afhalen</button>
             </div>
           </div>
 
-          {/* Row 2: Search bar (restaurant only) + filter + AI */}
+          {/* Row 3: Search + filter */}
           {isRestaurant && (
-            <div style={{ padding: '0 16px 14px', display: 'flex', gap: 8, alignItems: 'center' }}>
-              <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 10, background: 'var(--discover-input)', borderRadius: 40, border: '1px solid var(--b8)', padding: '0 16px', height: 48, minWidth: 0 }}>
-                <span style={{ fontSize: 16, color: ORANGE, flexShrink: 0 }}>🔍</span>
-                <input type="text" placeholder="Iets vinden?" value={search} onChange={e => setSearch(e.target.value)}
+            <div style={{ padding: '0 16px 12px', display: 'flex', gap: 8, alignItems: 'center' }}>
+              <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 10, background: 'var(--discover-input)', borderRadius: 40, border: '1px solid var(--b8)', padding: '0 16px', height: 46, minWidth: 0 }}>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--t45)" strokeWidth="2.5" strokeLinecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <input type="text" placeholder="Zoek een restaurant of categorie" value={search} onChange={e => setSearch(e.target.value)}
                   style={{ flex: 1, background: 'transparent', border: 'none', color: 'var(--text-primary)', fontSize: 14, outline: 'none', fontFamily: 'inherit', minWidth: 0 }} />
                 {search && <button onClick={() => setSearch('')} style={{ background: 'none', border: 'none', color: 'var(--t35)', cursor: 'pointer', fontSize: 16, flexShrink: 0 }}>✕</button>}
               </div>
-              <button onClick={() => setFiltersOpen(true)} style={{ width: 48, height: 48, borderRadius: '50%', cursor: 'pointer', background: 'var(--discover-input)', border: '1px solid var(--b8)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--t75)" strokeWidth="2" strokeLinecap="round">
+              <button onClick={() => setFiltersOpen(true)} style={{ width: 46, height: 46, borderRadius: '50%', cursor: 'pointer', background: 'var(--discover-input)', border: '1px solid var(--b8)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--t75)" strokeWidth="2" strokeLinecap="round">
                   <line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/>
                 </svg>
               </button>
-              <button style={{ width: 48, height: 48, borderRadius: '50%', border: 'none', cursor: 'pointer', background: `linear-gradient(135deg,${ORANGE},#FF3355)`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, boxShadow: '0 4px 16px rgba(255,107,0,0.4)', fontSize: 20 }}>✦</button>
             </div>
           )}
 
           {/* Category strip */}
           <div style={{ background: 'var(--catstrip-bg)', borderBottom: '1px solid var(--b8)' }}>
-            <div className="scroll-x" style={{ display: 'flex', justifyContent: 'center', padding: '0 4px' }}>
+            <div className="scroll-x" style={{ display: 'flex', padding: '0 4px' }}>
               {topCats.map((cat, i) => <CatIcon key={i} cat={cat} active={activeTopCat === i} onClick={() => setActiveTopCat(i)} />)}
             </div>
           </div>
@@ -728,6 +741,24 @@ function DiscoverContent() {
                 })}
               </div>
             </>
+          )}
+
+          {/* Deals — mobile */}
+          {isRestaurant && (
+            <div style={{ marginBottom: 22 }}>
+              <h2 style={{ fontSize: 16, fontWeight: 900, marginBottom: 12 }}>Aanbiedingen van vandaag 🔥</h2>
+              <div className="scroll-x" style={{ display: 'flex', gap: 10, paddingBottom: 4 }}>
+                {DEALS.map((d, i) => (
+                  <div key={i} style={{ borderRadius: 14, overflow: 'hidden', position: 'relative', minWidth: 180, height: 110, background: d.color, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0 }}>
+                    <span style={{ fontSize: 52, filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.4))' }}>{d.emoji}</span>
+                    <div style={{ position: 'absolute', top: 8, left: 8, background: '#F5C518', borderRadius: 6, padding: '3px 8px', fontSize: 11, fontWeight: 800, color: '#1C1C1C' }}>{d.deal}</div>
+                    <div style={{ position: 'absolute', bottom: 8, left: 10 }}>
+                      <p style={{ fontSize: 12, fontWeight: 800, color: 'white' }}>{d.name}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           )}
 
           <p style={{ fontSize: 16, fontWeight: 900, color: 'var(--text-primary)', marginBottom: 18 }}>

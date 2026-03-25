@@ -240,7 +240,7 @@ export function JoyaChatWidget() {
     return () => window.removeEventListener('resize', check);
   }, []);
 
-  /* Welcome message */
+  /* Welcome message + auto-open on first visit */
   useEffect(() => {
     const greeting = tc.greeting[lang];
     setMessages([{
@@ -248,6 +248,15 @@ export function JoyaChatWidget() {
       text: `${greeting}! Ik ben Joya — jouw persoonlijke eet-concierge. ${tc.suggestion[lang]}`,
       chips: tc.chips,
     }]);
+    // Auto-open on first visit (mobile only)
+    const hasOpened = localStorage.getItem('joyaOpened');
+    if (!hasOpened && window.innerWidth <= 768) {
+      const t = setTimeout(() => {
+        setOpen(true);
+        localStorage.setItem('joyaOpened', '1');
+      }, 1800);
+      return () => clearTimeout(t);
+    }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -277,23 +286,59 @@ export function JoyaChatWidget() {
 
   const handleSendRef = useRef<(override?: string) => void>(() => {});
 
-  const handleSend = useCallback((override?: string) => {
+  const handleSend = useCallback(async (override?: string) => {
     const msg = (override ?? input).trim();
     if (!msg || loading) return;
     const detected = detectLang(msg);
     if (detected !== lang) setLang(detected);
     setInput('');
-    setMessages(p => [...p, { role: 'user', text: msg }]);
+    const userMsg: Message = { role: 'user', text: msg };
+    setMessages(p => {
+      const next = [...p, userMsg];
+      sendToAI(next, detected);
+      return next;
+    });
     setLoading(true);
-    setTimeout(() => {
-      const resp = getResponse(msg, detected);
-      setMessages(p => [...p, resp]);
-      if (ttsOn) {
-        speakElevenLabs(resp.text, audioRef, () => setSpeaking(true), () => setSpeaking(false));
-      }
-      setLoading(false);
-    }, 350 + Math.random() * 250);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [input, loading, lang, ttsOn]);
+
+  const sendToAI = useCallback(async (history: Message[], detected: Lang) => {
+    try {
+      const res = await fetch('/api/joya', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages: history }),
+      });
+      if (res.ok) {
+        const data = await res.json() as { text: string };
+        if (data.text) {
+          const lastUserMsg = history.filter(m => m.role === 'user').pop()?.text ?? '';
+          const fallback = getResponse(lastUserMsg, detected);
+          const resp: Message = {
+            role: 'assistant',
+            text: data.text,
+            chips: fallback.chips,
+            restaurants: fallback.restaurants,
+          };
+          setMessages(p => [...p, resp]);
+          if (ttsOn) {
+            speakElevenLabs(resp.text, audioRef, () => setSpeaking(true), () => setSpeaking(false));
+          }
+          setLoading(false);
+          return;
+        }
+      }
+    } catch { /* fall through to rule-based */ }
+    // Fallback: rule-based response
+    const lastMsg = history.filter(m => m.role === 'user').pop()?.text ?? '';
+    const resp = getResponse(lastMsg, detected);
+    setMessages(p => [...p, resp]);
+    if (ttsOn) {
+      speakElevenLabs(resp.text, audioRef, () => setSpeaking(true), () => setSpeaking(false));
+    }
+    setLoading(false);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ttsOn]);
 
   useEffect(() => { handleSendRef.current = handleSend; }, [handleSend]);
 
