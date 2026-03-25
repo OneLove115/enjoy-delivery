@@ -110,6 +110,8 @@ export default function MenuPage() {
     });
   };
 
+  useEffect(() => { useCartStore.persist.rehydrate(); }, []);
+
   useEffect(() => {
     if (!slug) return;
 

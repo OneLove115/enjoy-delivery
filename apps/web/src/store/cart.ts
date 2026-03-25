@@ -72,6 +72,6 @@ export const useCartStore = create<CartStore>()(
       itemCount: () =>
         get().items.reduce((sum, i) => sum + i.qty, 0),
     }),
-    { name: 'enjoy-cart' }
+    { name: 'enjoy-cart', skipHydration: true }
   )
 );

@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { ThemeProvider } from './context/ThemeContext';
+import { PWAInstall } from './components/PWAInstall';
 
 export const metadata: Metadata = {
   title: 'EnJoy — Elite Gourmet Delivery | Order Signature Local Favorites',
@@ -61,7 +62,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       </head>
       <body style={{ fontFamily: 'Outfit, sans-serif' }}>
-        <ThemeProvider>{children}</ThemeProvider>
+        <ThemeProvider>
+          <PWAInstall />
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );
