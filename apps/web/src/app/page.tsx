@@ -137,7 +137,7 @@ function AddressBar() {
   const handleGeolocate = () => detectLocation();
 
   return (
-    <section style={{ background: 'var(--bg-page)', padding: '32px 16px 48px' }}>
+    <section id="address-section" style={{ background: 'var(--bg-page)', padding: '32px 16px 48px' }}>
       <div style={{ maxWidth: 680, margin: '0 auto' }}>
 
         <motion.p
@@ -210,6 +210,7 @@ function AddressBar() {
 
           {/* Input — font-size 16px prevents iOS auto-zoom */}
           <input
+            id="address-input"
             type="text"
             placeholder="Jouw bezorgadres... (verplicht)"
             value={address}
@@ -264,15 +265,39 @@ function AddressBar() {
   );
 }
 
+/* ─── Shared address guard ─── */
+function useAddressGuard() {
+  const router = useRouter();
+  return (dest: string = '/discover') => {
+    const addr = (typeof window !== 'undefined' ? localStorage.getItem('enjoyAddress') : null) || '';
+    if (!addr.trim()) {
+      const el = document.getElementById('address-section');
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        // Flash the input
+        const input = document.getElementById('address-input') as HTMLInputElement | null;
+        if (input) {
+          input.focus();
+          input.style.outline = '3px solid #FF6B00';
+          setTimeout(() => { input.style.outline = ''; }, 1800);
+        }
+      }
+      return;
+    }
+    router.push(dest);
+  };
+}
+
 /* ─── Food Culture Gallery ─── */
 function FoodCultureSection() {
+  const goDiscover = useAddressGuard();
   const cuisines = [
-    { img: '/food/cat-pizza.png',   name: 'Pizza',   href: '/discover' },
-    { img: '/food/cat-burger.png',  name: 'Burgers', href: '/discover' },
-    { img: '/food/cat-sushi.png',   name: 'Sushi',   href: '/discover' },
-    { img: '/food/cat-curry.png',   name: 'Curry',   href: '/discover' },
-    { img: '/food/cat-kebab.png',   name: 'Kebab',   href: '/discover' },
-    { img: '/food/cat-dessert.png', name: 'Dessert', href: '/discover' },
+    { img: '/food/cat-pizza.png',   name: 'Pizza'   },
+    { img: '/food/cat-burger.png',  name: 'Burgers' },
+    { img: '/food/cat-sushi.png',   name: 'Sushi'   },
+    { img: '/food/cat-curry.png',   name: 'Curry'   },
+    { img: '/food/cat-kebab.png',   name: 'Kebab'   },
+    { img: '/food/cat-dessert.png', name: 'Dessert' },
   ];
   return (
     <section className="section-pad" style={{ background: 'rgba(90,49,244,0.03)' }}>
@@ -284,14 +309,13 @@ function FoodCultureSection() {
       </p>
       <div className="grid-3" style={{ gap: 12, maxWidth: 900, margin: '0 auto' }}>
         {cuisines.map((c, i) => (
-          <Link key={i} href={c.href}>
-            <motion.div initial={{ opacity: 0, y: 15 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.08 }}
-              style={{ position: 'relative', borderRadius: 16, overflow: 'hidden', aspectRatio: '4/3', cursor: 'pointer', border: '1px solid var(--border)' }}>
-              <img src={c.img} alt={c.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-              <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 60%)' }} />
-              <span style={{ position: 'absolute', bottom: 10, left: 14, fontSize: 'clamp(13px, 3vw, 18px)', fontWeight: 800, color: 'white' }}>{c.name}</span>
-            </motion.div>
-          </Link>
+          <motion.div key={i} initial={{ opacity: 0, y: 15 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.08 }}
+            onClick={() => goDiscover()}
+            style={{ position: 'relative', borderRadius: 16, overflow: 'hidden', aspectRatio: '4/3', cursor: 'pointer', border: '1px solid var(--border)' }}>
+            <img src={c.img} alt={c.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 60%)' }} />
+            <span style={{ position: 'absolute', bottom: 10, left: 14, fontSize: 'clamp(13px, 3vw, 18px)', fontWeight: 800, color: 'white' }}>{c.name}</span>
+          </motion.div>
         ))}
       </div>
     </section>
@@ -326,6 +350,7 @@ function HowItWorks() {
 /* ─── Popular Restaurants Preview ─── */
 function PopularRestaurants() {
   const { t } = useTranslation();
+  const goDiscover = useAddressGuard();
   const restaurants = [
     { name: 'Royal Kitchen', cuisine: 'Indian · Curry',     rating: 4.8, time: '25-35 min', img: '/food/royal-kitchen.png',  slug: '' },
     { name: 'Burger Empire', cuisine: 'Burgers · American', rating: 4.6, time: '15-25 min', img: '/food/burger-empire.png', slug: '' },
@@ -337,30 +362,33 @@ function PopularRestaurants() {
       <h2 style={{ textAlign: 'center', fontSize: 'clamp(22px, 5vw, 36px)', fontWeight: 900, marginBottom: 32 }}>{t('popular_near')}</h2>
       <div className="grid-2" style={{ gap: 16, maxWidth: 960, margin: '0 auto' }}>
         {restaurants.map((r, i) => (
-          <Link key={i} href={r.slug ? `/menu/${r.slug}` : '/discover'} style={{ display: 'block' }}>
-            <motion.div initial={{ opacity: 0, y: 15 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.08 }}
-              style={{ display: 'flex', background: 'var(--bg-card)', borderRadius: 16, border: '1px solid var(--border)', overflow: 'hidden', cursor: 'pointer' }}>
-              <div style={{ width: 120, minHeight: 110, position: 'relative', overflow: 'hidden', flexShrink: 0 }}>
-                <img src={r.img} alt={r.name} style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', inset: 0 }} />
+          <motion.div key={i} initial={{ opacity: 0, y: 15 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.08 }}
+            onClick={() => goDiscover(r.slug ? `/menu/${r.slug}` : '/discover')}
+            style={{ display: 'flex', background: 'var(--bg-card)', borderRadius: 16, border: '1px solid var(--border)', overflow: 'hidden', cursor: 'pointer' }}>
+            <div style={{ width: 120, minHeight: 110, position: 'relative', overflow: 'hidden', flexShrink: 0 }}>
+              <img src={r.img} alt={r.name} style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', inset: 0 }} />
+            </div>
+            <div style={{ flex: 1, padding: '14px 16px', display: 'flex', flexDirection: 'column', justifyContent: 'center', minWidth: 0 }}>
+              <h3 style={{ fontSize: 15, fontWeight: 800, marginBottom: 3, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{r.name}</h3>
+              <p style={{ color: 'var(--text-muted)', fontSize: 12, marginBottom: 10, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{r.cuisine}</p>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+                <span style={{ background: 'rgba(255,215,0,0.12)', color: '#FFD700', padding: '2px 8px', borderRadius: 8, fontSize: 12, fontWeight: 700, whiteSpace: 'nowrap' }}>⭐ {r.rating}</span>
+                <span style={{ color: 'var(--text-muted)', fontSize: 12, whiteSpace: 'nowrap' }}>{r.time}</span>
               </div>
-              <div style={{ flex: 1, padding: '14px 16px', display: 'flex', flexDirection: 'column', justifyContent: 'center', minWidth: 0 }}>
-                <h3 style={{ fontSize: 15, fontWeight: 800, marginBottom: 3, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{r.name}</h3>
-                <p style={{ color: 'var(--text-muted)', fontSize: 12, marginBottom: 10, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{r.cuisine}</p>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-                  <span style={{ background: 'rgba(255,215,0,0.12)', color: '#FFD700', padding: '2px 8px', borderRadius: 8, fontSize: 12, fontWeight: 700, whiteSpace: 'nowrap' }}>⭐ {r.rating}</span>
-                  <span style={{ color: 'var(--text-muted)', fontSize: 12, whiteSpace: 'nowrap' }}>{r.time}</span>
-                </div>
-              </div>
-            </motion.div>
-          </Link>
+            </div>
+          </motion.div>
         ))}
       </div>
       <div style={{ textAlign: 'center', marginTop: 28 }}>
-        <Link href="/discover" style={{
-          display: 'inline-block', padding: '14px 32px', borderRadius: 50,
-          background: `linear-gradient(135deg,${PURPLE},${PINK})`,
-          color: 'white', fontWeight: 800, fontSize: 16,
-        }}>Bekijk alle restaurants →</Link>
+        <button
+          onClick={() => goDiscover()}
+          style={{
+            display: 'inline-block', padding: '14px 32px', borderRadius: 50,
+            background: `linear-gradient(135deg,${PURPLE},${PINK})`,
+            color: 'white', fontWeight: 800, fontSize: 16,
+            border: 'none', cursor: 'pointer',
+          }}
+        >Bekijk alle restaurants →</button>
       </div>
     </section>
   );

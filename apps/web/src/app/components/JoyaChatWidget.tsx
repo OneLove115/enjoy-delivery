@@ -216,7 +216,7 @@ async function speakElevenLabs(
 }
 
 /* ─── Main component ─── */
-export function JoyaChatWidget() {
+export function JoyaChatWidget({ triggerOpen = 0 }: { triggerOpen?: number }) {
   const tc = getTimeContext();
   const [open, setOpen]           = useState(false);
   const [lang, setLang]           = useState<Lang>('nl');
@@ -239,6 +239,15 @@ export function JoyaChatWidget() {
     window.addEventListener('resize', check);
     return () => window.removeEventListener('resize', check);
   }, []);
+
+  /* External trigger — orange button opens Joya */
+  useEffect(() => {
+    if (triggerOpen > 0) {
+      setOpen(true);
+      setTimeout(() => inputRef.current?.focus(), 300);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [triggerOpen]);
 
   /* Welcome message + auto-open on first visit */
   useEffect(() => {
@@ -369,7 +378,12 @@ export function JoyaChatWidget() {
         <div style={{ display: 'flex', alignItems: 'center', gap: 11 }}>
           <JoyaAvatar size={38} />
           <div>
-            <div style={{ color: '#fff', fontWeight: 800, fontSize: 15 }}>Joya</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <span style={{ color: '#fff', fontWeight: 800, fontSize: 15 }}>Joya</span>
+              <span style={{ fontSize: 11, fontWeight: 900, color: 'rgba(255,255,255,0.55)', letterSpacing: '0.5px' }}>
+                by En<span style={{ background: `linear-gradient(135deg,${PURPLE},${PINK})`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Joy</span>
+              </span>
+            </div>
             <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: 11 }}>
               AI concierge · {lang.toUpperCase()}
             </div>
@@ -552,12 +566,14 @@ const S: Record<string, React.CSSProperties> = {
     boxShadow: '0 24px 70px rgba(0,0,0,.7), 0 0 60px rgba(90,49,244,.15)',
   },
   panelMobile: {
-    position: 'fixed', left: 0, right: 0, bottom: 0, top: '10%',
+    position: 'fixed', left: 0, right: 0, bottom: 0, top: '8%',
     zIndex: 9999, borderRadius: '24px 24px 0 0', overflow: 'hidden',
     display: 'flex', flexDirection: 'column',
-    background: '#0A0A12',
+    background: 'rgba(8, 8, 20, 0.82)',
+    backdropFilter: 'blur(32px)',
+    WebkitBackdropFilter: 'blur(32px)',
     border: '1px solid rgba(90,49,244,0.35)',
-    boxShadow: '0 -16px 60px rgba(0,0,0,.8)',
+    boxShadow: '0 -16px 60px rgba(0,0,0,.6)',
   },
   header: {
     display: 'flex', alignItems: 'center', justifyContent: 'space-between',
