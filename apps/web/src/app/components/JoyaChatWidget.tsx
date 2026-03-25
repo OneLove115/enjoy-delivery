@@ -202,11 +202,16 @@ export function JoyaChatWidget({ triggerOpen = 0 }: { triggerOpen?: number }) {
   const [ttsOn, setTtsOn]         = useState(true);
   const [isMobile, setIsMobile]   = useState(false);
   const [barHidden, setBarHidden] = useState(false);
+  const [voiceMode, setVoiceMode] = useState(false);
   const endRef             = useRef<HTMLDivElement>(null);
   const recRef             = useRef<any>(null);
   const audioRef           = useRef<HTMLAudioElement | null>(null);
   const inputRef           = useRef<HTMLInputElement>(null);
   const hasSpokenWelcome   = useRef(false);
+  const voiceModeRef       = useRef(false);
+
+  /* Keep voiceModeRef in sync */
+  useEffect(() => { voiceModeRef.current = voiceMode; }, [voiceMode]);
 
   /* Detect mobile */
   useEffect(() => {
@@ -225,17 +230,26 @@ export function JoyaChatWidget({ triggerOpen = 0 }: { triggerOpen?: number }) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [triggerOpen]);
 
+  /* After Joya finishes speaking in voice mode → restart mic */
+  const onSpeakEnd = useCallback(() => {
+    setSpeaking(false);
+    if (voiceModeRef.current && recRef.current) {
+      setTimeout(() => {
+        try { recRef.current.start(); setListening(true); } catch { /* already running */ }
+      }, 600);
+    }
+  }, []);
+
   /* Auto-speak welcome message when chat opens for the first time */
   useEffect(() => {
     if (!open) return;
     if (hasSpokenWelcome.current) return;
     hasSpokenWelcome.current = true;
-    // Small delay so the panel is mounted and audio context can start
     const t = setTimeout(() => {
       setMessages(current => {
         const welcome = current[0];
         if (welcome && ttsOn) {
-          speakElevenLabs(welcome.text, audioRef, () => setSpeaking(true), () => setSpeaking(false));
+          speakElevenLabs(welcome.text, audioRef, () => setSpeaking(true), onSpeakEnd);
         }
         return current;
       });
@@ -326,7 +340,7 @@ export function JoyaChatWidget({ triggerOpen = 0 }: { triggerOpen?: number }) {
           };
           setMessages(p => [...p, resp]);
           if (ttsOn) {
-            speakElevenLabs(resp.text, audioRef, () => setSpeaking(true), () => setSpeaking(false));
+            speakElevenLabs(resp.text, audioRef, () => setSpeaking(true), onSpeakEnd);
           }
           setLoading(false);
           return;
@@ -338,11 +352,11 @@ export function JoyaChatWidget({ triggerOpen = 0 }: { triggerOpen?: number }) {
     const resp = getResponse(lastMsg, detected);
     setMessages(p => [...p, resp]);
     if (ttsOn) {
-      speakElevenLabs(resp.text, audioRef, () => setSpeaking(true), () => setSpeaking(false));
+      speakElevenLabs(resp.text, audioRef, () => setSpeaking(true), onSpeakEnd);
     }
     setLoading(false);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ttsOn]);
+  }, [ttsOn, onSpeakEnd]);
 
   useEffect(() => { handleSendRef.current = handleSend; }, [handleSend]);
 
@@ -350,6 +364,25 @@ export function JoyaChatWidget({ triggerOpen = 0 }: { triggerOpen?: number }) {
     if (!recRef.current) return;
     if (listening) { recRef.current.stop(); setListening(false); }
     else { recRef.current.start(); setListening(true); }
+  };
+
+  const enterVoiceMode = () => {
+    setVoiceMode(true);
+    setOpen(true);
+    // Start listening after a short delay so voice mode UI is painted first
+    setTimeout(() => {
+      if (recRef.current && !listening) {
+        try { recRef.current.start(); setListening(true); } catch {}
+      }
+    }, 700);
+  };
+
+  const exitVoiceMode = () => {
+    setVoiceMode(false);
+    if (audioRef.current) { audioRef.current.pause(); }
+    if (recRef.current && listening) { try { recRef.current.stop(); } catch {} }
+    setListening(false);
+    setSpeaking(false);
   };
 
   const kd = (e: React.KeyboardEvent) => {
@@ -364,6 +397,102 @@ export function JoyaChatWidget({ triggerOpen = 0 }: { triggerOpen?: number }) {
   };
 
   const isActive = listening || speaking;
+
+  /* ─── Voice Mode Panel (speech-to-speech full screen) ─── */
+  const lastJoyaMsg = messages.filter(m => m.role === 'assistant').slice(-1)[0]?.text ?? '';
+  const lastUserMsg = messages.filter(m => m.role === 'user').slice(-1)[0]?.text ?? '';
+
+  const voicePanel = (
+    <div style={{
+      position: 'fixed', inset: 0, zIndex: 10000,
+      background: 'linear-gradient(180deg, #08081A 0%, #14082E 60%, #0A0A18 100%)',
+      display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+      fontFamily: 'Outfit, sans-serif',
+    }}>
+      {/* Top bar */}
+      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 24px' }}>
+        <div style={{ fontSize: 13, fontWeight: 700, color: 'rgba(255,255,255,0.4)' }}>
+          by En<span style={{ background: `linear-gradient(135deg,${PURPLE},${PINK})`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Joy</span>
+        </div>
+        <button onClick={exitVoiceMode}
+          style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, color: 'rgba(255,255,255,0.5)', fontSize: 13, fontWeight: 700, padding: '6px 14px', cursor: 'pointer', fontFamily: 'inherit' }}>
+          💬 Chat
+        </button>
+      </div>
+
+      {/* Avatar with speaking ring */}
+      <div style={{ position: 'relative', marginBottom: 28 }}>
+        {speaking && (
+          <>
+            <div style={{ position: 'absolute', inset: -20, borderRadius: '50%', border: `2px solid rgba(90,49,244,0.4)`, animation: 'vring 1.4s ease-out infinite' }} />
+            <div style={{ position: 'absolute', inset: -10, borderRadius: '50%', border: `2px solid rgba(255,0,128,0.3)`, animation: 'vring 1.4s ease-out infinite 0.4s' }} />
+          </>
+        )}
+        {listening && (
+          <div style={{ position: 'absolute', inset: -12, borderRadius: '50%', border: `2px solid rgba(255,107,0,0.5)`, animation: 'vring 1s ease-out infinite' }} />
+        )}
+        <img src="/joya.jpg" alt="Joya"
+          style={{ width: 128, height: 128, borderRadius: '50%', objectFit: 'cover', objectPosition: 'center top', position: 'relative', zIndex: 1, border: `3px solid ${speaking ? PINK : listening ? ORANGE : 'rgba(255,255,255,0.15)'}`, transition: 'border-color 0.3s', boxShadow: speaking ? `0 0 40px rgba(255,0,128,0.4)` : listening ? `0 0 40px rgba(255,107,0,0.4)` : 'none' }} />
+      </div>
+
+      {/* Name + status */}
+      <div style={{ fontSize: 24, fontWeight: 900, color: 'white', marginBottom: 6 }}>Joya</div>
+      <div style={{ fontSize: 15, fontWeight: 600, marginBottom: 36, letterSpacing: '0.3px',
+        color: loading ? 'rgba(255,255,255,0.5)' : speaking ? PINK : listening ? ORANGE : 'rgba(255,255,255,0.35)',
+        transition: 'color 0.3s',
+      }}>
+        {loading ? 'Nadenken…' : speaking ? 'Joya spreekt…' : listening ? 'Luisteren…' : 'Tik om te spreken'}
+      </div>
+
+      {/* Waveform */}
+      <div style={{ marginBottom: 36 }}>
+        <WaveformBars active={isActive} />
+      </div>
+
+      {/* Transcript area */}
+      <div style={{ minHeight: 72, maxWidth: 320, padding: '0 24px', marginBottom: 48, textAlign: 'center' }}>
+        {lastUserMsg && (
+          <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.35)', marginBottom: 10, fontStyle: 'italic' }}>
+            &ldquo;{lastUserMsg.slice(0, 80)}{lastUserMsg.length > 80 ? '…' : ''}&rdquo;
+          </div>
+        )}
+        {lastJoyaMsg && (
+          <div style={{ fontSize: 14, color: 'rgba(255,255,255,0.65)', lineHeight: 1.6 }}>
+            {lastJoyaMsg.slice(0, 140)}{lastJoyaMsg.length > 140 ? '…' : ''}
+          </div>
+        )}
+      </div>
+
+      {/* Controls */}
+      <div style={{ display: 'flex', gap: 28, alignItems: 'center' }}>
+        {/* Mute/unmute mic */}
+        <button onClick={toggleVoice} title={listening ? 'Stop' : 'Spreken'}
+          style={{
+            width: 72, height: 72, borderRadius: '50%', border: 'none', cursor: 'pointer',
+            background: listening ? `linear-gradient(135deg,${ORANGE},${PINK})` : 'rgba(255,255,255,0.1)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            boxShadow: listening ? `0 0 28px rgba(255,107,0,0.5)` : 'none',
+            transition: 'all 0.25s',
+          }}>
+          <MicIcon active={listening} />
+        </button>
+        {/* End call */}
+        <button onClick={exitVoiceMode} title="Gesprek beëindigen"
+          style={{
+            width: 64, height: 64, borderRadius: '50%', border: 'none', cursor: 'pointer',
+            background: '#EF4444',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24,
+            boxShadow: '0 6px 20px rgba(239,68,68,0.5)',
+          }}>
+          📵
+        </button>
+      </div>
+
+      <style>{`
+        @keyframes vring { 0%{transform:scale(1);opacity:.8} 100%{transform:scale(1.6);opacity:0} }
+      `}</style>
+    </div>
+  );
 
   /* ─── Chat panel content (shared mobile/desktop) ─── */
   const chatPanel = (
@@ -395,6 +524,10 @@ export function JoyaChatWidget({ triggerOpen = 0 }: { triggerOpen?: number }) {
           <button onClick={() => setTtsOn(t => !t)} title={ttsOn ? 'Spraak uit' : 'Spraak aan'}
             style={{ ...S.iconBtn, background: ttsOn ? 'rgba(255,255,255,0.18)' : 'rgba(0,0,0,0.25)', fontSize: 15 }}>
             {ttsOn ? '🔊' : '🔇'}
+          </button>
+          <button onClick={enterVoiceMode} title="Spraak-naar-spraak modus"
+            style={{ ...S.iconBtn, background: 'rgba(255,107,0,0.25)', border: `1px solid rgba(255,107,0,0.4)`, fontSize: 15 }}>
+            📞
           </button>
           <button onClick={() => setOpen(false)} style={S.closeBtn}>✕</button>
         </div>
@@ -506,16 +639,16 @@ export function JoyaChatWidget({ triggerOpen = 0 }: { triggerOpen?: number }) {
             </div>
             <WaveformBars active={isActive} />
           </div>
-          {/* Mic button */}
+          {/* Mic button — enters voice mode on mobile */}
           <button
-            onClick={e => { e.stopPropagation(); toggleVoice(); }}
+            onClick={e => { e.stopPropagation(); enterVoiceMode(); }}
             style={{
               width: 50, height: 50, borderRadius: '50%', flexShrink: 0,
-              background: listening ? `linear-gradient(135deg, ${PURPLE}, ${PINK})` : 'rgba(255,255,255,0.08)',
-              border: listening ? 'none' : '1px solid rgba(255,255,255,0.15)',
+              background: listening ? `linear-gradient(135deg, ${ORANGE}, ${PINK})` : `linear-gradient(135deg, ${PURPLE}, ${PINK})`,
+              border: 'none',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               cursor: 'pointer',
-              boxShadow: listening ? `0 0 20px rgba(90,49,244,0.5)` : 'none',
+              boxShadow: `0 0 20px rgba(90,49,244,0.5)`,
               transition: 'all 0.2s',
             }}
           >
@@ -536,8 +669,11 @@ export function JoyaChatWidget({ triggerOpen = 0 }: { triggerOpen?: number }) {
         </div>
       )}
 
-      {/* ── Chat panel ── */}
-      {open && chatPanel}
+      {/* ── Voice mode full-screen ── */}
+      {voiceMode && voicePanel}
+
+      {/* ── Chat panel (hidden when voice mode active) ── */}
+      {open && !voiceMode && chatPanel}
 
       {/* ── Desktop FAB (only on desktop) ── */}
       {!isMobile && !open && (
