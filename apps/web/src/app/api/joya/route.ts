@@ -279,7 +279,7 @@ export async function POST(req: NextRequest) {
     if (!response.ok) {
       const errBody = await response.text();
       console.error('Anthropic error:', response.status, errBody);
-      return NextResponse.json({ error: 'AI unavailable', debug: errBody, status: response.status }, { status: 502 });
+      return NextResponse.json({ error: 'AI unavailable' }, { status: 502 });
     }
 
     const data = await response.json() as {
