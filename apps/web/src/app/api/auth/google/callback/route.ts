@@ -56,7 +56,7 @@ export async function GET(req: NextRequest) {
     const res = NextResponse.redirect(`${appUrl}/discover`);
     res.cookies.set('enjoy_session', data.token, {
       httpOnly: true,
-      secure: true,
+      secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       path: '/',
       maxAge: 60 * 60 * 24 * 7,

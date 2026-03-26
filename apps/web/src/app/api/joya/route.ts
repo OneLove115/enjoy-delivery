@@ -283,9 +283,15 @@ export async function POST(req: NextRequest) {
     }
 
     const data = await response.json() as {
-      content: Array<{ type: string; text: string }>;
+      content?: Array<{ type: string; text: string }>;
+      error?: { type: string; message: string };
     };
-    const text = data.content.find(c => c.type === 'text')?.text ?? '';
+    if (data.error) {
+      console.error('Anthropic API error:', data.error);
+      return NextResponse.json({ error: data.error.message }, { status: 502 });
+    }
+    const text = data.content?.find(c => c.type === 'text')?.text ?? '';
+    if (!text) return NextResponse.json({ error: 'Empty response' }, { status: 502 });
     return NextResponse.json({ text });
   } catch (err) {
     console.error('Joya API error:', err);

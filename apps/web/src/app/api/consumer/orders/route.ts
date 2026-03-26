@@ -10,6 +10,7 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const token = req.cookies.get('enjoy_session')?.value;
+    if (!token) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
 
     const data = await vpFetch<unknown>('/api/consumer/orders', {
       method: 'POST',
