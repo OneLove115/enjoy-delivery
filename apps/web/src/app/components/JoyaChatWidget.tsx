@@ -62,18 +62,18 @@ interface Message {
 }
 
 const R = {
-  pizza:    { nl: 'Uitstekende keuze! 🍕 De beste pizza spots:', en: 'Great choice! 🍕 Best pizza spots:', de: 'Ausgezeichnete Wahl! 🍕 Die besten Pizza-Stellen:', ar: 'خيار ممتاز! 🍕 أفضل مطاعم البيتزا:' },
-  burger:   { nl: 'Burger time! 🍔 Beste keuze:', en: 'Burger time! 🍔 Best pick:', de: 'Burger-Zeit! 🍔 Beste Wahl:', ar: 'وقت البرغر! 🍔 أفضل اختيار:' },
-  sushi:    { nl: 'Sushi — de koninklijke keuze! 🍣', en: 'Sushi — the royal choice! 🍣', de: 'Sushi — die königliche Wahl! 🍣', ar: 'السوشي — الاختيار الملكي! 🍣' },
-  fast:     { nl: '⚡ Snelste bezorging nu beschikbaar:', en: '⚡ Fastest delivery available now:', de: '⚡ Schnellste Lieferung jetzt verfügbar:', ar: '⚡ أسرع توصيل متاح الآن:' },
-  veg:      { nl: '🥗 Vegetarische & veganistische opties:', en: '🥗 Vegetarian & vegan options:', de: '🥗 Vegetarische & vegane Optionen:', ar: '🥗 خيارات نباتية:' },
-  surprise: { nl: "🎲 Joya's aanbeveling van vandaag:", en: "🎲 Joya's pick of the day:", de: '🎲 Joyas Empfehlung des Tages:', ar: '🎲 اختيار جويا اليوم:' },
-  chicken:  { nl: '🍗 Beste kip gerechten:', en: '🍗 Best chicken dishes:', de: '🍗 Beste Hühnchengerichte:', ar: '🍗 أفضل أطباق الدجاج:' },
-  asian:    { nl: '🥡 Aziatische smaakexplosie:', en: '🥡 Asian flavor explosion:', de: '🥡 Asiatische Geschmacksexplosion:', ar: '🥡 انفجار نكهات آسيوية:' },
-  cheap:    { nl: '💸 Beste deals — gratis bezorging:', en: '💸 Best deals — free delivery:', de: '💸 Beste Deals — kostenlose Lieferung:', ar: '💸 أفضل العروض — توصيل مجاني:' },
-  drinks:   { nl: '🍷 Drank bestellen — kies je favoriet:', en: '🍷 Order drinks — pick your favourite:', de: '🍷 Getränke bestellen — wähle deinen Favoriten:', ar: '🍷 اطلب المشروبات — اختر المفضلة لديك:' },
-  fallback: { nl: 'Ik help je graag snel bestellen! Wat wil je eten? 😊', en: 'Happy to help you order fast! What do you feel like eating? 😊', de: 'Ich helfe dir gerne schnell zu bestellen! Was möchtest du essen? 😊', ar: 'يسعدني مساعدتك في الطلب بسرعة! ماذا تريد أن تأكل؟ 😊' },
-  offer:    { nl: '🔥 Aanbiedingen van vandaag — mis ze niet!', en: "🔥 Today's deals — don't miss out!", de: '🔥 Angebote von heute — nicht verpassen!', ar: '🔥 عروض اليوم — لا تفوتها!' },
+  pizza:    { nl: 'Voor pizza heb ik twee goede opties voor je 🍕', en: 'Here are two solid pizza options 🍕', de: 'Hier sind zwei gute Pizza-Optionen für dich 🍕', ar: 'لديّ خياران جيدان للبيتزا 🍕' },
+  burger:   { nl: 'Burger Empire levert het snelst en heeft sterke reviews 🍔', en: 'Burger Empire is your best bet — fast and well-rated 🍔', de: 'Burger Empire liefert am schnellsten 🍔', ar: 'برغر إمباير هو خيارك الأفضل 🍔' },
+  sushi:    { nl: 'Sushi Palace is de beste keuze hier — 4.9 sterren, gratis bezorging 🍣', en: 'Sushi Palace is the one — 4.9 stars, free delivery 🍣', de: 'Sushi Palace ist die beste Wahl — 4,9 Sterne 🍣', ar: 'سوشي بالاس هو الأفضل — 4.9 نجوم 🍣' },
+  fast:     { nl: 'Als je haast hebt, Burger Empire bezorgt binnen 15-25 minuten ⚡', en: 'In a hurry? Burger Empire delivers in 15-25 minutes ⚡', de: 'Wenn es schnell gehen soll: Burger Empire in 15-25 Minuten ⚡', ar: 'إذا كنت مستعجلاً، برغر إمباير يوصل خلال 15-25 دقيقة ⚡' },
+  veg:      { nl: 'Voor plantaardig eten zijn dit de beste opties 🥗', en: 'These are the best spots for veggie options 🥗', de: 'Hier die besten Optionen für vegetarisches Essen 🥗', ar: 'هذه أفضل الخيارات للأكل النباتي 🥗' },
+  surprise: { nl: 'Royal Kitchen is op dit moment mijn favoriet — Chicken Tikka Masala voor €13,50 is echt de moeite waard', en: 'Royal Kitchen is my go-to right now — the Chicken Tikka Masala at €13.50 is worth it', de: 'Royal Kitchen ist gerade mein Favorit — das Chicken Tikka Masala für €13,50 ist es wert', ar: 'مطبخ رويال هو مفضلتي الآن — تيكا ماسالا بـ 13.50€ يستحق التجربة' },
+  chicken:  { nl: 'Royal Kitchen heeft de beste kip hier — de Tikka Masala is een klassieker 🍗', en: 'Royal Kitchen does the best chicken — the Tikka Masala is a classic 🍗', de: 'Royal Kitchen hat das beste Hühnchen — das Tikka Masala ist ein Klassiker 🍗', ar: 'مطبخ رويال لديه أفضل دجاج هنا 🍗' },
+  asian:    { nl: 'Dragon Wok of Pho Dynasty — beiden goed, afhankelijk van waar je zin in hebt 🥡', en: 'Dragon Wok or Pho Dynasty — both solid, depends what you feel like 🥡', de: 'Dragon Wok oder Pho Dynasty — beides gut, je nach Laune 🥡', ar: 'دراغون ووك أو فو دايناستي — كلاهما ممتاز 🥡' },
+  cheap:    { nl: 'Deze bezorgen gratis en hebben goede beoordelingen 💸', en: 'These all offer free delivery and are well-rated 💸', de: 'Diese liefern kostenlos und sind gut bewertet 💸', ar: 'هذه تقدم توصيلاً مجانياً وتحظى بتقييمات جيدة 💸' },
+  drinks:   { nl: 'Drankjes kun je erbij bestellen via de meeste restaurants hier', en: 'You can add drinks when ordering from most restaurants here', de: 'Bei den meisten Restaurants hier kannst du auch Getränke bestellen', ar: 'يمكنك إضافة المشروبات عند الطلب من معظم المطاعم هنا' },
+  fallback: { nl: 'Waar heb je trek in?', en: 'What are you in the mood for?', de: 'Worauf hast du Hunger?', ar: 'على ماذا تشتهي أن تأكل؟' },
+  offer:    { nl: 'Royal Kitchen heeft nu 30% korting, Sushi Palace heeft een 2+1 deal 🔥', en: 'Royal Kitchen has 30% off right now, Sushi Palace has a 2+1 deal 🔥', de: 'Royal Kitchen hat jetzt 30% Rabatt, Sushi Palace hat eine 2+1-Aktion 🔥', ar: 'مطبخ رويال لديه خصم 30٪ الآن 🔥' },
 };
 
 const RESTAURANTS = {
