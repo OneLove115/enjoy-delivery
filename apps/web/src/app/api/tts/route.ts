@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-// Bella voice – warm, natural female voice (premade, works on all plans)
-const VOICE_ID = 'EXAVITQu4vr4xnSDxMaL';
+// Joya voice – multilingual, warm female voice selected by user
+const VOICE_ID = 'FUfBrNit0NNZAwb58KWH';
 
 export async function POST(req: NextRequest) {
   const { text } = await req.json();
