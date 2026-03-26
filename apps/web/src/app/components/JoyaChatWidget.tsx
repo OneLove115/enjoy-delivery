@@ -231,9 +231,15 @@ export function JoyaChatWidget({ triggerOpen = 0 }: { triggerOpen?: number }) {
   const inputRef           = useRef<HTMLInputElement>(null);
   const hasSpokenWelcome   = useRef(false);
   const voiceModeRef       = useRef(false);
+  const messagesRef        = useRef<Message[]>([]);   // always-current messages
+  const processingRef      = useRef(false);            // sync guard, no stale closure
+  const langRef            = useRef<Lang>('nl');
+  const handleSendRef      = useRef<(override?: string) => void>(() => {});
 
-  /* Keep voiceModeRef in sync */
+  /* Keep refs in sync with state */
   useEffect(() => { voiceModeRef.current = voiceMode; }, [voiceMode]);
+  useEffect(() => { messagesRef.current = messages; }, [messages]);
+  useEffect(() => { langRef.current = lang; }, [lang]);
 
   /* Detect mobile */
   useEffect(() => {
@@ -252,15 +258,33 @@ export function JoyaChatWidget({ triggerOpen = 0 }: { triggerOpen?: number }) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [triggerOpen]);
 
-  /* After Joya finishes speaking in voice mode → restart mic */
+  /* Create a fresh SR instance and start it — avoids InvalidStateError on reuse */
+  const startListening = useCallback(() => {
+    if (typeof window === 'undefined') return;
+    const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SR) return;
+    const rec = new SR();
+    rec.continuous = false; rec.interimResults = false;
+    rec.lang = langRef.current === 'ar' ? 'ar-SA' : langRef.current === 'de' ? 'de-DE' : langRef.current === 'en' ? 'en-GB' : 'nl-NL';
+    rec.onresult = (e: any) => {
+      const transcript = e.results[0][0].transcript;
+      setInput(transcript);
+      setListening(false);
+      setTimeout(() => handleSendRef.current(transcript), 50);
+    };
+    rec.onerror = () => setListening(false);
+    rec.onend   = () => setListening(false);
+    recRef.current = rec;
+    try { rec.start(); setListening(true); } catch { setListening(false); }
+  }, []);
+
+  /* After Joya finishes speaking in voice mode → restart mic with fresh instance */
   const onSpeakEnd = useCallback(() => {
     setSpeaking(false);
-    if (voiceModeRef.current && recRef.current) {
-      setTimeout(() => {
-        try { recRef.current.start(); setListening(true); } catch { /* already running */ }
-      }, 600);
+    if (voiceModeRef.current) {
+      setTimeout(() => startListening(), 600);
     }
-  }, []);
+  }, [startListening]);
 
   /* Auto-speak welcome message when chat opens for the first time */
   useEffect(() => {
@@ -302,45 +326,20 @@ export function JoyaChatWidget({ triggerOpen = 0 }: { triggerOpen?: number }) {
 
   useEffect(() => { endRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages]);
 
-  /* Speech recognition setup */
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    if (SR) {
-      const rec = new SR();
-      rec.continuous = false; rec.interimResults = false;
-      rec.lang = lang === 'ar' ? 'ar-SA' : lang === 'de' ? 'de-DE' : lang === 'en' ? 'en-GB' : 'nl-NL';
-      rec.onresult = (e: any) => {
-        const transcript = e.results[0][0].transcript;
-        setInput(transcript);
-        setListening(false);
-        // Auto-send voice input
-        setTimeout(() => handleSendRef.current(transcript), 50);
-      };
-      rec.onerror = () => setListening(false);
-      rec.onend   = () => setListening(false);
-      recRef.current = rec;
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [lang]);
-
-  const handleSendRef = useRef<(override?: string) => void>(() => {});
-
   const handleSend = useCallback(async (override?: string) => {
     const msg = (override ?? input).trim();
-    if (!msg || loading) return;
+    if (!msg || processingRef.current) return;
+    processingRef.current = true;
     const detected = detectLang(msg);
-    if (detected !== lang) setLang(detected);
+    if (detected !== langRef.current) setLang(detected);
     setInput('');
     const userMsg: Message = { role: 'user', text: msg };
-    setMessages(p => {
-      const next = [...p, userMsg];
-      sendToAI(next, detected);
-      return next;
-    });
+    const history = [...messagesRef.current, userMsg];
+    setMessages(history);
     setLoading(true);
+    sendToAI(history, detected);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [input, loading, lang, ttsOn]);
+  }, [input]);
 
   const sendToAI = useCallback(async (history: Message[], detected: Lang) => {
     try {
@@ -361,10 +360,11 @@ export function JoyaChatWidget({ triggerOpen = 0 }: { triggerOpen?: number }) {
             restaurants: fallback.restaurants,
           };
           setMessages(p => [...p, resp]);
+          setLoading(false);
+          processingRef.current = false;
           if (ttsOn) {
             speakElevenLabs(resp.text, audioRef, () => setSpeaking(true), onSpeakEnd);
           }
-          setLoading(false);
           return;
         }
       }
@@ -373,30 +373,30 @@ export function JoyaChatWidget({ triggerOpen = 0 }: { triggerOpen?: number }) {
     const lastMsg = history.filter(m => m.role === 'user').pop()?.text ?? '';
     const resp = getResponse(lastMsg, detected);
     setMessages(p => [...p, resp]);
+    setLoading(false);
+    processingRef.current = false;
     if (ttsOn) {
       speakElevenLabs(resp.text, audioRef, () => setSpeaking(true), onSpeakEnd);
     }
-    setLoading(false);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ttsOn, onSpeakEnd]);
 
   useEffect(() => { handleSendRef.current = handleSend; }, [handleSend]);
 
   const toggleVoice = () => {
-    if (!recRef.current) return;
-    if (listening) { recRef.current.stop(); setListening(false); }
-    else { recRef.current.start(); setListening(true); }
+    if (listening) {
+      if (recRef.current) { try { recRef.current.stop(); } catch {} }
+      setListening(false);
+    } else {
+      startListening();
+    }
   };
 
   const enterVoiceMode = () => {
     setVoiceMode(true);
     setOpen(true);
     // Start listening after a short delay so voice mode UI is painted first
-    setTimeout(() => {
-      if (recRef.current && !listening) {
-        try { recRef.current.start(); setListening(true); } catch {}
-      }
-    }, 700);
+    setTimeout(() => { if (!listening) startListening(); }, 700);
   };
 
   const exitVoiceMode = () => {
