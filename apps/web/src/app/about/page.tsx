@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { Nav } from '../components/Nav';
 import { Footer } from '../components/Footer';
 
-const S = { page: { background: '#0A0A0F', minHeight: '100vh', color: 'white', fontFamily: 'Outfit, sans-serif' } as const, container: { maxWidth: 900, margin: '0 auto', padding: '40px 40px 60px' } as const, h1: { fontSize: 42, fontWeight: 900, marginBottom: 16, background: 'linear-gradient(135deg,#5A31F4,#FF0080)', WebkitBackgroundClip: 'text' as const, WebkitTextFillColor: 'transparent' as const } as const, p: { color: 'rgba(255,255,255,0.6)', lineHeight: 1.8, fontSize: 16, marginBottom: 16 } as const, back: { display: 'inline-block', marginBottom: 32, color: '#5A31F4', fontWeight: 700, fontSize: 14 } as const };
+const S = { page: { background: 'var(--bg-page)', minHeight: '100vh', color: 'var(--text-primary)', fontFamily: 'Outfit, sans-serif' } as const, container: { maxWidth: 900, margin: '0 auto', padding: 'clamp(24px,5vw,60px) clamp(16px,4vw,40px)' } as const, h1: { fontSize: 42, fontWeight: 900, marginBottom: 16, background: 'linear-gradient(135deg,#5A31F4,#FF0080)', WebkitBackgroundClip: 'text' as const, WebkitTextFillColor: 'transparent' as const } as const, p: { color: 'var(--text-secondary)', lineHeight: 1.8, fontSize: 16, marginBottom: 16 } as const, back: { display: 'inline-block', marginBottom: 32, color: '#5A31F4', fontWeight: 700, fontSize: 14 } as const };
 
 export default function AboutPage() {
   return (
@@ -26,27 +26,27 @@ export default function AboutPage() {
       <p style={S.p}>EnJoy was founded with a singular vision: to transform food delivery from a mundane transaction into a royal experience. We connect discerning foodies with the finest local kitchens, leveraging cutting-edge AI and a relentless commitment to quality.</p>
 
       <h2 style={{ fontSize: 28, fontWeight: 800, marginTop: 40, marginBottom: 20 }}>What Sets Us Apart</h2>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 20, marginBottom: 40 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 20, marginBottom: 40 }}>
         {[
           { icon: '👑', title: 'Royal Standards', text: 'Every partner restaurant is hand-selected and vetted for excellence. No mediocre meals.' },
           { icon: '🤖', title: 'Joya AI Concierge', text: 'Our voice-powered AI recommends dishes, tracks orders, and learns your preferences over time.' },
           { icon: '📸', title: 'AI Food Photography', text: 'We generate stunning, ultra-realistic images of every dish so you see exactly what you will savor.' },
           { icon: '💜', title: 'The Purple Promise', text: 'Our iconic purple branded bag is a symbol of trust, speed, and the royal treatment you deserve.' },
         ].map((f, i) => (
-          <div key={i} style={{ padding: '28px 24px', background: 'rgba(255,255,255,0.03)', borderRadius: 16, border: '1px solid rgba(255,255,255,0.06)' }}>
+          <div key={i} style={{ padding: '28px 24px', background: 'var(--bg-card)', borderRadius: 16, border: '1px solid var(--border)' }}>
             <div style={{ fontSize: 32, marginBottom: 12 }}>{f.icon}</div>
             <h3 style={{ fontSize: 18, fontWeight: 800, marginBottom: 8 }}>{f.title}</h3>
-            <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 14, lineHeight: 1.6 }}>{f.text}</p>
+            <p style={{ color: 'var(--text-secondary)', fontSize: 14, lineHeight: 1.6 }}>{f.text}</p>
           </div>
         ))}
       </div>
 
       <h2 style={{ fontSize: 28, fontWeight: 800, marginTop: 40, marginBottom: 20 }}>Our Numbers</h2>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 40 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 16, marginBottom: 40 }}>
         {[{ n: '1000+', l: 'Partner Restaurants' }, { n: '50K+', l: 'Happy Customers' }, { n: '4.8★', l: 'Average Rating' }, { n: '25min', l: 'Avg Delivery Time' }].map((s, i) => (
           <div key={i} style={{ textAlign: 'center', padding: '24px 16px', background: 'rgba(90,49,244,0.04)', borderRadius: 16 }}>
             <p style={{ fontSize: 32, fontWeight: 900, background: 'linear-gradient(135deg,#5A31F4,#FF0080)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>{s.n}</p>
-            <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: 13, fontWeight: 600 }}>{s.l}</p>
+            <p style={{ color: 'var(--text-muted)', fontSize: 13, fontWeight: 600 }}>{s.l}</p>
           </div>
         ))}
       </div>

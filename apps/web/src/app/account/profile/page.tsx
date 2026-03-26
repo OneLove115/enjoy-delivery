@@ -36,20 +36,20 @@ export default function ProfilePage() {
   };
 
   const input: React.CSSProperties = {
-    width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
-    borderRadius: 12, padding: '14px 18px', color: 'white', fontSize: 15, outline: 'none',
+    width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border-strong)',
+    borderRadius: 12, padding: '14px 18px', color: 'var(--text-primary)', fontSize: 15, outline: 'none',
     fontFamily: 'Outfit, sans-serif', boxSizing: 'border-box',
   };
 
   return (
-    <div style={{ background: '#0A0A0F', minHeight: '100vh', color: 'white', fontFamily: 'Outfit, sans-serif' }}>
+    <div style={{ background: 'var(--bg-page)', minHeight: '100vh', color: 'var(--text-primary)', fontFamily: 'Outfit, sans-serif' }}>
       <Nav />
       <section style={{ padding: '100px 60px 60px', maxWidth: 600, margin: '0 auto' }}>
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
           <h1 style={{ fontSize: 38, fontWeight: 900, marginBottom: 8 }}>Your profile</h1>
-          <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 15, marginBottom: 40 }}>Manage your personal information.</p>
+          <p style={{ color: 'var(--text-muted)', fontSize: 15, marginBottom: 40 }}>Manage your personal information.</p>
           {loading ? (
-            <div style={{ textAlign: 'center', padding: '60px 0', color: 'rgba(255,255,255,0.3)' }}>Loading...</div>
+            <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--text-muted)' }}>Loading...</div>
           ) : profile ? (
             <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
               <div>
@@ -65,7 +65,7 @@ export default function ProfilePage() {
                 <input type="tel" value={profile.phone ?? ''} onChange={e => setProfile({ ...profile, phone: e.target.value })} placeholder="+31 6 00 00 00 00" style={input} />
               </div>
               <button type="submit" disabled={saving}
-                style={{ background: saved ? '#22C55E' : `linear-gradient(135deg,${PURPLE},${PINK})`, color: 'white', border: 'none', borderRadius: 12, padding: '15px 0', fontSize: 15, fontWeight: 800, cursor: saving ? 'not-allowed' : 'pointer', opacity: saving ? 0.7 : 1, marginTop: 8, transition: 'background 0.3s' }}>
+                style={{ background: saved ? '#22C55E' : `linear-gradient(135deg,${PURPLE},${PINK})`, color: 'var(--text-primary)', border: 'none', borderRadius: 12, padding: '15px 0', fontSize: 15, fontWeight: 800, cursor: saving ? 'not-allowed' : 'pointer', opacity: saving ? 0.7 : 1, marginTop: 8, transition: 'background 0.3s' }}>
                 {saving ? 'Saving...' : saved ? '✓ Saved' : 'Save changes'}
               </button>
             </form>

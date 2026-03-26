@@ -48,17 +48,17 @@ function MenuItemCard({ item, onAdd }: { item: MenuItem; onAdd: () => void }) {
         gap: 16,
         padding: 20,
         borderRadius: 16,
-        background: 'rgba(255,255,255,0.03)',
-        border: '1px solid rgba(255,255,255,0.06)',
+        background: 'var(--bg-card)',
+        border: '1px solid var(--border)',
         cursor: 'pointer',
         transition: 'border-color 0.2s',
       }}
     >
       <div style={{ flex: 1 }}>
-        <h3 style={{ fontSize: 16, fontWeight: 800, marginBottom: 6, color: 'white' }}>{item.name}</h3>
-        <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.45)', lineHeight: 1.5, marginBottom: 14 }}>{item.description}</p>
+        <h3 style={{ fontSize: 16, fontWeight: 800, marginBottom: 6, color: 'var(--text-primary)' }}>{item.name}</h3>
+        <p style={{ fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.5, marginBottom: 14 }}>{item.description}</p>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <span style={{ fontSize: 16, fontWeight: 900, color: 'white' }}>{formatPrice(parseFloat(item.basePrice))}</span>
+          <span style={{ fontSize: 16, fontWeight: 900, color: 'var(--text-primary)' }}>{formatPrice(parseFloat(item.basePrice))}</span>
           <button
             onClick={onAdd}
             style={{
@@ -66,7 +66,7 @@ function MenuItemCard({ item, onAdd }: { item: MenuItem; onAdd: () => void }) {
               border: 'none',
               borderRadius: 10,
               padding: '8px 20px',
-              color: 'white',
+              color: 'var(--text-primary)',
               fontSize: 14,
               fontWeight: 800,
               cursor: 'pointer',
@@ -136,26 +136,26 @@ export default function MenuPage() {
 
   if (loading || !restaurant) {
     return (
-      <div style={{ background: '#0A0A0F', minHeight: '100vh', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18 }}>
+      <div style={{ background: 'var(--bg-page)', minHeight: '100vh', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18 }}>
         Loading...
       </div>
     );
   }
 
   return (
-    <div style={{ background: '#0A0A0F', minHeight: '100vh', color: 'white', fontFamily: 'inherit' }}>
+    <div style={{ background: 'var(--bg-page)', minHeight: '100vh', color: 'var(--text-primary)', fontFamily: 'inherit' }}>
       {/* Navbar */}
       <nav style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100, height: 70, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 32px', background: 'rgba(10,10,15,0.9)', backdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-        <Link href="/discover" style={{ fontSize: 24, fontWeight: 900, textDecoration: 'none', color: 'white' }}>
+        <Link href="/discover" style={{ fontSize: 24, fontWeight: 900, textDecoration: 'none', color: 'var(--text-primary)' }}>
           En<span style={{ background: 'linear-gradient(135deg, #5A31F4, #FF0080)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Joy</span>
         </Link>
         <button
           onClick={() => setCartOpen(true)}
-          style={{ position: 'relative', width: 44, height: 44, borderRadius: 12, background: 'rgba(255,255,255,0.06)', border: 'none', cursor: 'pointer', fontSize: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}
+          style={{ position: 'relative', width: 44, height: 44, borderRadius: 12, background: 'var(--b8)', border: 'none', cursor: 'pointer', fontSize: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-primary)' }}
         >
           🛒
           {itemCount() > 0 && (
-            <span style={{ position: 'absolute', top: -4, right: -4, background: 'linear-gradient(135deg, #5A31F4, #FF0080)', color: 'white', borderRadius: '50%', width: 20, height: 20, fontSize: 11, fontWeight: 900, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <span style={{ position: 'absolute', top: -4, right: -4, background: 'linear-gradient(135deg, #5A31F4, #FF0080)', color: 'var(--text-primary)', borderRadius: '50%', width: 20, height: 20, fontSize: 11, fontWeight: 900, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               {itemCount()}
             </span>
           )}
@@ -172,9 +172,9 @@ export default function MenuPage() {
           <div style={{ position: 'absolute', bottom: 24, left: 32 }}>
             <h1 style={{ fontSize: 32, fontWeight: 950, marginBottom: 6 }}>{restaurant.name}</h1>
             <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-              <span style={{ color: 'rgba(255,255,255,0.55)', fontSize: 14 }}>{restaurant.cuisine}</span>
+              <span style={{ color: 'var(--text-secondary)', fontSize: 14 }}>{restaurant.cuisine}</span>
               <span style={{ background: 'rgba(255,215,0,0.1)', color: '#FFD700', padding: '3px 10px', borderRadius: 8, fontSize: 13, fontWeight: 700 }}>⭐ {restaurant.rating}</span>
-              <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: 13 }}>🕐 {restaurant.deliveryTime}</span>
+              <span style={{ color: 'var(--text-muted)', fontSize: 13 }}>🕐 {restaurant.deliveryTime}</span>
             </div>
           </div>
         </div>
@@ -225,10 +225,10 @@ export default function MenuPage() {
 
         {/* Cart Sidebar (desktop) */}
         <div style={{ width: 320, flexShrink: 0, display: 'none' }} className="cart-sidebar-desktop">
-          <div style={{ position: 'sticky', top: 130, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 20, padding: 24 }}>
+          <div style={{ position: 'sticky', top: 130, background: 'var(--bg-elevated)', border: '1px solid var(--border-strong)', borderRadius: 20, padding: 24 }}>
             <h3 style={{ fontSize: 18, fontWeight: 900, marginBottom: 20 }}>Your Order</h3>
             {cart.length === 0 ? (
-              <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: 14, textAlign: 'center', padding: '32px 0' }}>Your cart is empty</p>
+              <p style={{ color: 'var(--text-muted)', fontSize: 14, textAlign: 'center', padding: '32px 0' }}>Your cart is empty</p>
             ) : (
               <>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 20 }}>
@@ -248,7 +248,7 @@ export default function MenuPage() {
                     <span>{formatPrice(totalCart)}</span>
                   </div>
                 </div>
-                <button style={{ width: '100%', background: 'linear-gradient(135deg, #5A31F4, #FF0080)', border: 'none', borderRadius: 12, padding: '16px', color: 'white', fontSize: 16, fontWeight: 900, cursor: 'pointer', boxShadow: '0 8px 20px rgba(90,49,244,0.3)' }}>
+                <button style={{ width: '100%', background: 'linear-gradient(135deg, #5A31F4, #FF0080)', border: 'none', borderRadius: 12, padding: '16px', color: 'var(--text-primary)', fontSize: 16, fontWeight: 900, cursor: 'pointer', boxShadow: '0 8px 20px rgba(90,49,244,0.3)' }}>
                   Checkout · {formatPrice(totalCart)}
                 </button>
               </>
@@ -270,10 +270,10 @@ export default function MenuPage() {
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
               <h3 style={{ fontSize: 20, fontWeight: 900 }}>Your Order</h3>
-              <button onClick={() => setCartOpen(false)} style={{ background: 'rgba(255,255,255,0.06)', border: 'none', borderRadius: 10, width: 36, height: 36, cursor: 'pointer', fontSize: 18, color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>×</button>
+              <button onClick={() => setCartOpen(false)} style={{ background: 'var(--b8)', border: 'none', borderRadius: 10, width: 36, height: 36, cursor: 'pointer', fontSize: 18, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>×</button>
             </div>
             {cart.length === 0 ? (
-              <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: 14, textAlign: 'center', padding: '40px 0', flex: 1 }}>Your cart is empty</p>
+              <p style={{ color: 'var(--text-muted)', fontSize: 14, textAlign: 'center', padding: '40px 0', flex: 1 }}>Your cart is empty</p>
             ) : (
               <>
                 <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 14 }}>
@@ -292,7 +292,7 @@ export default function MenuPage() {
                     <span>Total</span>
                     <span>{formatPrice(totalCart)}</span>
                   </div>
-                  <button style={{ width: '100%', background: 'linear-gradient(135deg, #5A31F4, #FF0080)', border: 'none', borderRadius: 12, padding: '16px', color: 'white', fontSize: 16, fontWeight: 900, cursor: 'pointer', boxShadow: '0 8px 20px rgba(90,49,244,0.3)' }}>
+                  <button style={{ width: '100%', background: 'linear-gradient(135deg, #5A31F4, #FF0080)', border: 'none', borderRadius: 12, padding: '16px', color: 'var(--text-primary)', fontSize: 16, fontWeight: 900, cursor: 'pointer', boxShadow: '0 8px 20px rgba(90,49,244,0.3)' }}>
                     Checkout · {formatPrice(totalCart)}
                   </button>
                 </div>
@@ -309,7 +309,7 @@ export default function MenuPage() {
             initial={{ y: 80, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             onClick={() => setCartOpen(true)}
-            style={{ width: '100%', background: 'linear-gradient(135deg, #5A31F4, #FF0080)', border: 'none', borderRadius: 16, padding: '18px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', color: 'white', fontSize: 16, fontWeight: 900, cursor: 'pointer', boxShadow: '0 16px 40px rgba(90,49,244,0.4)' }}
+            style={{ width: '100%', background: 'linear-gradient(135deg, #5A31F4, #FF0080)', border: 'none', borderRadius: 16, padding: '18px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', color: 'var(--text-primary)', fontSize: 16, fontWeight: 900, cursor: 'pointer', boxShadow: '0 16px 40px rgba(90,49,244,0.4)' }}
           >
             <span style={{ background: 'rgba(255,255,255,0.2)', borderRadius: 8, padding: '4px 10px', fontSize: 14, fontWeight: 900 }}>
               {itemCount()}

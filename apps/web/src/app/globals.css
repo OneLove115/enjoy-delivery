@@ -152,3 +152,10 @@ html.light input::placeholder { color: var(--text-muted); }
 /* ─── Scrollbar hide for horizontal strips ─── */
 .scroll-x { overflow-x: auto; scrollbar-width: none; }
 .scroll-x::-webkit-scrollbar { display: none; }
+
+/* ─── Marketing Pages ─── */
+.mkt-page { background: var(--bg-page); color: var(--text-primary); min-height: 100vh; font-family: 'Outfit', sans-serif; }
+.mkt-grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 24px; }
+.mkt-grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 24px; }
+.mkt-grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 16px; }
+.mkt-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 20px; }

@@ -56,12 +56,12 @@ export default function StampCardPage() {
   const remaining = STAMPS_FOR_REWARD - stamps;
 
   return (
-    <div style={{ background: '#0A0A0F', minHeight: '100vh', color: 'white', fontFamily: 'Outfit, sans-serif' }}>
+    <div style={{ background: 'var(--bg-page)', minHeight: '100vh', color: 'var(--text-primary)', fontFamily: 'Outfit, sans-serif' }}>
       <Nav />
       <div style={{ maxWidth: 560, margin: '0 auto', padding: '100px 20px 80px' }}>
 
         {/* Back */}
-        <Link href="/account" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, color: 'rgba(255,255,255,0.45)', fontSize: 14, fontWeight: 700, marginBottom: 32, textDecoration: 'none' }}>
+        <Link href="/account" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, color: 'var(--text-muted)', fontSize: 14, fontWeight: 700, marginBottom: 32, textDecoration: 'none' }}>
           ← Terug
         </Link>
 
@@ -69,7 +69,7 @@ export default function StampCardPage() {
           style={{ fontSize: 36, fontWeight: 900, marginBottom: 6 }}>
           Stempelkaart 🎟️
         </motion.h1>
-        <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: 15, marginBottom: 40 }}>
+        <p style={{ color: 'var(--text-muted)', fontSize: 15, marginBottom: 40 }}>
           Spaar stempels en win gratis maaltijden!
         </p>
 
@@ -99,13 +99,13 @@ export default function StampCardPage() {
 
           <StampGrid earned={stamps} total={STAMPS_FOR_REWARD} />
 
-          <div style={{ marginTop: 24, padding: '16px 20px', borderRadius: 14, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', gap: 14 }}>
+          <div style={{ marginTop: 24, padding: '16px 20px', borderRadius: 14, background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border-strong)', display: 'flex', alignItems: 'center', gap: 14 }}>
             <span style={{ fontSize: 28 }}>🎁</span>
             <div>
               <div style={{ fontWeight: 800, fontSize: 14, marginBottom: 3 }}>
                 Nog {remaining} stempel{remaining !== 1 ? 's' : ''} tot jouw gratis maaltijd!
               </div>
-              <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.45)' }}>
+              <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
                 Bestel voor €10 of meer om een stempel te verdienen
               </div>
             </div>
@@ -114,7 +114,7 @@ export default function StampCardPage() {
 
         {/* How it works */}
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }}
-          style={{ padding: '24px', borderRadius: 20, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', marginBottom: 28 }}>
+          style={{ padding: '24px', borderRadius: 20, background: 'var(--bg-card)', border: '1px solid var(--border)', marginBottom: 28 }}>
           <h2 style={{ fontSize: 18, fontWeight: 900, marginBottom: 20 }}>Hoe werkt het?</h2>
           {[
             { icon: '🛍️', title: 'Bestel', text: 'Bestel bij een deelnemend restaurant voor minimaal €10' },
@@ -127,7 +127,7 @@ export default function StampCardPage() {
               </div>
               <div>
                 <div style={{ fontWeight: 800, fontSize: 14, marginBottom: 4 }}>{step.title}</div>
-                <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.45)', lineHeight: 1.5 }}>{step.text}</div>
+                <div style={{ fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.5 }}>{step.text}</div>
               </div>
             </div>
           ))}
@@ -138,12 +138,12 @@ export default function StampCardPage() {
           <h2 style={{ fontSize: 18, fontWeight: 900, marginBottom: 16 }}>Recente activiteit</h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             {HISTORY.map((h, i) => (
-              <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 18px', borderRadius: 14, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>
+              <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 18px', borderRadius: 14, background: 'var(--bg-card)', border: '1px solid rgba(255,255,255,0.05)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                   <span style={{ fontSize: 20 }}>⭐</span>
                   <div>
                     <div style={{ fontWeight: 700, fontSize: 14 }}>{h.restaurant}</div>
-                    <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.35)' }}>{h.date}</div>
+                    <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{h.date}</div>
                   </div>
                 </div>
                 <span style={{ fontSize: 13, fontWeight: 800, color: PINK }}>+{h.stamps} stempel{h.stamps > 1 ? 's' : ''}</span>
@@ -155,7 +155,7 @@ export default function StampCardPage() {
         {/* CTA */}
         <div style={{ marginTop: 36, textAlign: 'center' }}>
           <Link href="/discover"
-            style={{ display: 'inline-block', padding: '16px 40px', borderRadius: 50, background: `linear-gradient(135deg,${ORANGE},${PINK})`, color: 'white', fontWeight: 900, fontSize: 16, textDecoration: 'none', boxShadow: '0 8px 24px rgba(255,107,0,0.35)' }}>
+            style={{ display: 'inline-block', padding: '16px 40px', borderRadius: 50, background: `linear-gradient(135deg,${ORANGE},${PINK})`, color: 'var(--text-primary)', fontWeight: 900, fontSize: 16, textDecoration: 'none', boxShadow: '0 8px 24px rgba(255,107,0,0.35)' }}>
             Bestel nu & verdien stempels →
           </Link>
         </div>

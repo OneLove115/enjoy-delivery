@@ -54,11 +54,11 @@ export default function OrderTrackingPage() {
   const activeStage = order ? STAGES.findIndex(s => s.key === order.status) : -1;
 
   return (
-    <div style={{ background: '#0A0A0F', minHeight: '100vh', color: 'white', fontFamily: 'Outfit, sans-serif' }}>
+    <div style={{ background: 'var(--bg-page)', minHeight: '100vh', color: 'var(--text-primary)', fontFamily: 'Outfit, sans-serif' }}>
       <Nav />
       <section style={{ padding: '100px 40px 60px', maxWidth: 720, margin: '0 auto' }}>
         {loading ? (
-          <div style={{ textAlign: 'center', padding: '80px 0', color: 'rgba(255,255,255,0.3)' }}>Loading your order...</div>
+          <div style={{ textAlign: 'center', padding: '80px 0', color: 'var(--text-muted)' }}>Loading your order...</div>
         ) : error ? (
           <div style={{ textAlign: 'center', padding: '80px 0' }}>
             <p style={{ color: '#EF4444', marginBottom: 24 }}>{error}</p>
@@ -66,16 +66,16 @@ export default function OrderTrackingPage() {
           </div>
         ) : order ? (
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-            <Link href="/account/orders" style={{ color: 'rgba(255,255,255,0.4)', fontSize: 14, textDecoration: 'none', display: 'block', marginBottom: 28 }}>← All orders</Link>
+            <Link href="/account/orders" style={{ color: 'var(--text-muted)', fontSize: 14, textDecoration: 'none', display: 'block', marginBottom: 28 }}>← All orders</Link>
             <h1 style={{ fontSize: 32, fontWeight: 900, marginBottom: 4 }}>Order from {order.restaurantName}</h1>
             {order.estimatedMinutes && order.status !== 'delivered' && (
               <p style={{ fontSize: 18, color: PURPLE, fontWeight: 700, marginBottom: 32 }}>🕐 Arriving in ~{order.estimatedMinutes} minutes</p>
             )}
 
             {/* Progress tracker */}
-            <div style={{ background: 'rgba(255,255,255,0.03)', borderRadius: 20, border: '1px solid rgba(255,255,255,0.06)', padding: '32px 28px', marginBottom: 24 }}>
+            <div style={{ background: 'var(--bg-card)', borderRadius: 20, border: '1px solid var(--border)', padding: '32px 28px', marginBottom: 24 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', position: 'relative' }}>
-                <div style={{ position: 'absolute', top: 20, left: '10%', right: '10%', height: 3, background: 'rgba(255,255,255,0.06)', borderRadius: 4 }} />
+                <div style={{ position: 'absolute', top: 20, left: '10%', right: '10%', height: 3, background: 'var(--b8)', borderRadius: 4 }} />
                 <div style={{ position: 'absolute', top: 20, left: '10%', height: 3, background: `linear-gradient(90deg,${PURPLE},${PINK})`, borderRadius: 4, width: `${Math.min(activeStage / (STAGES.length - 1) * 80, 80)}%`, transition: 'width 1s ease' }} />
                 {STAGES.map((s, i) => (
                   <div key={s.key} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, zIndex: 1 }}>
@@ -92,13 +92,13 @@ export default function OrderTrackingPage() {
                 <div style={{ width: 48, height: 48, background: `linear-gradient(135deg,${PURPLE},${PINK})`, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22 }}>🚲</div>
                 <div>
                   <p style={{ fontWeight: 800, fontSize: 16, margin: 0 }}>{order.rider.name} is on the way</p>
-                  <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 14, margin: 0 }}>Delivering to {order.address}</p>
+                  <p style={{ color: 'var(--text-muted)', fontSize: 14, margin: 0 }}>Delivering to {order.address}</p>
                 </div>
               </div>
             )}
 
             {/* Order items */}
-            <div style={{ background: 'rgba(255,255,255,0.03)', borderRadius: 20, border: '1px solid rgba(255,255,255,0.06)', padding: '24px 28px' }}>
+            <div style={{ background: 'var(--bg-card)', borderRadius: 20, border: '1px solid var(--border)', padding: '24px 28px' }}>
               <h3 style={{ fontSize: 18, fontWeight: 800, marginBottom: 16 }}>Order summary</h3>
               {order.items.map((item, i) => (
                 <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 0', borderBottom: i < order.items.length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none' }}>

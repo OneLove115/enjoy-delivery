@@ -27,38 +27,38 @@ export default function CitiesPage() {
   const coming = cities.filter(c => c.status === 'coming');
 
   return (
-    <div style={{ background: '#0A0A0F', minHeight: '100vh', color: 'white', fontFamily: 'Outfit, sans-serif' }}>
+    <div style={{ background: 'var(--bg-page)', minHeight: '100vh', color: 'var(--text-primary)', fontFamily: 'Outfit, sans-serif' }}>
       <Nav />
-      <section style={{ padding: '40px 60px 60px', textAlign: 'center' }}>
+      <section style={{ padding: 'clamp(24px,5vw,60px) clamp(16px,4vw,60px)', textAlign: 'center' }}>
         <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }}>
-          <h1 style={{ fontSize: 52, fontWeight: 950, marginBottom: 16, letterSpacing: -2 }}>
+          <h1 style={{ fontSize: 'clamp(26px,5.5vw,52px)', fontWeight: 950, marginBottom: 16, letterSpacing: -2 }}>
             We deliver in <span style={{ background: `linear-gradient(135deg,${PURPLE},${PINK})`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>your city</span>
           </h1>
-          <p style={{ fontSize: 18, color: 'rgba(255,255,255,0.5)', maxWidth: 520, margin: '0 auto 60px' }}>Currently live in 6 Dutch cities. Expanding across Europe in 2026.</p>
+          <p style={{ fontSize: 18, color: 'var(--text-secondary)', maxWidth: 520, margin: '0 auto 60px' }}>Currently live in 6 Dutch cities. Expanding across Europe in 2026.</p>
         </motion.div>
 
         <div style={{ maxWidth: 900, margin: '0 auto' }}>
           <h2 style={{ fontSize: 22, fontWeight: 800, marginBottom: 24, textAlign: 'left' }}>🟢 Live now</h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20, marginBottom: 56 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 20, marginBottom: 56 }}>
             {live.map((c, i) => (
               <motion.div key={c.name} initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.07 }}>
-                <Link href="/discover" style={{ display: 'block', padding: '28px 24px', background: 'rgba(255,255,255,0.03)', borderRadius: 20, border: `1px solid ${PURPLE}20`, textDecoration: 'none', color: 'white' }}>
+                <Link href="/discover" style={{ display: 'block', padding: '28px 24px', background: 'var(--bg-card)', borderRadius: 20, border: `1px solid ${PURPLE}20`, textDecoration: 'none', color: 'var(--text-primary)' }}>
                   <div style={{ fontSize: 36, marginBottom: 12 }}>{c.flag}</div>
                   <h3 style={{ fontSize: 20, fontWeight: 800, marginBottom: 4 }}>{c.name}</h3>
-                  <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 14 }}>{c.restaurants} restaurants</p>
+                  <p style={{ color: 'var(--text-muted)', fontSize: 14 }}>{c.restaurants} restaurants</p>
                 </Link>
               </motion.div>
             ))}
           </div>
 
           <h2 style={{ fontSize: 22, fontWeight: 800, marginBottom: 24, textAlign: 'left' }}>⏳ Coming soon</h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20, marginBottom: 60 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 20, marginBottom: 60 }}>
             {coming.map((c, i) => (
               <motion.div key={c.name} initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.07 }}>
-                <div style={{ padding: '28px 24px', background: 'rgba(255,255,255,0.015)', borderRadius: 20, border: '1px solid rgba(255,255,255,0.05)', opacity: 0.6 }}>
+                <div style={{ padding: '28px 24px', background: 'rgba(255,255,255,0.015)', borderRadius: 20, border: '1px solid var(--border)' as const, opacity: 0.6 }}>
                   <div style={{ fontSize: 36, marginBottom: 12 }}>{c.flag}</div>
                   <h3 style={{ fontSize: 20, fontWeight: 800, marginBottom: 4 }}>{c.name}</h3>
-                  <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 14 }}>Coming 2026</p>
+                  <p style={{ color: 'var(--text-muted)', fontSize: 14 }}>Coming 2026</p>
                 </div>
               </motion.div>
             ))}

@@ -15,14 +15,14 @@ const articles = [
 
 export default function PressPage() {
   return (
-    <div style={{ background: '#0A0A0F', minHeight: '100vh', color: 'white', fontFamily: 'Outfit, sans-serif' }}>
+    <div style={{ background: 'var(--bg-page)', minHeight: '100vh', color: 'var(--text-primary)', fontFamily: 'Outfit, sans-serif' }}>
       <Nav />
-      <section style={{ padding: '40px 60px 80px' }}>
+      <section style={{ padding: 'clamp(24px,5vw,80px) clamp(16px,4vw,60px)' }}>
         <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} style={{ maxWidth: 760, margin: '0 auto' }}>
-          <h1 style={{ fontSize: 52, fontWeight: 950, marginBottom: 16, letterSpacing: -2 }}>
+          <h1 style={{ fontSize: 'clamp(26px,5.5vw,52px)', fontWeight: 950, marginBottom: 16, letterSpacing: -2 }}>
             Press & <span style={{ background: `linear-gradient(135deg,${PURPLE},${PINK})`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Media</span>
           </h1>
-          <p style={{ fontSize: 18, color: 'rgba(255,255,255,0.5)', marginBottom: 16, lineHeight: 1.6 }}>
+          <p style={{ fontSize: 18, color: 'var(--text-secondary)', marginBottom: 16, lineHeight: 1.6 }}>
             For media enquiries, interview requests, and brand assets, contact our communications team.
           </p>
           <a href="mailto:press@enjoy.delivery" style={{ color: PURPLE, fontWeight: 700, fontSize: 16, textDecoration: 'none' }}>press@enjoy.delivery</a>
@@ -30,7 +30,7 @@ export default function PressPage() {
           {/* Brand assets */}
           <div style={{ display: 'flex', gap: 16, marginTop: 32, marginBottom: 56, flexWrap: 'wrap' }}>
             {['Logo pack (.zip)', 'Brand guidelines (.pdf)', 'Press photos'].map((a, i) => (
-              <div key={i} style={{ padding: '12px 20px', background: 'rgba(255,255,255,0.04)', borderRadius: 10, border: '1px solid rgba(255,255,255,0.08)', fontSize: 14, color: 'rgba(255,255,255,0.6)', cursor: 'pointer' }}>
+              <div key={i} style={{ padding: '12px 20px', background: 'rgba(255,255,255,0.04)', borderRadius: 10, border: '1px solid rgba(255,255,255,0.08)', fontSize: 14, color: 'var(--text-secondary)', cursor: 'pointer' }}>
                 📎 {a}
               </div>
             ))}
@@ -40,7 +40,7 @@ export default function PressPage() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             {articles.map((a, i) => (
               <motion.div key={i} initial={{ opacity: 0, x: -16 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.08 }}
-                style={{ padding: '24px 28px', background: 'rgba(255,255,255,0.03)', borderRadius: 16, border: '1px solid rgba(255,255,255,0.06)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 24 }}>
+                style={{ padding: '24px 28px', background: 'var(--bg-card)', borderRadius: 16, border: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 24 }}>
                 <div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
                     <span style={{ fontSize: 13, fontWeight: 800, color: PURPLE }}>{a.outlet}</span>
@@ -48,7 +48,7 @@ export default function PressPage() {
                   </div>
                   <p style={{ fontSize: 16, fontWeight: 700, lineHeight: 1.4, margin: 0 }}>{a.title}</p>
                 </div>
-                <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: 13, flexShrink: 0 }}>{a.date}</span>
+                <span style={{ color: 'var(--text-muted)', fontSize: 13, flexShrink: 0 }}>{a.date}</span>
               </motion.div>
             ))}
           </div>

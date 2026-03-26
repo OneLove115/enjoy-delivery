@@ -43,18 +43,18 @@ export default function AccountPage() {
     : '?';
 
   return (
-    <div style={{ background: '#0A0A0F', minHeight: '100vh', color: 'white', fontFamily: 'Outfit, sans-serif' }}>
+    <div style={{ background: 'var(--bg-page)', minHeight: '100vh', color: 'var(--text-primary)', fontFamily: 'Outfit, sans-serif' }}>
       <Nav />
       <div style={{ maxWidth: 600, margin: '0 auto', padding: '100px 20px 80px' }}>
 
         {/* Profile hero */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
-          style={{ display: 'flex', alignItems: 'center', gap: 20, marginBottom: 40, padding: '28px', background: 'rgba(255,255,255,0.03)', borderRadius: 20, border: '1px solid rgba(255,255,255,0.07)' }}>
+          style={{ display: 'flex', alignItems: 'center', gap: 20, marginBottom: 40, padding: '28px', background: 'var(--bg-card)', borderRadius: 20, border: '1px solid rgba(255,255,255,0.07)' }}>
           <div style={{
             width: 72, height: 72, borderRadius: '50%', flexShrink: 0,
             background: `linear-gradient(135deg,${PURPLE},${PINK})`,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: 26, fontWeight: 900, color: 'white',
+            fontSize: 26, fontWeight: 900, color: 'var(--text-primary)',
           }}>
             {loading ? '…' : initials}
           </div>
@@ -64,35 +64,35 @@ export default function AccountPage() {
             ) : user ? (
               <>
                 <div style={{ fontSize: 20, fontWeight: 900, marginBottom: 4 }}>{user.name}</div>
-                <div style={{ fontSize: 14, color: 'rgba(255,255,255,0.45)' }}>{user.email}</div>
+                <div style={{ fontSize: 14, color: 'var(--text-muted)' }}>{user.email}</div>
               </>
             ) : (
               <>
                 <div style={{ fontSize: 17, fontWeight: 800, marginBottom: 10 }}>Nog niet ingelogd</div>
                 <div style={{ display: 'flex', gap: 10 }}>
-                  <Link href="/login" style={{ padding: '9px 22px', borderRadius: 24, background: `linear-gradient(135deg,${PURPLE},${PINK})`, color: 'white', fontWeight: 800, fontSize: 14, textDecoration: 'none' }}>Inloggen</Link>
-                  <Link href="/signup" style={{ padding: '9px 22px', borderRadius: 24, background: 'rgba(255,255,255,0.08)', color: 'white', fontWeight: 700, fontSize: 14, textDecoration: 'none', border: '1px solid rgba(255,255,255,0.12)' }}>Registreren</Link>
+                  <Link href="/login" style={{ padding: '9px 22px', borderRadius: 24, background: `linear-gradient(135deg,${PURPLE},${PINK})`, color: 'var(--text-primary)', fontWeight: 800, fontSize: 14, textDecoration: 'none' }}>Inloggen</Link>
+                  <Link href="/signup" style={{ padding: '9px 22px', borderRadius: 24, background: 'rgba(255,255,255,0.08)', color: 'var(--text-primary)', fontWeight: 700, fontSize: 14, textDecoration: 'none', border: '1px solid var(--border-strong)' }}>Registreren</Link>
                 </div>
               </>
             )}
           </div>
           {user && (
-            <Link href="/account/profile" style={{ padding: '8px 16px', borderRadius: 10, background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.7)', fontSize: 13, fontWeight: 700, textDecoration: 'none', flexShrink: 0 }}>
+            <Link href="/account/profile" style={{ padding: '8px 16px', borderRadius: 10, background: 'rgba(255,255,255,0.08)', border: '1px solid var(--border-strong)', color: 'rgba(255,255,255,0.7)', fontSize: 13, fontWeight: 700, textDecoration: 'none', flexShrink: 0 }}>
               Bewerken
             </Link>
           )}
         </motion.div>
 
         {/* Tiles grid */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 14, marginBottom: 32 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 14, marginBottom: 32 }}>
           {tiles.map((t, i) => (
             <motion.div key={t.href} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
-              <Link href={t.href} style={{ display: 'block', padding: '22px 20px', borderRadius: 18, background: t.color, border: '1px solid rgba(255,255,255,0.06)', textDecoration: 'none', color: 'white', transition: 'transform 0.15s, box-shadow 0.15s' }}
+              <Link href={t.href} style={{ display: 'block', padding: '22px 20px', borderRadius: 18, background: t.color, border: '1px solid var(--border)', textDecoration: 'none', color: 'var(--text-primary)', transition: 'transform 0.15s, box-shadow 0.15s' }}
                 onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.transform = 'translateY(-2px)'; (e.currentTarget as HTMLAnchorElement).style.boxShadow = '0 8px 24px rgba(0,0,0,0.4)'; }}
                 onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.transform = ''; (e.currentTarget as HTMLAnchorElement).style.boxShadow = ''; }}>
                 <div style={{ fontSize: 28, marginBottom: 10 }}>{t.icon}</div>
                 <div style={{ fontSize: 15, fontWeight: 800, marginBottom: 4 }}>{t.label}</div>
-                <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.45)', lineHeight: 1.4 }}>{t.sub}</div>
+                <div style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.4 }}>{t.sub}</div>
               </Link>
             </motion.div>
           ))}
@@ -104,8 +104,8 @@ export default function AccountPage() {
           <img src="/joya.jpg" alt="Joya" style={{ width: 60, height: 60, borderRadius: '50%', objectFit: 'cover', objectPosition: 'center top', flexShrink: 0 }} />
           <div>
             <div style={{ fontWeight: 900, fontSize: 16, marginBottom: 4 }}>Hulp nodig met bestellen?</div>
-            <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.55)', marginBottom: 12 }}>Joya helpt je 24/7 met aanbevelingen, deals en bestellen.</div>
-            <Link href="/help" style={{ padding: '8px 20px', borderRadius: 20, background: `linear-gradient(135deg,${PURPLE},${PINK})`, color: 'white', fontWeight: 800, fontSize: 13, textDecoration: 'none' }}>
+            <div style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 12 }}>Joya helpt je 24/7 met aanbevelingen, deals en bestellen.</div>
+            <Link href="/help" style={{ padding: '8px 20px', borderRadius: 20, background: `linear-gradient(135deg,${PURPLE},${PINK})`, color: 'var(--text-primary)', fontWeight: 800, fontSize: 13, textDecoration: 'none' }}>
               Chat met Joya →
             </Link>
           </div>
@@ -115,7 +115,7 @@ export default function AccountPage() {
         {user && (
           <div style={{ textAlign: 'center' }}>
             <button onClick={logout}
-              style={{ background: 'none', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 12, color: 'rgba(255,255,255,0.45)', fontSize: 14, fontWeight: 700, padding: '12px 28px', cursor: 'pointer', transition: 'all 0.2s' }}
+              style={{ background: 'none', border: '1px solid var(--border-strong)', borderRadius: 12, color: 'var(--text-muted)', fontSize: 14, fontWeight: 700, padding: '12px 28px', cursor: 'pointer', transition: 'all 0.2s' }}
               onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.color = '#EF4444'; (e.currentTarget as HTMLButtonElement).style.borderColor = '#EF4444'; }}
               onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.color = 'rgba(255,255,255,0.45)'; (e.currentTarget as HTMLButtonElement).style.borderColor = 'rgba(255,255,255,0.12)'; }}>
               Uitloggen
