@@ -1,88 +1,151 @@
 'use client';
-import { useState, useEffect } from 'react';
-import { useParams } from 'next/navigation';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
+import { useParams } from 'next/navigation';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useCartStore } from '../../../store/cart';
+
+const PURPLE = '#5A31F4';
+const PINK   = '#FF0080';
+const NAV_H  = 60;
 
 /* ─── Types ─── */
 type MenuItem = {
-  id: string;
-  name: string;
-  description: string;
-  basePrice: string;
-  imageUrl: string | null;
-  category: string;
+  id: string; name: string; description: string;
+  basePrice: string; imageUrl: string | null; category: string;
 };
-
-type MenuCategory = {
-  id: string;
-  name: string;
-  items: MenuItem[];
-};
-
+type MenuCategory = { id: string; name: string; items: MenuItem[] };
 type Restaurant = {
-  id: string;
-  name: string;
-  cuisine: string;
-  rating: number;
-  deliveryTime: string;
-  imageUrl: string | null;
-  slug?: string;
+  id: string; name: string; slug: string;
+  address: string | null; phone: string | null;
+  logo: string | null; primaryColor: string | null;
+  tagline: string | null; cuisineCategories: string[];
+  businessHours: unknown; timezone: string; currency: string; locale: string;
 };
 
 /* ─── Helpers ─── */
-function formatPrice(amount: number): string {
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
+function fmt(amount: number, currency = 'EUR', locale = 'nl-NL') {
+  return new Intl.NumberFormat(locale, { style: 'currency', currency }).format(amount);
 }
 
+/* ─── Qty Control ─── */
+function QtyControl({ qty, onAdd, onInc, onDec, small }: {
+  qty: number; onAdd: () => void; onInc: () => void; onDec: () => void; small?: boolean;
+}) {
+  const dim = small ? 28 : 32;
+  const fs  = small ? 16 : 18;
+  if (qty === 0) {
+    return (
+      <button onClick={onAdd} style={{
+        background: `linear-gradient(135deg,${PURPLE},${PINK})`,
+        border: 'none', borderRadius: 20, padding: small ? '5px 14px' : '7px 18px',
+        color: 'white', fontSize: 13, fontWeight: 800, cursor: 'pointer',
+        boxShadow: '0 4px 12px rgba(90,49,244,0.25)',
+      }}>+ Toevoegen</button>
+    );
+  }
+  return (
+    <div style={{ display: 'inline-flex', alignItems: 'center', background: `linear-gradient(135deg,${PURPLE},${PINK})`, borderRadius: 20 }}>
+      <button onClick={onDec} style={{ background: 'transparent', border: 'none', cursor: 'pointer', width: dim, height: dim, color: 'white', fontSize: fs, fontWeight: 900, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>−</button>
+      <span style={{ color: 'white', fontSize: 13, fontWeight: 900, minWidth: 20, textAlign: 'center' }}>{qty}</span>
+      <button onClick={onInc} style={{ background: 'transparent', border: 'none', cursor: 'pointer', width: dim, height: dim, color: 'white', fontSize: fs, fontWeight: 900, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>+</button>
+    </div>
+  );
+}
 
 /* ─── Menu Item Card ─── */
-function MenuItemCard({ item, onAdd }: { item: MenuItem; onAdd: () => void }) {
+function MenuItemCard({ item, qty, onAdd, onInc, onDec, currency, locale }: {
+  item: MenuItem; qty: number; onAdd: () => void; onInc: () => void; onDec: () => void;
+  currency: string; locale: string;
+}) {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      style={{
-        display: 'flex',
-        gap: 16,
-        padding: 20,
-        borderRadius: 16,
-        background: 'var(--bg-card)',
-        border: '1px solid var(--border)',
-        cursor: 'pointer',
-        transition: 'border-color 0.2s',
-      }}
-    >
-      <div style={{ flex: 1 }}>
-        <h3 style={{ fontSize: 16, fontWeight: 800, marginBottom: 6, color: 'var(--text-primary)' }}>{item.name}</h3>
-        <p style={{ fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.5, marginBottom: 14 }}>{item.description}</p>
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', padding: '18px 0', borderBottom: '1px solid var(--border)', gap: 16 }}>
+      {/* Text */}
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 4 }}>{item.name}</div>
+        {item.description && (
+          <div style={{
+            fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.5, marginBottom: 10,
+            display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden',
+          } as React.CSSProperties}>{item.description}</div>
+        )}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <span style={{ fontSize: 16, fontWeight: 900, color: 'var(--text-primary)' }}>{formatPrice(parseFloat(item.basePrice))}</span>
-          <button
-            onClick={onAdd}
-            style={{
-              background: 'linear-gradient(135deg, #5A31F4, #FF0080)',
-              border: 'none',
-              borderRadius: 10,
-              padding: '8px 20px',
-              color: 'var(--text-primary)',
-              fontSize: 14,
-              fontWeight: 800,
-              cursor: 'pointer',
-              boxShadow: '0 4px 12px rgba(90,49,244,0.3)',
-            }}
-          >
-            + Add
-          </button>
+          <span style={{ fontSize: 14, fontWeight: 800 }}>{fmt(parseFloat(item.basePrice), currency, locale)}</span>
+          {/* Mobile: qty inline with price */}
+          <span className="show-mobile" style={{ display: 'none' }}>
+            <QtyControl qty={qty} onAdd={onAdd} onInc={onInc} onDec={onDec} small />
+          </span>
         </div>
       </div>
-      {item.imageUrl && (
-        <div style={{ width: 90, height: 90, borderRadius: 12, overflow: 'hidden', flexShrink: 0 }}>
-          <img src={item.imageUrl} alt={item.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+      {/* Image + desktop qty */}
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 10, flexShrink: 0 }}>
+        <div style={{ width: 88, height: 88, borderRadius: 12, overflow: 'hidden', background: 'var(--bg-elevated)', flexShrink: 0 }}>
+          {item.imageUrl
+            ? <img src={item.imageUrl} alt={item.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 32 }}>🍽️</div>
+          }
         </div>
-      )}
-    </motion.div>
+        <span className="hide-mobile">
+          <QtyControl qty={qty} onAdd={onAdd} onInc={onInc} onDec={onDec} />
+        </span>
+      </div>
+    </div>
+  );
+}
+
+/* ─── Cart Panel (shared content, used by sidebar + drawer) ─── */
+function CartContent({ cart, currency, locale, totalCart, onCheckout }: {
+  cart: ReturnType<typeof useCartStore.getState>['items'];
+  currency: string; locale: string; totalCart: number;
+  onCheckout?: () => void;
+}) {
+  const { updateQty, removeItem } = useCartStore();
+  if (cart.length === 0) {
+    return (
+      <div style={{ padding: '40px 20px', textAlign: 'center' }}>
+        <div style={{ fontSize: 36, marginBottom: 12 }}>🛒</div>
+        <div style={{ fontSize: 14, color: 'var(--text-muted)' }}>Je winkelwagen is leeg</div>
+        <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 6 }}>Voeg gerechten toe om te beginnen</div>
+      </div>
+    );
+  }
+  return (
+    <>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 14, maxHeight: 360, overflowY: 'auto', padding: '16px 20px' }}>
+        {cart.map(c => (
+          <div key={c.id} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontSize: 13, fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.name}</div>
+              <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{fmt(parseFloat(c.basePrice), currency, locale)} / stuk</div>
+            </div>
+            <QtyControl
+              qty={c.qty} small onAdd={() => {}}
+              onInc={() => updateQty(c.id, c.qty + 1)}
+              onDec={() => { if (c.qty <= 1) removeItem(c.id); else updateQty(c.id, c.qty - 1); }}
+            />
+            <span style={{ fontSize: 13, fontWeight: 800, minWidth: 52, textAlign: 'right' }}>
+              {fmt(parseFloat(c.basePrice) * c.qty, currency, locale)}
+            </span>
+          </div>
+        ))}
+      </div>
+      <div style={{ padding: '14px 20px', borderTop: '1px solid var(--border)' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, color: 'var(--text-secondary)', marginBottom: 8 }}>
+          <span>Bezorgkosten</span>
+          <span style={{ fontWeight: 700, color: 'var(--text-primary)' }}>Gratis</span>
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 16, fontWeight: 900, marginBottom: 16 }}>
+          <span>Totaal</span><span>{fmt(totalCart, currency, locale)}</span>
+        </div>
+        <Link href="/checkout" onClick={onCheckout} style={{
+          display: 'block', background: `linear-gradient(135deg,${PURPLE},${PINK})`,
+          borderRadius: 12, padding: '14px', color: 'white', fontSize: 15, fontWeight: 900,
+          textAlign: 'center', boxShadow: '0 8px 20px rgba(90,49,244,0.3)', textDecoration: 'none',
+        }}>
+          Bestellen · {fmt(totalCart, currency, locale)}
+        </Link>
+      </div>
+    </>
   );
 }
 
@@ -97,225 +160,323 @@ export default function MenuPage() {
   const [loading, setLoading] = useState(true);
   const [cartOpen, setCartOpen] = useState(false);
 
-  const { items: cart, addItem, total: cartTotal, itemCount } = useCartStore();
+  const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
+
+  const { items: cart, addItem, updateQty, removeItem, total: cartTotal, itemCount } = useCartStore();
   const totalCart = cartTotal();
 
-  const addToCart = (item: MenuItem) => {
+  const getQty = useCallback((id: string) => cart.find(c => c.id === id)?.qty ?? 0, [cart]);
+
+  const handleAdd = useCallback((item: MenuItem) => {
     if (!restaurant) return;
-    addItem(slug, restaurant.name, {
-      id: item.id,
-      name: item.name,
-      basePrice: item.basePrice,
-      imageUrl: item.imageUrl,
-    });
-  };
+    addItem(slug, restaurant.name, { id: item.id, name: item.name, basePrice: item.basePrice, imageUrl: item.imageUrl });
+  }, [restaurant, slug, addItem]);
+
+  const handleDec = useCallback((id: string) => {
+    const q = cart.find(c => c.id === id)?.qty ?? 0;
+    if (q <= 1) removeItem(id); else updateQty(id, q - 1);
+  }, [cart, removeItem, updateQty]);
 
   useEffect(() => { useCartStore.persist.rehydrate(); }, []);
 
   useEffect(() => {
     if (!slug) return;
-
     Promise.all([
       fetch('/api/restaurants').then(r => r.json()),
       fetch(`/api/restaurants/${slug}/menu`).then(r => r.json()),
-    ])
-      .then(([restaurantData, menuData]) => {
-        const found = (restaurantData.restaurants || []).find((r: Restaurant) => r.slug === slug);
-        setRestaurant(found || null);
-
-        const categories: MenuCategory[] = menuData?.data?.menu || [];
-        setMenu(categories);
-        if (categories.length > 0) setActiveCategory(categories[0].id);
-      })
-      .catch(() => {})
-      .finally(() => setLoading(false));
+    ]).then(([rd, md]) => {
+      const found = (rd.restaurants || []).find((r: Restaurant) => r.slug === slug) || null;
+      setRestaurant(found);
+      const categories: MenuCategory[] = md?.data?.menu || [];
+      setMenu(categories);
+      if (categories.length > 0) setActiveCategory(categories[0].id);
+    }).catch(() => {}).finally(() => setLoading(false));
   }, [slug]);
 
-  const activeMenuCategory = menu.find(c => c.id === activeCategory);
-  const filteredItems: MenuItem[] = activeMenuCategory?.items || [];
+  /* Scroll-spy */
+  useEffect(() => {
+    if (!menu.length) return;
+    const observers: IntersectionObserver[] = [];
+    menu.forEach(cat => {
+      const el = sectionRefs.current[cat.id];
+      if (!el) return;
+      const obs = new IntersectionObserver(([entry]) => {
+        if (entry.isIntersecting) setActiveCategory(cat.id);
+      }, { rootMargin: '-25% 0px -65% 0px', threshold: 0 });
+      obs.observe(el);
+      observers.push(obs);
+    });
+    return () => observers.forEach(o => o.disconnect());
+  }, [menu]);
 
-  if (loading || !restaurant) {
+  const scrollTo = (catId: string) => {
+    const el = sectionRefs.current[catId];
+    if (!el) return;
+    const top = el.getBoundingClientRect().top + window.scrollY - (NAV_H + 56);
+    window.scrollTo({ top, behavior: 'smooth' });
+  };
+
+  const currency = restaurant?.currency || 'EUR';
+  const locale   = restaurant?.locale   || 'nl-NL';
+
+  /* ─── Loading ─── */
+  if (loading) {
     return (
-      <div style={{ background: 'var(--bg-page)', minHeight: '100vh', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18 }}>
-        Loading...
+      <div style={{ background: 'var(--bg-page)', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 16 }}>
+        <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
+        <div style={{ width: 44, height: 44, borderRadius: '50%', border: `3px solid ${PURPLE}`, borderTopColor: 'transparent', animation: 'spin 0.8s linear infinite' }} />
       </div>
     );
   }
 
+  /* ─── Not found ─── */
+  if (!restaurant) {
+    return (
+      <div style={{ background: 'var(--bg-page)', minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 16, fontFamily: 'Outfit, sans-serif' }}>
+        <div style={{ fontSize: 48 }}>😕</div>
+        <div style={{ fontSize: 20, fontWeight: 800, color: 'var(--text-primary)' }}>Restaurant niet gevonden</div>
+        <Link href="/discover" style={{ background: `linear-gradient(135deg,${PURPLE},${PINK})`, color: 'white', padding: '10px 24px', borderRadius: 12, fontWeight: 800 }}>← Terug naar overzicht</Link>
+      </div>
+    );
+  }
+
+  const accent  = restaurant.primaryColor || PURPLE;
+  const initials = restaurant.name.split(' ').map((w: string) => w[0]).join('').slice(0, 2).toUpperCase();
+
   return (
-    <div style={{ background: 'var(--bg-page)', minHeight: '100vh', color: 'var(--text-primary)', fontFamily: 'inherit' }}>
-      {/* Navbar */}
-      <nav style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100, height: 70, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 32px', background: 'rgba(10,10,15,0.9)', backdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-        <Link href="/discover" style={{ fontSize: 24, fontWeight: 900, textDecoration: 'none', color: 'var(--text-primary)' }}>
-          En<span style={{ background: 'linear-gradient(135deg, #5A31F4, #FF0080)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Joy</span>
+    <div style={{ background: 'var(--bg-page)', minHeight: '100vh', color: 'var(--text-primary)', fontFamily: 'Outfit, sans-serif' }}>
+
+      {/* ─── Sticky Nav ─── */}
+      <nav style={{
+        position: 'fixed', top: 0, left: 0, right: 0, zIndex: 200,
+        height: NAV_H, display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        padding: '0 20px', background: 'var(--bg-nav)', backdropFilter: 'blur(20px)',
+        borderBottom: '1px solid var(--border)',
+      }}>
+        <Link href="/discover" style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'var(--text-secondary)', fontWeight: 700, fontSize: 14, textDecoration: 'none' }}>
+          <span>←</span><span className="hide-mobile">Ontdekken</span>
         </Link>
-        <button
-          onClick={() => setCartOpen(true)}
-          style={{ position: 'relative', width: 44, height: 44, borderRadius: 12, background: 'var(--b8)', border: 'none', cursor: 'pointer', fontSize: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-primary)' }}
-        >
+        <Link href="/" style={{ fontSize: 18, fontWeight: 900, textDecoration: 'none' }}>
+          En<span style={{ background: `linear-gradient(135deg,${PURPLE},${PINK})`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Joy</span>
+        </Link>
+        <button onClick={() => setCartOpen(true)} style={{
+          position: 'relative', width: 40, height: 40, borderRadius: 10,
+          background: 'var(--b8)', border: '1px solid var(--border)', cursor: 'pointer',
+          fontSize: 18, display: 'flex', alignItems: 'center', justifyContent: 'center',
+        }}>
           🛒
           {itemCount() > 0 && (
-            <span style={{ position: 'absolute', top: -4, right: -4, background: 'linear-gradient(135deg, #5A31F4, #FF0080)', color: 'var(--text-primary)', borderRadius: '50%', width: 20, height: 20, fontSize: 11, fontWeight: 900, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              {itemCount()}
-            </span>
+            <span style={{
+              position: 'absolute', top: -6, right: -6,
+              background: `linear-gradient(135deg,${PURPLE},${PINK})`, color: 'white',
+              borderRadius: '50%', width: 20, height: 20, fontSize: 11, fontWeight: 900,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>{itemCount()}</span>
           )}
         </button>
       </nav>
 
-      {/* Restaurant Header */}
-      <div style={{ paddingTop: 70 }}>
-        <div style={{ position: 'relative', height: 220, overflow: 'hidden' }}>
-          {restaurant.imageUrl && (
-            <img src={restaurant.imageUrl} alt={restaurant.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-          )}
-          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, transparent 30%, rgba(10,10,15,0.95) 100%)' }} />
-          <div style={{ position: 'absolute', bottom: 24, left: 32 }}>
-            <h1 style={{ fontSize: 32, fontWeight: 950, marginBottom: 6 }}>{restaurant.name}</h1>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-              <span style={{ color: 'var(--text-secondary)', fontSize: 14 }}>{restaurant.cuisine}</span>
-              <span style={{ background: 'rgba(255,215,0,0.1)', color: '#FFD700', padding: '3px 10px', borderRadius: 8, fontSize: 13, fontWeight: 700 }}>⭐ {restaurant.rating}</span>
-              <span style={{ color: 'var(--text-muted)', fontSize: 13 }}>🕐 {restaurant.deliveryTime}</span>
+      {/* ─── Hero ─── */}
+      <div style={{ marginTop: NAV_H }}>
+        <div style={{
+          position: 'relative', padding: '40px 32px 32px',
+          background: `linear-gradient(135deg, ${accent}28 0%, ${accent}18 50%, ${PINK}14 100%)`,
+          borderBottom: '1px solid var(--border)',
+        }}>
+          {/* Subtle dot pattern */}
+          <div style={{ position: 'absolute', inset: 0, opacity: 0.04, backgroundImage: 'radial-gradient(circle, currentColor 1px, transparent 1px)', backgroundSize: '22px 22px', pointerEvents: 'none' }} />
+
+          <div style={{ position: 'relative', maxWidth: 1200, margin: '0 auto', display: 'flex', alignItems: 'flex-end', gap: 22 }}>
+            {/* Logo */}
+            <div style={{
+              width: 88, height: 88, borderRadius: 18, flexShrink: 0, overflow: 'hidden',
+              background: `linear-gradient(135deg,${accent},${PINK})`,
+              border: '3px solid var(--bg-page)', boxShadow: '0 8px 28px rgba(0,0,0,0.25)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>
+              {restaurant.logo
+                ? <img src={restaurant.logo} alt={restaurant.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                : <span style={{ fontSize: 30, fontWeight: 900, color: 'white' }}>{initials}</span>
+              }
+            </div>
+
+            {/* Info */}
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <h1 style={{ fontSize: 26, fontWeight: 950, marginBottom: 4, lineHeight: 1.2 }}>{restaurant.name}</h1>
+              {restaurant.tagline && (
+                <p style={{ fontSize: 14, color: 'var(--text-secondary)', marginBottom: 10 }}>{restaurant.tagline}</p>
+              )}
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                {restaurant.cuisineCategories.slice(0, 5).map(cat => (
+                  <span key={cat} style={{
+                    background: `${accent}1a`, border: `1px solid ${accent}40`,
+                    color: 'var(--text-secondary)', padding: '3px 10px', borderRadius: 20,
+                    fontSize: 12, fontWeight: 600,
+                  }}>{cat}</span>
+                ))}
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Category Strip */}
-      <div style={{ position: 'sticky', top: 70, zIndex: 50, background: 'rgba(10,10,15,0.95)', backdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(255,255,255,0.06)', padding: '0 32px' }}>
-        <div style={{ display: 'flex', gap: 4, overflowX: 'auto', paddingBottom: 1 }}>
-          {menu.map(cat => (
-            <button
-              key={cat.id}
-              onClick={() => setActiveCategory(cat.id)}
-              style={{
-                padding: '16px 20px',
-                border: 'none',
-                background: 'transparent',
-                color: activeCategory === cat.id ? 'white' : 'rgba(255,255,255,0.4)',
-                fontWeight: activeCategory === cat.id ? 800 : 500,
-                fontSize: 14,
-                cursor: 'pointer',
-                borderBottom: activeCategory === cat.id ? '2px solid #5A31F4' : '2px solid transparent',
-                transition: 'all 0.2s',
-                whiteSpace: 'nowrap',
-                fontFamily: 'inherit',
-              }}
-            >
-              {cat.name}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Main Content */}
-      <div style={{ display: 'flex', maxWidth: 1100, margin: '0 auto', padding: '32px 24px', gap: 32 }}>
-        {/* Menu Items */}
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <h2 style={{ fontSize: 22, fontWeight: 900, marginBottom: 20 }}>{activeMenuCategory?.name ?? ''}</h2>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            {filteredItems.map((item) => (
-              <MenuItemCard
-                key={item.id}
-                item={item}
-                onAdd={() => addToCart(item)}
-              />
+        {/* ─── Delivery Info Bar ─── */}
+        <div style={{ background: 'var(--bg-elevated)', borderBottom: '1px solid var(--border)', padding: '0 32px' }}>
+          <div className="scroll-x" style={{ maxWidth: 1200, margin: '0 auto', display: 'flex', alignItems: 'center', gap: 0 }}>
+            {[
+              { icon: '🕐', label: '30–45 min' },
+              { icon: '🚴', label: 'Gratis bezorgd' },
+              { icon: '🛍️', label: `Min. ${fmt(0, currency, locale)}` },
+              ...(restaurant.address ? [{ icon: '📍', label: restaurant.address }] : []),
+            ].map((item, i, arr) => (
+              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 0 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '13px 20px 13px 0', fontSize: 13, color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>
+                  <span>{item.icon}</span>
+                  <span style={{ fontWeight: 600 }}>{item.label}</span>
+                </div>
+                {i < arr.length - 1 && <div style={{ width: 1, height: 16, background: 'var(--border)', marginRight: 20, flexShrink: 0 }} />}
+              </div>
             ))}
           </div>
         </div>
 
-        {/* Cart Sidebar (desktop) */}
-        <div style={{ width: 320, flexShrink: 0, display: 'none' }} className="cart-sidebar-desktop">
-          <div style={{ position: 'sticky', top: 130, background: 'var(--bg-elevated)', border: '1px solid var(--border-strong)', borderRadius: 20, padding: 24 }}>
-            <h3 style={{ fontSize: 18, fontWeight: 900, marginBottom: 20 }}>Your Order</h3>
-            {cart.length === 0 ? (
-              <p style={{ color: 'var(--text-muted)', fontSize: 14, textAlign: 'center', padding: '32px 0' }}>Your cart is empty</p>
+        {/* ─── Mobile Category Strip ─── */}
+        <div className="show-mobile" style={{ display: 'none', position: 'sticky', top: NAV_H, zIndex: 100, background: 'var(--catstrip-bg)', borderBottom: '1px solid var(--border)' }}>
+          <div className="scroll-x" style={{ display: 'flex', gap: 0, padding: '0 12px' }}>
+            {menu.map(cat => (
+              <button key={cat.id} onClick={() => scrollTo(cat.id)} style={{
+                padding: '13px 14px', border: 'none', background: 'transparent',
+                color: activeCategory === cat.id ? 'var(--text-primary)' : 'var(--text-muted)',
+                fontWeight: activeCategory === cat.id ? 800 : 500, fontSize: 14,
+                cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap',
+                borderBottom: activeCategory === cat.id ? `2px solid ${PURPLE}` : '2px solid transparent',
+                transition: 'all 0.15s',
+              }}>{cat.name}</button>
+            ))}
+          </div>
+        </div>
+
+        {/* ─── Body ─── */}
+        <div style={{ display: 'flex', maxWidth: 1200, margin: '0 auto', padding: '28px 24px 100px', gap: 28, alignItems: 'flex-start' }}>
+
+          {/* ─── Category Sidebar (desktop) ─── */}
+          <div className="hide-mobile" style={{ width: 220, flexShrink: 0, position: 'sticky', top: NAV_H + 20 }}>
+            <div style={{ background: 'var(--bg-elevated)', borderRadius: 16, border: '1px solid var(--border)', overflow: 'hidden' }}>
+              <div style={{ padding: '14px 18px 10px', fontSize: 11, fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-muted)' }}>
+                Menu
+              </div>
+              {menu.map((cat, i) => (
+                <button key={cat.id} onClick={() => scrollTo(cat.id)} style={{
+                  display: 'block', width: '100%', textAlign: 'left',
+                  padding: '12px 18px', border: 'none', cursor: 'pointer',
+                  background: activeCategory === cat.id ? `${accent}18` : 'transparent',
+                  color: activeCategory === cat.id ? 'var(--text-primary)' : 'var(--text-secondary)',
+                  fontWeight: activeCategory === cat.id ? 800 : 500, fontSize: 14,
+                  borderLeft: activeCategory === cat.id ? `3px solid ${accent}` : '3px solid transparent',
+                  borderBottom: i < menu.length - 1 ? '1px solid var(--border)' : 'none',
+                  transition: 'all 0.15s', fontFamily: 'inherit',
+                }}>
+                  <span>{cat.name}</span>
+                  <span style={{ float: 'right', fontSize: 11, color: 'var(--text-muted)', fontWeight: 600, marginTop: 2 }}>{cat.items.length}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* ─── Menu Sections ─── */}
+          <div style={{ flex: 1, minWidth: 0 }}>
+            {menu.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '60px 20px', color: 'var(--text-muted)' }}>
+                <div style={{ fontSize: 48, marginBottom: 16 }}>🍽️</div>
+                <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-primary)' }}>Geen menu beschikbaar</div>
+                <div style={{ fontSize: 14, marginTop: 8 }}>Dit restaurant heeft nog geen menu opgezet.</div>
+              </div>
             ) : (
-              <>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 20 }}>
-                  {cart.map((c) => (
-                    <div key={c.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', fontSize: 14 }}>
-                      <div style={{ display: 'flex', gap: 12, fontWeight: 700 }}>
-                        <span style={{ color: 'var(--text-muted)' }}>{c.qty}x</span>
-                        <span>{c.name}</span>
-                      </div>
-                      <span style={{ fontWeight: 800 }}>{formatPrice(parseFloat(c.basePrice) * c.qty)}</span>
-                    </div>
+              menu.map(cat => (
+                <div key={cat.id} ref={el => { sectionRefs.current[cat.id] = el; }} style={{ marginBottom: 44 }}>
+                  <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 4, paddingTop: 4 }}>
+                    <h2 style={{ fontSize: 20, fontWeight: 900 }}>{cat.name}</h2>
+                    <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{cat.items.length} gerecht{cat.items.length !== 1 ? 'en' : ''}</span>
+                  </div>
+                  <div style={{ height: 1, background: 'var(--border)', marginBottom: 4 }} />
+                  {cat.items.map(item => (
+                    <MenuItemCard
+                      key={item.id} item={item}
+                      qty={getQty(item.id)}
+                      onAdd={() => handleAdd(item)}
+                      onInc={() => handleAdd(item)}
+                      onDec={() => handleDec(item.id)}
+                      currency={currency} locale={locale}
+                    />
                   ))}
                 </div>
-                <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: 16, marginBottom: 16 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 900, fontSize: 16 }}>
-                    <span>Total</span>
-                    <span>{formatPrice(totalCart)}</span>
-                  </div>
-                </div>
-                <button style={{ width: '100%', background: 'linear-gradient(135deg, #5A31F4, #FF0080)', border: 'none', borderRadius: 12, padding: '16px', color: 'var(--text-primary)', fontSize: 16, fontWeight: 900, cursor: 'pointer', boxShadow: '0 8px 20px rgba(90,49,244,0.3)' }}>
-                  Checkout · {formatPrice(totalCart)}
-                </button>
-              </>
+              ))
             )}
+          </div>
+
+          {/* ─── Cart Sidebar (desktop) ─── */}
+          <div className="hide-mobile" style={{ width: 300, flexShrink: 0, position: 'sticky', top: NAV_H + 20 }}>
+            <div style={{ background: 'var(--bg-elevated)', borderRadius: 20, border: '1px solid var(--border-strong)', overflow: 'hidden' }}>
+              <div style={{ padding: '18px 20px', borderBottom: '1px solid var(--border)' }}>
+                <h3 style={{ fontSize: 16, fontWeight: 900 }}>Jouw bestelling</h3>
+                <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{restaurant.name}</div>
+              </div>
+              <CartContent cart={cart} currency={currency} locale={locale} totalCart={totalCart} />
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Cart Drawer (mobile/overlay) */}
-      {cartOpen && (
-        <div style={{ position: 'fixed', inset: 0, zIndex: 200 }}>
-          <div onClick={() => setCartOpen(false)} style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.6)' }} />
-          <motion.div
-            initial={{ x: '100%' }}
-            animate={{ x: 0 }}
-            exit={{ x: '100%' }}
-            transition={{ type: 'tween', duration: 0.25 }}
-            style={{ position: 'absolute', top: 0, right: 0, bottom: 0, width: 340, background: '#111118', borderLeft: '1px solid rgba(255,255,255,0.08)', padding: 28, overflowY: 'auto', display: 'flex', flexDirection: 'column' }}
-          >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-              <h3 style={{ fontSize: 20, fontWeight: 900 }}>Your Order</h3>
-              <button onClick={() => setCartOpen(false)} style={{ background: 'var(--b8)', border: 'none', borderRadius: 10, width: 36, height: 36, cursor: 'pointer', fontSize: 18, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>×</button>
-            </div>
-            {cart.length === 0 ? (
-              <p style={{ color: 'var(--text-muted)', fontSize: 14, textAlign: 'center', padding: '40px 0', flex: 1 }}>Your cart is empty</p>
-            ) : (
-              <>
-                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 14 }}>
-                  {cart.map((c) => (
-                    <div key={c.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', fontSize: 14 }}>
-                      <div style={{ display: 'flex', gap: 12, fontWeight: 700 }}>
-                        <span style={{ color: 'var(--text-muted)' }}>{c.qty}x</span>
-                        <span>{c.name}</span>
-                      </div>
-                      <span style={{ fontWeight: 800 }}>{formatPrice(parseFloat(c.basePrice) * c.qty)}</span>
-                    </div>
-                  ))}
-                </div>
-                <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: 20, marginTop: 20 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 900, fontSize: 16, marginBottom: 16 }}>
-                    <span>Total</span>
-                    <span>{formatPrice(totalCart)}</span>
-                  </div>
-                  <button style={{ width: '100%', background: 'linear-gradient(135deg, #5A31F4, #FF0080)', border: 'none', borderRadius: 12, padding: '16px', color: 'var(--text-primary)', fontSize: 16, fontWeight: 900, cursor: 'pointer', boxShadow: '0 8px 20px rgba(90,49,244,0.3)' }}>
-                    Checkout · {formatPrice(totalCart)}
-                  </button>
-                </div>
-              </>
-            )}
-          </motion.div>
-        </div>
-      )}
+      {/* ─── Mobile Cart Drawer ─── */}
+      <AnimatePresence>
+        {cartOpen && (
+          <div style={{ position: 'fixed', inset: 0, zIndex: 400 }}>
+            <motion.div
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              onClick={() => setCartOpen(false)}
+              style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.65)' }}
+            />
+            <motion.div
+              initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
+              transition={{ type: 'tween', duration: 0.28 }}
+              style={{
+                position: 'absolute', bottom: 0, left: 0, right: 0,
+                background: 'var(--bg-elevated)', borderRadius: '20px 20px 0 0',
+                maxHeight: '88vh', display: 'flex', flexDirection: 'column',
+                boxShadow: '0 -8px 40px rgba(0,0,0,0.5)',
+              }}
+            >
+              <div style={{ display: 'flex', justifyContent: 'center', padding: '12px 0 0' }}>
+                <div style={{ width: 36, height: 4, borderRadius: 2, background: 'var(--border-strong)' }} />
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 24px', borderBottom: '1px solid var(--border)' }}>
+                <h3 style={{ fontSize: 18, fontWeight: 900 }}>Jouw bestelling</h3>
+                <button onClick={() => setCartOpen(false)} style={{ background: 'var(--b8)', border: 'none', borderRadius: 10, width: 34, height: 34, cursor: 'pointer', fontSize: 18, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>×</button>
+              </div>
+              <div style={{ overflowY: 'auto', flex: 1 }}>
+                <CartContent cart={cart} currency={currency} locale={locale} totalCart={totalCart} onCheckout={() => setCartOpen(false)} />
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
-      {/* Mobile Cart Bar */}
+      {/* ─── Mobile Floating Cart Bar ─── */}
       {itemCount() > 0 && (
-        <div style={{ position: 'fixed', bottom: 24, left: 24, right: 24, zIndex: 100 }}>
+        <div className="show-mobile" style={{ display: 'none', position: 'fixed', bottom: 20, left: 16, right: 16, zIndex: 300 }}>
           <motion.button
-            initial={{ y: 80, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
+            initial={{ y: 80, opacity: 0 }} animate={{ y: 0, opacity: 1 }}
             onClick={() => setCartOpen(true)}
-            style={{ width: '100%', background: 'linear-gradient(135deg, #5A31F4, #FF0080)', border: 'none', borderRadius: 16, padding: '18px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', color: 'var(--text-primary)', fontSize: 16, fontWeight: 900, cursor: 'pointer', boxShadow: '0 16px 40px rgba(90,49,244,0.4)' }}
+            style={{
+              width: '100%', background: `linear-gradient(135deg,${PURPLE},${PINK})`,
+              border: 'none', borderRadius: 16, padding: '16px 22px',
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              color: 'white', fontSize: 15, fontWeight: 900, cursor: 'pointer',
+              boxShadow: '0 12px 36px rgba(90,49,244,0.4)',
+            }}
           >
-            <span style={{ background: 'rgba(255,255,255,0.2)', borderRadius: 8, padding: '4px 10px', fontSize: 14, fontWeight: 900 }}>
-              {itemCount()}
-            </span>
-            <span>View Cart</span>
-            <span>{formatPrice(totalCart)}</span>
+            <span style={{ background: 'rgba(255,255,255,0.2)', borderRadius: 8, padding: '4px 10px', fontSize: 13, fontWeight: 900 }}>{itemCount()}</span>
+            <span>Bekijk bestelling</span>
+            <span>{fmt(totalCart, currency, locale)}</span>
           </motion.button>
         </div>
       )}
