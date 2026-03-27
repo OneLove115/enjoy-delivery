@@ -15,12 +15,17 @@ type MenuItem = {
   basePrice: string; imageUrl: string | null; category: string;
 };
 type MenuCategory = { id: string; name: string; items: MenuItem[] };
+type BusinessHours = {
+  [day: string]: { open: string; close: string; closed: boolean };
+};
 type Restaurant = {
   id: string; name: string; slug: string;
   address: string | null; phone: string | null;
-  logo: string | null; primaryColor: string | null;
+  logo: string | null; heroImage: string | null; primaryColor: string | null;
   tagline: string | null; cuisineCategories: string[];
-  businessHours: unknown; timezone: string; currency: string; locale: string;
+  contactEmail: string | null;
+  deliveryTimeMin: number; deliveryTimeMax: number;
+  businessHours: BusinessHours | null; timezone: string; currency: string; locale: string;
 };
 
 /* ─── Helpers ─── */
@@ -159,6 +164,7 @@ export default function MenuPage() {
   const [activeCategory, setActiveCategory] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [cartOpen, setCartOpen] = useState(false);
+  const [infoOpen, setInfoOpen] = useState(false);
 
   const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
@@ -279,41 +285,70 @@ export default function MenuPage() {
       {/* ─── Hero ─── */}
       <div style={{ marginTop: NAV_H }}>
         <div style={{
-          position: 'relative', padding: '40px 32px 32px',
-          background: `linear-gradient(135deg, ${accent}28 0%, ${accent}18 50%, ${PINK}14 100%)`,
+          position: 'relative',
+          background: restaurant.heroImage
+            ? 'var(--bg-page)'
+            : `linear-gradient(135deg, ${accent}28 0%, ${accent}18 50%, ${PINK}14 100%)`,
           borderBottom: '1px solid var(--border)',
         }}>
-          {/* Subtle dot pattern */}
-          <div style={{ position: 'absolute', inset: 0, opacity: 0.04, backgroundImage: 'radial-gradient(circle, currentColor 1px, transparent 1px)', backgroundSize: '22px 22px', pointerEvents: 'none' }} />
-
-          <div style={{ position: 'relative', maxWidth: 1200, margin: '0 auto', display: 'flex', alignItems: 'flex-end', gap: 22 }}>
-            {/* Logo */}
-            <div style={{
-              width: 88, height: 88, borderRadius: 18, flexShrink: 0, overflow: 'hidden',
-              background: `linear-gradient(135deg,${accent},${PINK})`,
-              border: '3px solid var(--bg-page)', boxShadow: '0 8px 28px rgba(0,0,0,0.25)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-            }}>
-              {restaurant.logo
-                ? <img src={restaurant.logo} alt={restaurant.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                : <span style={{ fontSize: 30, fontWeight: 900, color: 'white' }}>{initials}</span>
-              }
+          {/* Hero image */}
+          {restaurant.heroImage && (
+            <div style={{ position: 'relative', height: 220, overflow: 'hidden' }}>
+              <img src={restaurant.heroImage} alt={restaurant.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, transparent 30%, rgba(10,10,15,0.92) 100%)' }} />
             </div>
+          )}
 
-            {/* Info */}
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <h1 style={{ fontSize: 26, fontWeight: 950, marginBottom: 4, lineHeight: 1.2 }}>{restaurant.name}</h1>
-              {restaurant.tagline && (
-                <p style={{ fontSize: 14, color: 'var(--text-secondary)', marginBottom: 10 }}>{restaurant.tagline}</p>
-              )}
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                {restaurant.cuisineCategories.slice(0, 5).map(cat => (
-                  <span key={cat} style={{
-                    background: `${accent}1a`, border: `1px solid ${accent}40`,
-                    color: 'var(--text-secondary)', padding: '3px 10px', borderRadius: 20,
-                    fontSize: 12, fontWeight: 600,
-                  }}>{cat}</span>
-                ))}
+          {/* Restaurant info card */}
+          <div style={{
+            position: restaurant.heroImage ? 'absolute' : 'relative',
+            bottom: restaurant.heroImage ? 0 : undefined,
+            left: 0, right: 0,
+            padding: restaurant.heroImage ? '0 32px 28px' : '36px 32px 28px',
+          }}>
+            {!restaurant.heroImage && (
+              <div style={{ position: 'absolute', inset: 0, opacity: 0.04, backgroundImage: 'radial-gradient(circle, currentColor 1px, transparent 1px)', backgroundSize: '22px 22px', pointerEvents: 'none' }} />
+            )}
+            <div style={{ position: 'relative', maxWidth: 1200, margin: '0 auto', display: 'flex', alignItems: 'flex-end', gap: 20 }}>
+              {/* Logo */}
+              <div style={{
+                width: 80, height: 80, borderRadius: 16, flexShrink: 0, overflow: 'hidden',
+                background: `linear-gradient(135deg,${accent},${PINK})`,
+                border: '3px solid var(--bg-page)', boxShadow: '0 8px 24px rgba(0,0,0,0.3)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}>
+                {restaurant.logo
+                  ? <img src={restaurant.logo} alt={restaurant.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  : <span style={{ fontSize: 28, fontWeight: 900, color: 'white' }}>{initials}</span>
+                }
+              </div>
+
+              {/* Name + tags + info button */}
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <h1 style={{ fontSize: 24, fontWeight: 950, marginBottom: 4, lineHeight: 1.2 }}>{restaurant.name}</h1>
+                {restaurant.tagline && (
+                  <p style={{ fontSize: 13, color: restaurant.heroImage ? 'rgba(255,255,255,0.7)' : 'var(--text-secondary)', marginBottom: 8 }}>{restaurant.tagline}</p>
+                )}
+                <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 6 }}>
+                  {restaurant.cuisineCategories.slice(0, 4).map(cat => (
+                    <span key={cat} style={{
+                      background: restaurant.heroImage ? 'rgba(255,255,255,0.15)' : `${accent}1a`,
+                      border: `1px solid ${restaurant.heroImage ? 'rgba(255,255,255,0.25)' : `${accent}40`}`,
+                      color: restaurant.heroImage ? 'rgba(255,255,255,0.9)' : 'var(--text-secondary)',
+                      padding: '3px 10px', borderRadius: 20, fontSize: 12, fontWeight: 600,
+                    }}>{cat}</span>
+                  ))}
+                  {/* Info button */}
+                  <button onClick={() => setInfoOpen(true)} style={{
+                    display: 'flex', alignItems: 'center', gap: 5, padding: '4px 12px', borderRadius: 20,
+                    border: `1px solid ${restaurant.heroImage ? 'rgba(255,255,255,0.3)' : 'var(--border-strong)'}`,
+                    background: restaurant.heroImage ? 'rgba(255,255,255,0.12)' : 'var(--b8)',
+                    color: restaurant.heroImage ? 'rgba(255,255,255,0.9)' : 'var(--text-secondary)',
+                    fontSize: 12, fontWeight: 700, cursor: 'pointer',
+                  }}>
+                    <span>ℹ️</span><span>Info</span>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -323,7 +358,7 @@ export default function MenuPage() {
         <div style={{ background: 'var(--bg-elevated)', borderBottom: '1px solid var(--border)', padding: '0 32px' }}>
           <div className="scroll-x" style={{ maxWidth: 1200, margin: '0 auto', display: 'flex', alignItems: 'center', gap: 0 }}>
             {[
-              { icon: '🕐', label: '30–45 min' },
+              { icon: '🕐', label: `${restaurant.deliveryTimeMin}–${restaurant.deliveryTimeMax} min` },
               { icon: '🚴', label: 'Gratis bezorgd' },
               { icon: '🛍️', label: `Min. ${fmt(0, currency, locale)}` },
               ...(restaurant.address ? [{ icon: '📍', label: restaurant.address }] : []),
@@ -454,6 +489,98 @@ export default function MenuPage() {
               </div>
               <div style={{ overflowY: 'auto', flex: 1 }}>
                 <CartContent cart={cart} currency={currency} locale={locale} totalCart={totalCart} onCheckout={() => setCartOpen(false)} />
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* ─── Restaurant Info Modal ─── */}
+      <AnimatePresence>
+        {infoOpen && (
+          <div style={{ position: 'fixed', inset: 0, zIndex: 500 }}>
+            <motion.div
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              onClick={() => setInfoOpen(false)}
+              style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.65)' }}
+            />
+            <motion.div
+              initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
+              transition={{ type: 'tween', duration: 0.28 }}
+              style={{
+                position: 'absolute', bottom: 0, left: 0, right: 0,
+                background: 'var(--bg-elevated)', borderRadius: '20px 20px 0 0',
+                maxHeight: '85vh', overflowY: 'auto',
+                boxShadow: '0 -8px 40px rgba(0,0,0,0.5)',
+              }}
+            >
+              {/* Handle */}
+              <div style={{ display: 'flex', justifyContent: 'center', padding: '12px 0 0' }}>
+                <div style={{ width: 36, height: 4, borderRadius: 2, background: 'var(--border-strong)' }} />
+              </div>
+              {/* Header */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 24px', borderBottom: '1px solid var(--border)' }}>
+                <div>
+                  <h3 style={{ fontSize: 18, fontWeight: 900 }}>{restaurant.name}</h3>
+                  {restaurant.tagline && <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 2 }}>{restaurant.tagline}</p>}
+                </div>
+                <button onClick={() => setInfoOpen(false)} style={{ background: 'var(--b8)', border: 'none', borderRadius: 10, width: 34, height: 34, cursor: 'pointer', fontSize: 18, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>×</button>
+              </div>
+
+              <div style={{ padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: 0 }}>
+                {/* Contact details */}
+                {[
+                  restaurant.address  && { icon: '📍', label: 'Adres',    value: restaurant.address },
+                  restaurant.phone    && { icon: '📞', label: 'Telefoon', value: restaurant.phone, href: `tel:${restaurant.phone}` },
+                  restaurant.contactEmail && { icon: '✉️', label: 'Email', value: restaurant.contactEmail, href: `mailto:${restaurant.contactEmail}` },
+                ].filter(Boolean).map((row: any) => (
+                  <div key={row.icon} style={{ display: 'flex', alignItems: 'flex-start', gap: 14, padding: '14px 0', borderBottom: '1px solid var(--border)' }}>
+                    <div style={{ width: 36, height: 36, borderRadius: 10, background: 'var(--b8)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, flexShrink: 0 }}>{row.icon}</div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 3 }}>{row.label}</div>
+                      {row.href
+                        ? <a href={row.href} style={{ fontSize: 14, fontWeight: 600, color: accent, textDecoration: 'none' }}>{row.value}</a>
+                        : <div style={{ fontSize: 14, fontWeight: 600 }}>{row.value}</div>
+                      }
+                    </div>
+                  </div>
+                ))}
+
+                {/* Delivery info */}
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14, padding: '14px 0', borderBottom: '1px solid var(--border)' }}>
+                  <div style={{ width: 36, height: 36, borderRadius: 10, background: 'var(--b8)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, flexShrink: 0 }}>🚴</div>
+                  <div>
+                    <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 3 }}>Bezorging</div>
+                    <div style={{ fontSize: 14, fontWeight: 600 }}>{restaurant.deliveryTimeMin}–{restaurant.deliveryTimeMax} minuten · Gratis bezorgd</div>
+                  </div>
+                </div>
+
+                {/* Opening hours */}
+                {restaurant.businessHours && Object.keys(restaurant.businessHours).length > 0 && (
+                  <div style={{ padding: '14px 0' }}>
+                    <div style={{ display: 'flex', gap: 14, marginBottom: 12 }}>
+                      <div style={{ width: 36, height: 36, borderRadius: 10, background: 'var(--b8)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, flexShrink: 0 }}>🕐</div>
+                      <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', paddingTop: 10 }}>Openingstijden</div>
+                    </div>
+                    <div style={{ display: 'grid', gap: 6, paddingLeft: 50 }}>
+                      {['monday','tuesday','wednesday','thursday','friday','saturday','sunday'].map(day => {
+                        const h = restaurant.businessHours?.[day];
+                        if (!h) return null;
+                        const labels: Record<string, string> = { monday:'Ma', tuesday:'Di', wednesday:'Wo', thursday:'Do', friday:'Vr', saturday:'Za', sunday:'Zo' };
+                        const today = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'][new Date().getDay()];
+                        const isToday = day === today;
+                        return (
+                          <div key={day} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 13 }}>
+                            <span style={{ fontWeight: isToday ? 800 : 500, color: isToday ? 'var(--text-primary)' : 'var(--text-secondary)', minWidth: 28 }}>{labels[day]}</span>
+                            <span style={{ fontWeight: isToday ? 700 : 400, color: h.closed ? 'var(--text-muted)' : isToday ? accent : 'var(--text-secondary)' }}>
+                              {h.closed ? 'Gesloten' : `${h.open} – ${h.close}`}
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
               </div>
             </motion.div>
           </div>
