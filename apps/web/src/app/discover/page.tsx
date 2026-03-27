@@ -110,7 +110,7 @@ const RESTAURANT_EMOJIS: Record<string, string> = {
 function EnJoyLogo() {
   return (
     <Link href="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', flexShrink: 0 }}>
-      <span style={{ fontSize: 22, fontWeight: 900, color: 'var(--text-primary)' }}>
+      <span translate="no" style={{ fontSize: 22, fontWeight: 900, color: 'var(--text-primary)' }}>
         En<span style={{ background: LOGO, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Joy</span>
       </span>
     </Link>
@@ -614,7 +614,7 @@ function DiscoverContent() {
           {/* Row 1: Logo + Address pill + Hamburger */}
           <div style={{ padding: '12px 16px 10px', display: 'flex', alignItems: 'center', gap: 10 }}>
             <Link href="/" style={{ textDecoration: 'none', flexShrink: 0 }}>
-              <span style={{ fontSize: 20, fontWeight: 900, color: 'var(--text-primary)' }}>
+              <span translate="no" style={{ fontSize: 20, fontWeight: 900, color: 'var(--text-primary)' }}>
                 En<span style={{ background: LOGO, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Joy</span>
               </span>
             </Link>

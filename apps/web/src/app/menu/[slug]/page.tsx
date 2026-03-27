@@ -262,7 +262,7 @@ export default function MenuPage() {
         <Link href="/discover" style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'var(--text-secondary)', fontWeight: 700, fontSize: 14, textDecoration: 'none' }}>
           <span>←</span><span className="hide-mobile">Ontdekken</span>
         </Link>
-        <Link href="/" style={{ fontSize: 18, fontWeight: 900, textDecoration: 'none' }}>
+        <Link href="/" translate="no" style={{ fontSize: 18, fontWeight: 900, textDecoration: 'none' }}>
           En<span style={{ background: `linear-gradient(135deg,${PURPLE},${PINK})`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Joy</span>
         </Link>
         <button onClick={() => setCartOpen(true)} style={{

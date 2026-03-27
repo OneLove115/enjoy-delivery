@@ -433,7 +433,7 @@ export function JoyaChatWidget({ triggerOpen = 0 }: { triggerOpen?: number }) {
     }}>
       {/* Top bar */}
       <div style={{ position: 'absolute', top: 0, left: 0, right: 0, display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 24px' }}>
-        <div style={{ fontSize: 13, fontWeight: 700, color: 'rgba(255,255,255,0.4)' }}>
+        <div translate="no" style={{ fontSize: 13, fontWeight: 700, color: 'rgba(255,255,255,0.4)' }}>
           by En<span style={{ background: `linear-gradient(135deg,${PURPLE},${PINK})`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Joy</span>
         </div>
         <button onClick={exitVoiceMode}
@@ -526,7 +526,7 @@ export function JoyaChatWidget({ triggerOpen = 0 }: { triggerOpen?: number }) {
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
               <span style={{ color: '#fff', fontWeight: 800, fontSize: 15 }}>Joya</span>
-              <span style={{ fontSize: 11, fontWeight: 900, color: 'rgba(255,255,255,0.55)', letterSpacing: '0.5px' }}>
+              <span translate="no" style={{ fontSize: 11, fontWeight: 900, color: 'rgba(255,255,255,0.55)', letterSpacing: '0.5px' }}>
                 by En<span style={{ background: `linear-gradient(135deg,${PURPLE},${PINK})`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Joy</span>
               </span>
             </div>

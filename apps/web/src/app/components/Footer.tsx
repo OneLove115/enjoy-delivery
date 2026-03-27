@@ -43,7 +43,7 @@ export function Footer() {
           {/* Brand */}
           <div style={{ maxWidth: 260, marginBottom: 8 }}>
             <Link href="/" style={{ textDecoration: 'none' }}>
-              <span style={{ fontSize: 24, fontWeight: 900, color: 'var(--text-primary)' }}>
+              <span translate="no" style={{ fontSize: 24, fontWeight: 900, color: 'var(--text-primary)' }}>
                 En<span style={{ background: `linear-gradient(135deg,${PURPLE},${PINK})`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Joy</span>
               </span>
             </Link>

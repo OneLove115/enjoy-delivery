@@ -43,7 +43,7 @@ export function Nav() {
       }}>
         {/* Logo */}
         <Link href="/" style={{ textDecoration: 'none', flexShrink: 0 }}>
-          <span style={{ fontSize: 22, fontWeight: 900, color: 'var(--text-primary)' }}>
+          <span translate="no" style={{ fontSize: 22, fontWeight: 900, color: 'var(--text-primary)' }}>
             En<span style={{ background: `linear-gradient(135deg,${PURPLE},${PINK})`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Joy</span>
           </span>
         </Link>
@@ -122,7 +122,7 @@ export function Nav() {
             padding: '20px', gap: 4, boxShadow: '-8px 0 32px rgba(0,0,0,0.5)',
           }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-              <span style={{ fontSize: 20, fontWeight: 900, color: 'var(--text-primary)' }}>
+              <span translate="no" style={{ fontSize: 20, fontWeight: 900, color: 'var(--text-primary)' }}>
                 En<span style={{ background: `linear-gradient(135deg,${PURPLE},${PINK})`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Joy</span>
               </span>
               <button onClick={() => setDrawerOpen(false)} style={{ background: 'none', border: 'none', fontSize: 24, cursor: 'pointer', color: 'var(--text-primary)' }}>✕</button>
