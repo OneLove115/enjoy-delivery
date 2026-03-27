@@ -8,14 +8,14 @@ import { Footer } from '../../components/Footer';
 const PURPLE = '#5A31F4';
 const PINK = '#FF0080';
 
-type Address = { id: string; label: string; street: string; city: string; postcode: string };
+type Address = { id: string; label: string; street: string; city: string; zip: string; postcode?: string };
 
 export default function AddressesPage() {
   const router = useRouter();
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [loading, setLoading] = useState(true);
   const [adding, setAdding] = useState(false);
-  const [form, setForm] = useState({ label: '', street: '', city: '', postcode: '' });
+  const [form, setForm] = useState({ label: '', street: '', city: '', zip: '' });
 
   useEffect(() => {
     fetch('/api/auth/me')
@@ -36,7 +36,7 @@ export default function AddressesPage() {
     if (res.ok) {
       const newAddr = await res.json();
       setAddresses(prev => [...prev, newAddr]);
-      setForm({ label: '', street: '', city: '', postcode: '' });
+      setForm({ label: '', street: '', city: '', zip: '' });
       setAdding(false);
     }
   };
@@ -67,7 +67,7 @@ export default function AddressesPage() {
               <input placeholder="Street and number" value={form.street} onChange={e => setForm({ ...form, street: e.target.value })} required style={input} />
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                 <input placeholder="City" value={form.city} onChange={e => setForm({ ...form, city: e.target.value })} required style={input} />
-                <input placeholder="Postcode" value={form.postcode} onChange={e => setForm({ ...form, postcode: e.target.value })} required style={input} />
+                <input placeholder="Postcode" value={form.zip} onChange={e => setForm({ ...form, zip: e.target.value })} required style={input} />
               </div>
               <button type="submit"
                 style={{ background: `linear-gradient(135deg,${PURPLE},${PINK})`, color: 'var(--text-primary)', border: 'none', borderRadius: 12, padding: '13px 0', fontSize: 15, fontWeight: 700, cursor: 'pointer', marginTop: 4 }}>
@@ -88,7 +88,7 @@ export default function AddressesPage() {
                   <span style={{ fontSize: 24 }}>📍</span>
                   <div>
                     <p style={{ fontWeight: 700, fontSize: 15, marginBottom: 2 }}>{a.label}</p>
-                    <p style={{ color: 'var(--text-muted)', fontSize: 14, margin: 0 }}>{a.street}, {a.postcode} {a.city}</p>
+                    <p style={{ color: 'var(--text-muted)', fontSize: 14, margin: 0 }}>{a.street}, {a.zip || a.postcode} {a.city}</p>
                   </div>
                 </motion.div>
               ))}
