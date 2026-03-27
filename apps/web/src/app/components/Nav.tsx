@@ -18,7 +18,7 @@ const navLinks = [
 const themeIcon: Record<string, string> = { dark: '🌙', light: '☀️', system: '💻' };
 
 export function Nav() {
-  const [user, setUser]       = useState<{ name: string } | null>(null);
+  const [user, setUser]       = useState<{ name: string; avatarUrl?: string } | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const pathname  = usePathname();
   const { theme, setTheme } = useTheme();
@@ -74,8 +74,15 @@ export function Nav() {
           <div className="nav-center-links" style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
             {user ? (
               <>
-                <Link href="/account/orders" style={{ color: 'var(--text-secondary)', fontSize: 14, fontWeight: 600 }}>
-                  👤 {user.name}
+                <Link href="/account" style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--text-secondary)', fontSize: 14, fontWeight: 600, textDecoration: 'none' }}>
+                  {user.avatarUrl ? (
+                    <img src={user.avatarUrl} alt={user.name} style={{ width: 28, height: 28, borderRadius: '50%', objectFit: 'cover', border: '1px solid rgba(255,255,255,0.2)' }} />
+                  ) : (
+                    <span style={{ width: 28, height: 28, borderRadius: '50%', background: `linear-gradient(135deg,${PURPLE},${PINK})`, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 900, color: 'white' }}>
+                      {user.name[0]?.toUpperCase()}
+                    </span>
+                  )}
+                  {user.name.split(' ')[0]}
                 </Link>
                 <button onClick={signOut} style={{
                   background: 'var(--bg-card)', border: '1px solid var(--border)',

@@ -45,15 +45,15 @@ export async function GET(req: NextRequest) {
       return NextResponse.redirect(`${appUrl}/login?error=google_failed`);
     }
 
-    const profile = await profileRes.json() as { id: string; email: string; name: string };
+    const profile = await profileRes.json() as { id: string; email: string; name: string; picture?: string };
 
     // Create or find user in VelociPizza backend
-    const data = await vpFetch<{ token: string; user: { id: string; name: string; email: string } }>(
+    const data = await vpFetch<{ token: string; user: { id: string; name: string; email: string; avatarUrl?: string } }>(
       '/api/consumer/auth/google-login',
-      { method: 'POST', body: { email: profile.email, name: profile.name, googleId: profile.id } }
+      { method: 'POST', body: { email: profile.email, name: profile.name, googleId: profile.id, avatarUrl: profile.picture ?? null } }
     );
 
-    const res = NextResponse.redirect(`${appUrl}/discover`);
+    const res = NextResponse.redirect(`${appUrl}/account`);
     res.cookies.set('enjoy_session', data.token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
@@ -61,6 +61,15 @@ export async function GET(req: NextRequest) {
       path: '/',
       maxAge: 60 * 60 * 24 * 7,
     });
+    if (data.user.avatarUrl) {
+      res.cookies.set('enjoy_avatar', data.user.avatarUrl, {
+        httpOnly: false,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        path: '/',
+        maxAge: 60 * 60 * 24 * 7,
+      });
+    }
     return res;
   } catch (err) {
     console.error('[google/callback] error:', err);

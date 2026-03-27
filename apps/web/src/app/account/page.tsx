@@ -10,7 +10,7 @@ const PURPLE = '#5A31F4';
 const PINK   = '#FF0080';
 const ORANGE = '#FF6B00';
 
-type User = { id: string; name: string; email: string };
+type User = { id: string; name: string; email: string; avatarUrl?: string };
 
 const tiles = [
   { icon: '🛍️', label: 'Bestellingen',   sub: 'Bekijk je ordergeschiedenis', href: '/account/orders',     color: '#1a2a5e' },
@@ -50,14 +50,19 @@ export default function AccountPage() {
         {/* Profile hero */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
           style={{ display: 'flex', alignItems: 'center', gap: 20, marginBottom: 40, padding: '28px', background: 'var(--bg-card)', borderRadius: 20, border: '1px solid rgba(255,255,255,0.07)' }}>
-          <div style={{
-            width: 72, height: 72, borderRadius: '50%', flexShrink: 0,
-            background: `linear-gradient(135deg,${PURPLE},${PINK})`,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: 26, fontWeight: 900, color: 'var(--text-primary)',
-          }}>
-            {loading ? '…' : initials}
-          </div>
+          {user?.avatarUrl ? (
+            <img src={user.avatarUrl} alt={user.name}
+              style={{ width: 72, height: 72, borderRadius: '50%', objectFit: 'cover', flexShrink: 0, border: `2px solid ${PURPLE}` }} />
+          ) : (
+            <div style={{
+              width: 72, height: 72, borderRadius: '50%', flexShrink: 0,
+              background: `linear-gradient(135deg,${PURPLE},${PINK})`,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: 26, fontWeight: 900, color: 'var(--text-primary)',
+            }}>
+              {loading ? '…' : initials}
+            </div>
+          )}
           <div style={{ flex: 1, minWidth: 0 }}>
             {loading ? (
               <div style={{ height: 20, width: 140, background: 'rgba(255,255,255,0.08)', borderRadius: 8, marginBottom: 8 }} />
