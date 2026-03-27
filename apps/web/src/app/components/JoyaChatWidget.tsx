@@ -126,7 +126,7 @@ function JoyaAvatar({ size = 40 }: { size?: number }) {
   );
 }
 
-/* ─── Animated waveform ─── */
+/* ─── Animated waveform (mini — for chat bar) ─── */
 function WaveformBars({ active }: { active: boolean }) {
   const [heights, setHeights] = useState([4, 4, 4, 4, 4, 4, 4]);
   useEffect(() => {
@@ -147,6 +147,72 @@ function WaveformBars({ active }: { active: boolean }) {
         }} />
       ))}
     </div>
+  );
+}
+
+/* ─── Full-width voice waveform (for voice mode panel) ─── */
+function VoiceWaveform({ active }: { active: boolean }) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const rafRef    = useRef<number>(0);
+  const barsRef   = useRef<number[]>(Array(40).fill(0.05));
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const N = 40;
+    let running = true;
+
+    const draw = () => {
+      if (!running) return;
+      const W = canvas.width;
+      const H = canvas.height;
+      ctx.clearRect(0, 0, W, H);
+
+      const target = active
+        ? Array.from({ length: N }, (_, i) => {
+            const dist = Math.abs(i - N / 2) / (N / 2);
+            const envelope = 1 - dist * 0.6;
+            return (0.1 + Math.random() * 0.9) * envelope;
+          })
+        : Array(N).fill(0.05);
+
+      barsRef.current = barsRef.current.map((v, i) => v + (target[i] - v) * 0.18);
+
+      const barW = W / N;
+      const cx = W / 2;
+      const grad = ctx.createLinearGradient(cx - 80, 0, cx + 80, 0);
+      grad.addColorStop(0, 'rgba(90,49,244,0.9)');
+      grad.addColorStop(0.5, 'rgba(200,30,180,0.95)');
+      grad.addColorStop(1, 'rgba(90,49,244,0.9)');
+
+      barsRef.current.forEach((v, i) => {
+        const x = i * barW + barW * 0.2;
+        const bh = Math.max(4, v * H * 0.85);
+        const y = (H - bh) / 2;
+        const r = barW * 0.3;
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.roundRect(x, y, barW * 0.6, bh, r);
+        ctx.fill();
+      });
+
+      rafRef.current = requestAnimationFrame(draw);
+    };
+
+    draw();
+    return () => { running = false; cancelAnimationFrame(rafRef.current); };
+  }, [active]);
+
+  return (
+    <canvas
+      ref={canvasRef}
+      width={340}
+      height={120}
+      style={{ width: '100%', maxWidth: 360, height: 120, display: 'block' }}
+    />
   );
 }
 
@@ -424,87 +490,96 @@ export function JoyaChatWidget({ triggerOpen = 0 }: { triggerOpen?: number }) {
   const lastJoyaMsg = messages.filter(m => m.role === 'assistant').slice(-1)[0]?.text ?? '';
   const lastUserMsg = messages.filter(m => m.role === 'user').slice(-1)[0]?.text ?? '';
 
+  /* ─── Voice Mode Panel — redesigned to match Joya AI screenshot ─── */
   const voicePanel = (
     <div style={{
       position: 'fixed', inset: 0, zIndex: 10000,
-      background: 'linear-gradient(180deg, #08081A 0%, #14082E 60%, #0A0A18 100%)',
-      display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+      background: 'linear-gradient(180deg, #05050F 0%, #0E0520 55%, #060610 100%)',
+      display: 'flex', flexDirection: 'column', alignItems: 'center',
       fontFamily: 'Outfit, sans-serif',
     }}>
       {/* Top bar */}
-      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 24px' }}>
-        <div translate="no" style={{ fontSize: 13, fontWeight: 700, color: 'rgba(255,255,255,0.4)' }}>
+      <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 24px', flexShrink: 0 }}>
+        <div translate="no" style={{ fontSize: 13, fontWeight: 700, color: 'rgba(255,255,255,0.3)' }}>
           by En<span style={{ background: `linear-gradient(135deg,${PURPLE},${PINK})`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Joy</span>
         </div>
         <button onClick={exitVoiceMode}
-          style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, color: 'rgba(255,255,255,0.5)', fontSize: 13, fontWeight: 700, padding: '6px 14px', cursor: 'pointer', fontFamily: 'inherit' }}>
+          style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, color: 'rgba(255,255,255,0.5)', fontSize: 13, fontWeight: 700, padding: '6px 14px', cursor: 'pointer', fontFamily: 'inherit' }}>
           💬 Chat
         </button>
       </div>
 
-      {/* Avatar with speaking ring */}
-      <div style={{ position: 'relative', marginBottom: 28 }}>
-        {speaking && (
-          <>
-            <div style={{ position: 'absolute', inset: -20, borderRadius: '50%', border: `2px solid rgba(90,49,244,0.4)`, animation: 'vring 1.4s ease-out infinite' }} />
-            <div style={{ position: 'absolute', inset: -10, borderRadius: '50%', border: `2px solid rgba(255,0,128,0.3)`, animation: 'vring 1.4s ease-out infinite 0.4s' }} />
-          </>
-        )}
-        {listening && (
-          <div style={{ position: 'absolute', inset: -12, borderRadius: '50%', border: `2px solid rgba(255,107,0,0.5)`, animation: 'vring 1s ease-out infinite' }} />
-        )}
-        <img src="/joya.jpg" alt="Joya"
-          style={{ width: 128, height: 128, borderRadius: '50%', objectFit: 'cover', objectPosition: 'center top', position: 'relative', zIndex: 1, border: `3px solid ${speaking ? PINK : listening ? ORANGE : 'rgba(255,255,255,0.15)'}`, transition: 'border-color 0.3s', boxShadow: speaking ? `0 0 40px rgba(255,0,128,0.4)` : listening ? `0 0 40px rgba(255,107,0,0.4)` : 'none' }} />
+      {/* Spacer */}
+      <div style={{ flex: 1 }} />
+
+      {/* Title */}
+      <div style={{ textAlign: 'center', marginBottom: 6 }}>
+        <div style={{ fontSize: 26, fontWeight: 900, color: 'white', letterSpacing: '-0.3px' }}>Joya AI</div>
       </div>
 
-      {/* Name + status */}
-      <div style={{ fontSize: 24, fontWeight: 900, color: 'white', marginBottom: 6 }}>Joya</div>
-      <div style={{ fontSize: 15, fontWeight: 600, marginBottom: 36, letterSpacing: '0.3px',
-        color: loading ? 'rgba(255,255,255,0.5)' : speaking ? PINK : listening ? ORANGE : 'rgba(255,255,255,0.35)',
-        transition: 'color 0.3s',
-      }}>
-        {loading ? 'Nadenken…' : speaking ? 'Joya spreekt…' : listening ? 'Luisteren…' : 'Tik om te spreken'}
+      {/* Subtitle / status */}
+      <div style={{ fontSize: 14, fontWeight: 500, color: 'rgba(255,255,255,0.55)', marginBottom: 32, textAlign: 'center', padding: '0 32px', minHeight: 22 }}>
+        {loading
+          ? 'Nadenken…'
+          : speaking
+            ? lastJoyaMsg.slice(0, 60) + (lastJoyaMsg.length > 60 ? '…' : '')
+            : listening
+              ? `"${lastUserMsg.slice(0, 50)}${lastUserMsg.length > 50 ? '…' : ''}"` || 'Luisteren…'
+              : 'Zeg: \u201cHé Joya, ik heb trek in Sushi\u201d\u2026'
+        }
       </div>
 
-      {/* Waveform */}
-      <div style={{ marginBottom: 36 }}>
-        <WaveformBars active={isActive} />
-      </div>
+      {/* Waveform with centered mic button */}
+      <div style={{ position: 'relative', width: '100%', maxWidth: 380, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 40 }}>
+        <VoiceWaveform active={listening || speaking} />
 
-      {/* Transcript area */}
-      <div style={{ minHeight: 72, maxWidth: 320, padding: '0 24px', marginBottom: 48, textAlign: 'center' }}>
-        {lastUserMsg && (
-          <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.35)', marginBottom: 10, fontStyle: 'italic' }}>
-            &ldquo;{lastUserMsg.slice(0, 80)}{lastUserMsg.length > 80 ? '…' : ''}&rdquo;
-          </div>
-        )}
-        {lastJoyaMsg && (
-          <div style={{ fontSize: 14, color: 'rgba(255,255,255,0.65)', lineHeight: 1.6 }}>
-            {lastJoyaMsg.slice(0, 140)}{lastJoyaMsg.length > 140 ? '…' : ''}
-          </div>
-        )}
-      </div>
-
-      {/* Controls */}
-      <div style={{ display: 'flex', gap: 28, alignItems: 'center' }}>
-        {/* Mute/unmute mic */}
-        <button onClick={toggleVoice} title={listening ? 'Stop' : 'Spreken'}
+        {/* Central mic button — overlaid on waveform */}
+        <button
+          onClick={toggleVoice}
+          title={listening ? 'Stop' : 'Spreken'}
           style={{
+            position: 'absolute',
             width: 72, height: 72, borderRadius: '50%', border: 'none', cursor: 'pointer',
-            background: listening ? `linear-gradient(135deg,${ORANGE},${PINK})` : 'rgba(255,255,255,0.1)',
+            background: listening
+              ? `linear-gradient(135deg, ${ORANGE}, ${PINK})`
+              : speaking
+                ? `linear-gradient(135deg, ${PINK}, ${PURPLE})`
+                : `linear-gradient(135deg, ${PURPLE}, ${PINK})`,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            boxShadow: listening ? `0 0 28px rgba(255,107,0,0.5)` : 'none',
-            transition: 'all 0.25s',
-          }}>
-          <MicIcon active={listening} />
+            boxShadow: listening
+              ? `0 0 0 10px rgba(255,107,0,0.15), 0 0 40px rgba(255,107,0,0.4)`
+              : `0 0 0 10px rgba(90,49,244,0.15), 0 0 40px rgba(90,49,244,0.45)`,
+            transition: 'all 0.3s ease',
+            zIndex: 2,
+          }}
+        >
+          {speaking
+            ? <svg width="26" height="26" viewBox="0 0 24 24" fill="white"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>
+            : <MicIcon active={listening} />
+          }
         </button>
-        {/* End call */}
+      </div>
+
+      {/* Transcript below waveform */}
+      {(lastJoyaMsg || lastUserMsg) && listening && (
+        <div style={{ maxWidth: 320, padding: '0 24px', marginBottom: 24, textAlign: 'center' }}>
+          <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', fontStyle: 'italic' }}>
+            &ldquo;{lastUserMsg.slice(0, 80)}&rdquo;
+          </div>
+        </div>
+      )}
+
+      {/* Spacer */}
+      <div style={{ flex: 1 }} />
+
+      {/* End call button */}
+      <div style={{ paddingBottom: 48, flexShrink: 0 }}>
         <button onClick={exitVoiceMode} title="Gesprek beëindigen"
           style={{
-            width: 64, height: 64, borderRadius: '50%', border: 'none', cursor: 'pointer',
-            background: '#EF4444',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24,
-            boxShadow: '0 6px 20px rgba(239,68,68,0.5)',
+            width: 58, height: 58, borderRadius: '50%', border: 'none', cursor: 'pointer',
+            background: '#C0392B',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22,
+            boxShadow: '0 6px 20px rgba(192,57,43,0.5)',
           }}>
           📵
         </button>

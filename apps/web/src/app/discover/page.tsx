@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { TranslationProvider } from '../context/TranslationContext';
 import { Footer } from '../components/Footer';
+import { JoyaChatWidget } from '../components/JoyaChatWidget';
 
 const ORANGE = '#FF6B00';
 const PURPLE = '#5A31F4';
@@ -410,6 +411,7 @@ function DiscoverContent() {
   const [isMobile, setIsMobile]             = useState(true);
   const [canScrollL, setCanScrollL]         = useState(false);
   const [canScrollR, setCanScrollR]         = useState(true);
+  const [joyaTrigger, setJoyaTrigger]       = useState(0);
   const cuisineRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -630,6 +632,25 @@ function DiscoverContent() {
               <button onClick={() => setFiltersOpen(true)} style={{ width: 46, height: 46, borderRadius: '50%', cursor: 'pointer', background: 'var(--discover-input)', border: '1px solid var(--b8)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--t75)" strokeWidth="2" strokeLinecap="round">
                   <line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/>
+                </svg>
+              </button>
+              {/* Joya AI orange button */}
+              <button
+                onClick={() => setJoyaTrigger(t => t + 1)}
+                title="Joya AI — Bestelassistent"
+                style={{
+                  width: 46, height: 46, borderRadius: '50%', flexShrink: 0,
+                  background: `linear-gradient(135deg, ${ORANGE}, ${PINK})`,
+                  border: 'none', cursor: 'pointer',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  boxShadow: `0 4px 16px rgba(255,107,0,0.4)`,
+                }}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/>
+                  <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                  <line x1="12" y1="19" x2="12" y2="22"/>
+                  <line x1="8" y1="22" x2="16" y2="22"/>
                 </svg>
               </button>
             </div>
@@ -986,6 +1007,7 @@ function DiscoverContent() {
       {/* ══ ACCOUNT DRAWER ══ */}
       <AccountDrawer open={accountOpen} onClose={() => setAccountOpen(false)} />
 
+      <JoyaChatWidget triggerOpen={joyaTrigger} />
       {isMobile && <BottomNav />}
       {!isMobile && <Footer />}
     </div>

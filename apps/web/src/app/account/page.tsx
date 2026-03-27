@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Nav } from '../components/Nav';
 import { Footer } from '../components/Footer';
+import { useTheme } from '../context/ThemeContext';
 
 const PURPLE = '#5A31F4';
 const PINK   = '#FF0080';
@@ -37,6 +38,8 @@ export default function AccountPage() {
     await fetch('/api/auth/logout', { method: 'POST' });
     router.push('/');
   };
+
+  const { theme, setTheme } = useTheme();
 
   const initials = user?.name
     ? user.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
@@ -102,6 +105,30 @@ export default function AccountPage() {
             </motion.div>
           ))}
         </div>
+
+        {/* Weergave / Modus */}
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}
+          style={{ padding: '20px 22px', borderRadius: 18, background: 'rgba(255,255,255,0.04)', border: '1px solid var(--border)', marginBottom: 20 }}>
+          <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-muted)', marginBottom: 14, textTransform: 'uppercase', letterSpacing: 1 }}>Weergave</div>
+          <div style={{ display: 'flex', gap: 10 }}>
+            {(['dark', 'light', 'system'] as const).map(t => {
+              const icons: Record<string, string> = { dark: '🌙', light: '☀️', system: '💻' };
+              const labels: Record<string, string> = { dark: 'Donker', light: 'Licht', system: 'Systeem' };
+              return (
+                <button key={t} onClick={() => { setTheme(t); localStorage.setItem('enjoy-theme', t); }}
+                  style={{
+                    flex: 1, padding: '11px 6px', borderRadius: 12, fontSize: 13, fontWeight: 700,
+                    cursor: 'pointer', border: '1px solid var(--border)',
+                    background: theme === t ? `linear-gradient(135deg,${PURPLE},${PINK})` : 'var(--bg-card)',
+                    color: theme === t ? 'white' : 'var(--text-secondary)',
+                    transition: 'all 0.2s',
+                  }}>
+                  {icons[t]} {labels[t]}
+                </button>
+              );
+            })}
+          </div>
+        </motion.div>
 
         {/* Joya promo */}
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }}

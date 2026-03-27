@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
@@ -27,6 +27,107 @@ const STAGES = [
   { key: 'delivered', label: 'Delivered', icon: '🎉' },
 ];
 
+function NotificationBanner() {
+  const [show, setShow] = useState(false);
+  useEffect(() => {
+    if ('Notification' in window && Notification.permission === 'default') setShow(true);
+  }, []);
+  if (!show) return null;
+  return (
+    <div style={{ background: 'rgba(90,49,244,0.12)', borderBottom: '1px solid rgba(90,49,244,0.2)', padding: '10px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+      <span style={{ fontSize: 14, color: 'var(--text-primary)' }}>🔔 Ontvang meldingen bij statusupdates</span>
+      <button onClick={() => { Notification.requestPermission().then(() => setShow(false)); }}
+        style={{ background: `linear-gradient(135deg,#5A31F4,#FF0080)`, color: 'white', border: 'none', borderRadius: 8, padding: '7px 16px', fontWeight: 700, fontSize: 13, cursor: 'pointer', flexShrink: 0 }}>
+        Sta toe
+      </button>
+    </div>
+  );
+}
+
+function MapView({ address }: { address: string }) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const mapRef = useRef<unknown>(null);
+  const [geocoded, setGeocoded] = useState<[number, number] | null>(null);
+  const [mapError, setMapError] = useState(false);
+  const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
+
+  // Geocode address using Nominatim (free, no key needed)
+  useEffect(() => {
+    if (!address) return;
+    fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(address)}&format=json&limit=1`)
+      .then(r => r.json())
+      .then(data => {
+        if (data[0]) setGeocoded([parseFloat(data[0].lon), parseFloat(data[0].lat)]);
+      })
+      .catch(() => setMapError(true));
+  }, [address]);
+
+  // Load Mapbox and render map
+  useEffect(() => {
+    if (!geocoded || !containerRef.current) return;
+    if (!token) { setMapError(true); return; }
+
+    // Load Mapbox GL JS CSS
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = 'https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.css';
+    document.head.appendChild(link);
+
+    // Load Mapbox GL JS script
+    const script = document.createElement('script');
+    script.src = 'https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.js';
+    script.onload = () => {
+      try {
+        const mapboxgl = (window as unknown as { mapboxgl: { accessToken: string; Map: new(opts: unknown) => unknown; Marker: new() => { setLngLat: (c: [number, number]) => { addTo: (m: unknown) => unknown } } } }).mapboxgl;
+        mapboxgl.accessToken = token!;
+        const map = new mapboxgl.Map({
+          container: containerRef.current!,
+          style: 'mapbox://styles/mapbox/dark-v11',
+          center: geocoded,
+          zoom: 14,
+        });
+        new mapboxgl.Marker().setLngLat(geocoded).addTo(map);
+        mapRef.current = map;
+      } catch {
+        setMapError(true);
+      }
+    };
+    script.onerror = () => setMapError(true);
+    document.head.appendChild(script);
+
+    return () => {
+      link.remove();
+      // Note: mapbox map cleanup would go here in production
+    };
+  }, [geocoded, token]);
+
+  if (!token) {
+    return (
+      <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 16, padding: '24px', textAlign: 'center', color: 'var(--text-muted)', fontSize: 14 }}>
+        🗺️ Voeg <code>NEXT_PUBLIC_MAPBOX_TOKEN</code> toe aan je .env om de kaart te activeren.
+      </div>
+    );
+  }
+
+  if (mapError) {
+    return (
+      <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 16, padding: '24px', textAlign: 'center', color: 'var(--text-muted)', fontSize: 14 }}>
+        📍 Bezorgadres: <strong style={{ color: 'var(--text-primary)' }}>{address}</strong>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ borderRadius: 20, overflow: 'hidden', border: '1px solid var(--border)', marginBottom: 24 }}>
+      <div ref={containerRef} style={{ width: '100%', height: 260 }} />
+      <div style={{ padding: '12px 16px', background: 'var(--bg-card)', display: 'flex', alignItems: 'center', gap: 8 }}>
+        <span style={{ fontSize: 16 }}>📍</span>
+        <span style={{ fontSize: 13, color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{address}</span>
+      </div>
+    </div>
+  );
+}
+
 export default function OrderTrackingPage() {
   const router = useRouter();
   const params = useParams();
@@ -34,12 +135,40 @@ export default function OrderTrackingPage() {
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const prevStatusRef = useRef<string>('');
+
+  useEffect(() => {
+    if ('Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission();
+    }
+  }, []);
 
   useEffect(() => {
     const load = () =>
       fetch(`/api/orders/${id}`)
         .then(r => { if (!r.ok) { setError('Order not found'); return null; } return r.json(); })
-        .then(d => d && setOrder(d))
+        .then(d => {
+          if (!d) return;
+          // Detect status change
+          if (prevStatusRef.current && prevStatusRef.current !== d.status && 'Notification' in window && Notification.permission === 'granted') {
+            const msgs: Record<string, string> = {
+              confirmed: '✅ Je bestelling is bevestigd!',
+              preparing: '👨‍🍳 Je bestelling wordt bereid...',
+              ready:     '📦 Je bestelling is klaar voor afhaal!',
+              on_the_way:'🚲 Je bezorger is onderweg!',
+              delivered: '🎉 Je bestelling is bezorgd. Eet smakelijk!',
+              cancelled: '❌ Je bestelling is geannuleerd.',
+            };
+            const msg = msgs[d.status] || `Status bijgewerkt: ${d.status}`;
+            new Notification('EnJoy Bestelling', {
+              body: msg,
+              icon: '/icons/icon-192.png',
+              tag: `order-${d.id}`,
+            });
+          }
+          prevStatusRef.current = d.status;
+          setOrder(d);
+        })
         .catch(() => setError('Failed to load order'));
 
     fetch('/api/auth/me')
@@ -56,6 +185,7 @@ export default function OrderTrackingPage() {
   return (
     <div style={{ background: 'var(--bg-page)', minHeight: '100vh', color: 'var(--text-primary)', fontFamily: 'Outfit, sans-serif' }}>
       <Nav />
+      <NotificationBanner />
       <section style={{ padding: '100px 40px 60px', maxWidth: 720, margin: '0 auto' }}>
         {loading ? (
           <div style={{ textAlign: 'center', padding: '80px 0', color: 'var(--text-muted)' }}>Loading your order...</div>
@@ -85,6 +215,9 @@ export default function OrderTrackingPage() {
                 ))}
               </div>
             </div>
+
+            {/* Interactive map */}
+            <MapView address={order.address} />
 
             {/* Rider info */}
             {order.rider && order.status === 'on_the_way' && (
