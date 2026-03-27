@@ -33,7 +33,7 @@ export const metadata: Metadata = {
 };
 
 const themeScript = `(function(){
-  var t=localStorage.getItem('enjoy-theme')||'dark';
+  var t=localStorage.getItem('enjoy-theme')||'system';
   var dark=t==='system'?window.matchMedia('(prefers-color-scheme:dark)').matches:t!=='light';
   if(!dark)document.documentElement.classList.add('light');
 })();`;

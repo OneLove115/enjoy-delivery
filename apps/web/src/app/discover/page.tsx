@@ -4,7 +4,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { TranslationProvider } from '../context/TranslationContext';
-import { useTheme } from '../context/ThemeContext';
 import { Footer } from '../components/Footer';
 
 const ORANGE = '#FF6B00';
@@ -289,13 +288,6 @@ function RestaurantCard({ r }: { r: RestaurantRow }) {
 
 /* ─── Account Drawer ─── */
 function AccountDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const { theme, setTheme } = useTheme();
-  const modeLabel: Record<string, string> = { dark: 'Donker', light: 'Licht', system: 'Systeem' };
-  const cycleTheme = () => {
-    const next = theme === 'dark' ? 'light' : theme === 'light' ? 'system' : 'dark';
-    setTheme(next);
-  };
-
   const menuItems = [
     { icon: '🛍', label: 'Bestellingen',    href: '/account/orders'  },
     { icon: '⭐', label: 'Beloningen',      href: '/rewards'         },
@@ -365,21 +357,6 @@ function AccountDrawer({ open, onClose }: { open: boolean; onClose: () => void }
                     {item.label}
                   </Link>
                 ))}
-
-                {/* Modus row */}
-                <button onClick={cycleTheme} style={{
-                  width: '100%', display: 'flex', alignItems: 'center', gap: 14, padding: '14px 24px',
-                  background: 'transparent', border: 'none', borderBottom: '1px solid var(--border)',
-                  cursor: 'pointer', color: 'var(--text-primary)', fontSize: 15, fontWeight: 600,
-                }}>
-                  <span style={{ fontSize: 20, width: 28, textAlign: 'center', position: 'relative' }}>
-                    🌙
-                    <span style={{ position: 'absolute', top: -4, right: -4, width: 8, height: 8, borderRadius: '50%', background: ORANGE, display: 'block' }} />
-                  </span>
-                  <span style={{ flex: 1, textAlign: 'left' }}>Modus</span>
-                  <span style={{ fontSize: 11, fontWeight: 800, background: GREEN, color: 'white', padding: '2px 8px', borderRadius: 12 }}>Nieuw</span>
-                  <span style={{ fontSize: 13, color: 'var(--t45)', marginLeft: 8 }}>{modeLabel[theme]}</span>
-                </button>
 
                 <div style={{ height: 8, background: 'var(--b8)' }} />
 

@@ -9,14 +9,14 @@ interface ThemeCtx {
   resolved: 'dark' | 'light';
 }
 
-const ThemeContext = createContext<ThemeCtx>({ theme: 'dark', setTheme: () => {}, resolved: 'dark' });
+const ThemeContext = createContext<ThemeCtx>({ theme: 'system', setTheme: () => {}, resolved: 'dark' });
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>('dark');
+  const [theme, setThemeState] = useState<Theme>('system');
   const [resolved, setResolved] = useState<'dark' | 'light'>('dark');
 
   useEffect(() => {
-    const saved = (localStorage.getItem('enjoy-theme') as Theme) || 'dark';
+    const saved = (localStorage.getItem('enjoy-theme') as Theme) || 'system';
     setThemeState(saved);
     apply(saved);
 

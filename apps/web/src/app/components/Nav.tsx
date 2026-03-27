@@ -2,7 +2,6 @@
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
-import { useTheme } from '../context/ThemeContext';
 
 const PURPLE = '#5A31F4';
 const PINK   = '#FF0080';
@@ -15,20 +14,14 @@ const navLinks = [
   { href: '/business',    label: 'Business' },
 ];
 
-const themeIcon: Record<string, string> = { dark: '🌙', light: '☀️', system: '💻' };
-
 export function Nav() {
   const [user, setUser]       = useState<{ name: string; avatarUrl?: string } | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const pathname  = usePathname();
-  const { theme, setTheme } = useTheme();
 
   useEffect(() => {
     fetch('/api/auth/me').then(r => r.ok ? r.json() : null).then(setUser).catch(() => null);
   }, []);
-
-  const cycleTheme = () =>
-    setTheme(theme === 'dark' ? 'light' : theme === 'light' ? 'system' : 'dark');
 
   const signOut = () =>
     fetch('/api/auth/logout', { method: 'POST' }).then(() => { setUser(null); window.location.href = '/'; });
@@ -62,14 +55,6 @@ export function Nav() {
 
         {/* Right actions */}
         <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-          {/* Theme toggle */}
-          <button onClick={cycleTheme} title={`Mode: ${theme}`} style={{
-            width: 38, height: 38, borderRadius: 10,
-            background: 'var(--bg-card)', border: '1px solid var(--border)',
-            cursor: 'pointer', fontSize: 16,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-          }}>{themeIcon[theme]}</button>
-
           {/* Auth — desktop */}
           <div className="nav-center-links" style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
             {user ? (
@@ -162,17 +147,6 @@ export function Nav() {
               )}
             </div>
 
-            {/* Theme toggle in drawer */}
-            <div style={{ marginTop: 'auto', paddingTop: 20, borderTop: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: 12 }}>
-              {(['dark', 'light', 'system'] as const).map(t => (
-                <button key={t} onClick={() => setTheme(t)} style={{
-                  flex: 1, padding: '10px 6px', borderRadius: 10, fontSize: 13, fontWeight: 700,
-                  cursor: 'pointer', border: '1px solid var(--border)',
-                  background: theme === t ? `linear-gradient(135deg,${PURPLE},${PINK})` : 'var(--bg-card)',
-                  color: theme === t ? 'white' : 'var(--text-secondary)',
-                }}>{themeIcon[t]} {t}</button>
-              ))}
-            </div>
           </div>
         </div>
       )}
