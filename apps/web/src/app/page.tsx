@@ -4,7 +4,6 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { TranslationProvider, useTranslation } from './context/TranslationContext';
-import { JoyaChatWidget } from './components/JoyaChatWidget';
 import { Nav } from './components/Nav';
 import { Footer } from './components/Footer';
 
@@ -478,7 +477,6 @@ export default function LandingPage() {
         <PopularRestaurants />
         <HowItWorks />
         <Footer />
-        <JoyaChatWidget />
       </div>
     </TranslationProvider>
   );

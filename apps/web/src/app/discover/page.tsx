@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { TranslationProvider } from '../context/TranslationContext';
 import { useTheme } from '../context/ThemeContext';
-import { JoyaChatWidget } from '../components/JoyaChatWidget';
 import { Footer } from '../components/Footer';
 
 const ORANGE = '#FF6B00';
@@ -434,7 +433,6 @@ function DiscoverContent() {
   const [isMobile, setIsMobile]             = useState(true);
   const [canScrollL, setCanScrollL]         = useState(false);
   const [canScrollR, setCanScrollR]         = useState(true);
-  const [joyaTrigger, setJoyaTrigger]       = useState(0);
   const cuisineRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -655,27 +653,6 @@ function DiscoverContent() {
               <button onClick={() => setFiltersOpen(true)} style={{ width: 46, height: 46, borderRadius: '50%', cursor: 'pointer', background: 'var(--discover-input)', border: '1px solid var(--b8)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--t75)" strokeWidth="2" strokeLinecap="round">
                   <line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/>
-                </svg>
-              </button>
-              {/* Orange Joya AI button */}
-              <button
-                onClick={() => setJoyaTrigger(t => t + 1)}
-                title="Joya — AI concierge"
-                style={{
-                  width: 46, height: 46, borderRadius: '50%', flexShrink: 0,
-                  background: ORANGE, border: 'none', cursor: 'pointer',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  boxShadow: '0 4px 14px rgba(255,107,0,0.45)',
-                  transition: 'transform 0.15s, box-shadow 0.15s',
-                }}
-                onMouseDown={e => (e.currentTarget.style.transform = 'scale(0.93)')}
-                onMouseUp={e => (e.currentTarget.style.transform = 'scale(1)')}
-              >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-                  <circle cx="9" cy="10" r="1" fill="white" stroke="none"/>
-                  <circle cx="12" cy="10" r="1" fill="white" stroke="none"/>
-                  <circle cx="15" cy="10" r="1" fill="white" stroke="none"/>
                 </svg>
               </button>
             </div>
@@ -1034,7 +1011,6 @@ function DiscoverContent() {
 
       {isMobile && <BottomNav />}
       {!isMobile && <Footer />}
-      <JoyaChatWidget triggerOpen={joyaTrigger} />
     </div>
   );
 }

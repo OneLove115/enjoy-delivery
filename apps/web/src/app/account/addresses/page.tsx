@@ -16,6 +16,8 @@ export default function AddressesPage() {
   const [loading, setLoading] = useState(true);
   const [adding, setAdding] = useState(false);
   const [form, setForm] = useState({ label: '', street: '', city: '', zip: '' });
+  const [saving, setSaving] = useState(false);
+  const [formError, setFormError] = useState('');
 
   useEffect(() => {
     fetch('/api/auth/me')
@@ -28,16 +30,26 @@ export default function AddressesPage() {
 
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
-    const res = await fetch('/api/account/addresses', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(form),
-    });
-    if (res.ok) {
-      const newAddr = await res.json();
-      setAddresses(prev => [...prev, newAddr]);
-      setForm({ label: '', street: '', city: '', zip: '' });
-      setAdding(false);
+    setSaving(true);
+    setFormError('');
+    try {
+      const res = await fetch('/api/account/addresses', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setAddresses(prev => [...prev, data]);
+        setForm({ label: '', street: '', city: '', zip: '' });
+        setAdding(false);
+      } else {
+        setFormError(data.error || data.message || 'Could not save address. Please try again.');
+      }
+    } catch {
+      setFormError('Network error. Please check your connection and try again.');
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -54,7 +66,7 @@ export default function AddressesPage() {
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
             <h1 style={{ fontSize: 38, fontWeight: 900 }}>Your addresses</h1>
-            <button onClick={() => setAdding(!adding)}
+            <button onClick={() => { setAdding(!adding); setFormError(''); }}
               style={{ background: `linear-gradient(135deg,${PURPLE},${PINK})`, color: 'var(--text-primary)', border: 'none', borderRadius: 12, padding: '10px 20px', fontSize: 14, fontWeight: 700, cursor: 'pointer' }}>
               + Add address
             </button>
@@ -69,9 +81,14 @@ export default function AddressesPage() {
                 <input placeholder="City" value={form.city} onChange={e => setForm({ ...form, city: e.target.value })} required style={input} />
                 <input placeholder="Postcode" value={form.zip} onChange={e => setForm({ ...form, zip: e.target.value })} required style={input} />
               </div>
-              <button type="submit"
-                style={{ background: `linear-gradient(135deg,${PURPLE},${PINK})`, color: 'var(--text-primary)', border: 'none', borderRadius: 12, padding: '13px 0', fontSize: 15, fontWeight: 700, cursor: 'pointer', marginTop: 4 }}>
-                Save address
+              {formError && (
+                <p style={{ color: '#FF4444', fontSize: 13, fontWeight: 600, textAlign: 'center', marginTop: 4 }}>
+                  ⚠️ {formError}
+                </p>
+              )}
+              <button type="submit" disabled={saving}
+                style={{ background: saving ? 'rgba(90,49,244,0.5)' : `linear-gradient(135deg,${PURPLE},${PINK})`, color: 'var(--text-primary)', border: 'none', borderRadius: 12, padding: '13px 0', fontSize: 15, fontWeight: 700, cursor: saving ? 'not-allowed' : 'pointer', marginTop: 4 }}>
+                {saving ? 'Saving...' : 'Save address'}
               </button>
             </form>
           )}
