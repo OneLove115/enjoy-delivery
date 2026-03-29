@@ -450,6 +450,12 @@ export function JoyaChatWidget({ triggerOpen = 0 }: { triggerOpen?: number }) {
   };
 
   const enterVoiceMode = () => {
+    // Voice strip is mobile-only — on desktop fall back to regular chat
+    if (!isMobile) {
+      setOpen(true);
+      setTimeout(() => inputRef.current?.focus(), 300);
+      return;
+    }
     setVoiceMode(true);
     setOpen(true);
     // Start listening after a short delay so voice mode UI is painted first
@@ -729,11 +735,11 @@ export function JoyaChatWidget({ triggerOpen = 0 }: { triggerOpen?: number }) {
         </div>
       )}
 
-      {/* ── Voice mode full-screen ── */}
-      {voiceMode && voicePanel}
+      {/* ── Voice strip (mobile only) ── */}
+      {voiceMode && isMobile && voicePanel}
 
-      {/* ── Chat panel (hidden when voice mode active) ── */}
-      {open && !voiceMode && chatPanel}
+      {/* ── Chat panel (desktop always; mobile when not in voice mode) ── */}
+      {open && (!voiceMode || !isMobile) && chatPanel}
 
       {/* ── Desktop FAB (only on desktop) ── */}
       {!isMobile && !open && (
