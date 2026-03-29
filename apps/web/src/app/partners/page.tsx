@@ -54,7 +54,7 @@ const plans = [
     price: '€99.95',
     period: '/maand',
     desc: 'Alles wat je nodig hebt om online te beginnen met bestellen',
-    perks: ['Tot 500 bestellingen/maand', 'Web + SMS bestellen', 'Menubeheer', 'Keuken display systeem', 'Basis analytics', 'E-mail support', '3 teamleden'],
+    perks: ['Tot 500 bestellingen/maand', 'Web + SMS bestellen', 'Menubeheer', 'Keuken display systeem', 'Basis analytics', 'E-mail support', '3 teamleden', '1 telefoonnummer inbegrepen', '100 marketing SMS/maand', '50 marketing WhatsApp/maand', 'Bestelnotificaties inbegrepen'],
     cta: 'Start gratis proefperiode',
     href: 'https://www.veloci.online/signup',
     highlight: false,
@@ -64,7 +64,7 @@ const plans = [
     price: '€199.95',
     period: '/maand',
     desc: 'Geavanceerde functies voor groeiende restaurants',
-    perks: ['Onbeperkte bestellingen', 'Alles van Growth', 'WhatsApp bestellen', 'Bezorgbeheer', 'Live kaart volgen', 'Chauffeursbeheer (max 10)', 'Eigen domein', '10 teamleden', 'Prioriteit support'],
+    perks: ['Onbeperkte bestellingen', 'Alles van Growth', 'WhatsApp bestellen', 'Bezorgbeheer', 'Live kaart volgen', 'Chauffeursbeheer (max 10)', 'Eigen domein', '10 teamleden', '1 telefoonnummer inbegrepen', '100 AI telefoon bestellingen/maand', '300 marketing SMS/maand', '200 marketing WhatsApp/maand', 'Bestelnotificaties inbegrepen', 'Prioriteit support'],
     cta: 'Start gratis proefperiode',
     href: 'https://www.veloci.online/signup',
     highlight: true,
@@ -74,7 +74,7 @@ const plans = [
     price: '€299.95',
     period: '/maand',
     desc: 'Volledig platform met AI en onbeperkte schaal',
-    perks: ['Alles onbeperkt', 'Alles van Pro', 'AI telefoon bestellen', 'Bezorgautomatisering', 'API toegang', 'AI analytics & inzichten', 'Video marketingtools', 'Onbeperkte teamleden & chauffeurs', 'Dedicated account manager'],
+    perks: ['Alles onbeperkt', 'Alles van Pro', 'AI telefoon bestellen', 'Bezorgautomatisering', 'API toegang', 'AI analytics & inzichten', 'Video marketingtools', 'Onbeperkte teamleden & chauffeurs', '2 telefoonnummers inbegrepen', '300 AI telefoon bestellingen/maand', '1000 marketing SMS/maand', '500 marketing WhatsApp/maand', 'Bestelnotificaties inbegrepen', 'Dedicated account manager'],
     cta: 'Neem contact op',
     href: 'https://www.veloci.online/signup',
     highlight: false,
@@ -121,7 +121,7 @@ export default function PartnersPage() {
             EnJoy draait op <strong style={{ color: 'var(--text-primary)' }}>Veloci</strong> — het AI-orderplatform voor bezorgrestaurants. Meld je aan bij Veloci en je restaurant verschijnt automatisch op EnJoy.
           </p>
           <p style={{ fontSize: 15, color: 'var(--text-muted)', marginBottom: 40 }}>
-            Geen gemiste bestellingen meer. Setup in 24 uur. 14 dagen gratis uitproberen.
+            Geen gemiste bestellingen meer. Setup in 24 uur. Start voor slechts €1.
           </p>
 
           <div style={{ display: 'flex', gap: 14, justifyContent: 'center', flexWrap: 'wrap' }}>
@@ -136,7 +136,7 @@ export default function PartnersPage() {
           </div>
 
           <p style={{ marginTop: 16, color: 'var(--text-muted)', fontSize: 13 }}>
-            Geen creditcard vereist · Annuleer wanneer je wilt
+            €1 proefperiode · 14 dagen · Annuleer wanneer je wilt
           </p>
         </motion.div>
       </section>
@@ -282,7 +282,7 @@ export default function PartnersPage() {
           ))}
         </div>
         <p style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: 13, marginTop: 28 }}>
-          Alle abonnementen inclusief 14 dagen gratis proefperiode. Geen creditcard. Annuleer altijd.
+          Alle abonnementen starten met een proefperiode van €1 (14 dagen). Bestelnotificaties (SMS & WhatsApp) inbegrepen bij alle abonnementen.
         </p>
       </section>
 
