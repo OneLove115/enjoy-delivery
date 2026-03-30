@@ -54,8 +54,8 @@ const plans = [
     price: '€99.95',
     period: '/maand',
     desc: 'Alles wat je nodig hebt om online te beginnen met bestellen',
-    perks: ['Tot 500 bestellingen/maand', 'Web + SMS bestellen', 'Menubeheer', 'Keuken display systeem', 'Basis analytics', 'E-mail support', '3 teamleden', '1 telefoonnummer inbegrepen', '100 marketing SMS/maand', '50 marketing WhatsApp/maand', 'Bestelnotificaties inbegrepen'],
-    cta: 'Start gratis proefperiode',
+    perks: ['Tot 500 bestellingen/maand', 'Web + SMS bestellen', 'Menubeheer', 'Keuken display systeem', 'Basis analytics', 'E-mail support', '3 teamleden', '1 telefoonnummer inbegrepen', '€5 gratis communicatietegoed/maand', 'Bestelnotificaties altijd gratis', 'Tegoed opwaarderen wanneer je wilt'],
+    cta: 'Start €1 proefperiode',
     href: 'https://www.veloci.online/signup',
     highlight: false,
   },
@@ -64,8 +64,8 @@ const plans = [
     price: '€199.95',
     period: '/maand',
     desc: 'Geavanceerde functies voor groeiende restaurants',
-    perks: ['Onbeperkte bestellingen', 'Alles van Growth', 'WhatsApp bestellen', 'Bezorgbeheer', 'Live kaart volgen', 'Chauffeursbeheer (max 10)', 'Eigen domein', '10 teamleden', '1 telefoonnummer inbegrepen', '100 AI telefoon bestellingen/maand', '300 marketing SMS/maand', '200 marketing WhatsApp/maand', 'Bestelnotificaties inbegrepen', 'Prioriteit support'],
-    cta: 'Start gratis proefperiode',
+    perks: ['Onbeperkte bestellingen', 'Alles van Growth', 'WhatsApp bestellen', 'Bezorgbeheer', 'Live kaart volgen', 'Chauffeursbeheer (max 10)', 'Eigen domein', '10 teamleden', '1 telefoonnummer inbegrepen', '€15 gratis communicatietegoed/maand', 'AI telefoon bestellen inbegrepen', 'Bestelnotificaties altijd gratis', 'Prioriteit support'],
+    cta: 'Start €1 proefperiode',
     href: 'https://www.veloci.online/signup',
     highlight: true,
   },
@@ -74,8 +74,8 @@ const plans = [
     price: '€299.95',
     period: '/maand',
     desc: 'Volledig platform met AI en onbeperkte schaal',
-    perks: ['Alles onbeperkt', 'Alles van Pro', 'AI telefoon bestellen', 'Bezorgautomatisering', 'API toegang', 'AI analytics & inzichten', 'Video marketingtools', 'Onbeperkte teamleden & chauffeurs', '2 telefoonnummers inbegrepen', '300 AI telefoon bestellingen/maand', '1000 marketing SMS/maand', '500 marketing WhatsApp/maand', 'Bestelnotificaties inbegrepen', 'Dedicated account manager'],
-    cta: 'Neem contact op',
+    perks: ['Alles onbeperkt', 'Alles van Pro', 'AI telefoon bestellen', 'Bezorgautomatisering', 'API toegang', 'AI analytics & inzichten', 'Video marketingtools', 'Onbeperkte teamleden & chauffeurs', '2 telefoonnummers inbegrepen', '€30 gratis communicatietegoed/maand', 'Bestelnotificaties altijd gratis', 'Dedicated account manager'],
+    cta: 'Start €1 proefperiode',
     href: 'https://www.veloci.online/signup',
     highlight: false,
   },
@@ -136,7 +136,7 @@ export default function PartnersPage() {
           </div>
 
           <p style={{ marginTop: 16, color: 'var(--text-muted)', fontSize: 13 }}>
-            €1 proefperiode · 14 dagen · Annuleer wanneer je wilt
+            €1 proefperiode · 5 dagen · Annuleer wanneer je wilt
           </p>
         </motion.div>
       </section>
@@ -282,7 +282,7 @@ export default function PartnersPage() {
           ))}
         </div>
         <p style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: 13, marginTop: 28 }}>
-          Alle abonnementen starten met een proefperiode van €1 (14 dagen). Bestelnotificaties (SMS & WhatsApp) inbegrepen bij alle abonnementen.
+          Alle abonnementen starten met een proefperiode van €1 (5 dagen). Bestelnotificaties (SMS & WhatsApp) inbegrepen bij alle abonnementen.
         </p>
       </section>
 
@@ -293,7 +293,7 @@ export default function PartnersPage() {
             Klaar om te stoppen met bestellingen missen?
           </h2>
           <p style={{ color: 'var(--text-secondary)', fontSize: 17, marginBottom: 36, lineHeight: 1.65 }}>
-            Start je gratis 14-daagse proefperiode. Geen creditcard. Opzet in 24 uur. Annuleer wanneer je wilt.
+            Start je gratis 5-daagse proefperiode. Geen creditcard. Opzet in 24 uur. Annuleer wanneer je wilt.
           </p>
           <div style={{ display: 'flex', gap: 14, justifyContent: 'center', flexWrap: 'wrap' }}>
             <a href="https://www.veloci.online/signup" target="_blank" rel="noopener noreferrer"
@@ -306,7 +306,7 @@ export default function PartnersPage() {
             </a>
           </div>
           <div style={{ display: 'flex', gap: 24, justifyContent: 'center', marginTop: 22, flexWrap: 'wrap' }}>
-            {['14 dagen gratis', 'Geen creditcard', 'Annuleer altijd', '24/7 support'].map(t => (
+            {['5 dagen gratis', 'Geen creditcard', 'Annuleer altijd', '24/7 support'].map(t => (
               <span key={t} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'var(--text-muted)' }}>
                 <span style={{ color: '#22C55E', fontSize: 15 }}>✓</span>{t}
               </span>
