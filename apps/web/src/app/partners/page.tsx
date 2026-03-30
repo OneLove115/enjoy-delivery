@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { Nav } from '../components/Nav';
 import { Footer } from '../components/Footer';
+import { PartnersExitPopup } from './ExitIntentPopup';
 
 const PURPLE = '#5A31F4';
 const PINK   = '#FF0080';
@@ -97,6 +98,7 @@ const steps = [
 export default function PartnersPage() {
   return (
     <div style={{ background: 'var(--bg-page)', minHeight: '100vh', color: 'var(--text-primary)', fontFamily: 'Outfit, sans-serif' }}>
+      <PartnersExitPopup />
       <Nav />
 
       {/* ─── Hero ─── */}
@@ -127,7 +129,7 @@ export default function PartnersPage() {
           <div style={{ display: 'flex', gap: 14, justifyContent: 'center', flexWrap: 'wrap' }}>
             <a href="https://www.veloci.online/signup" target="_blank" rel="noopener noreferrer"
               style={{ background: `linear-gradient(135deg,${PURPLE},${PINK})`, color: 'white', padding: '16px 38px', borderRadius: 14, fontSize: 16, fontWeight: 800, textDecoration: 'none', boxShadow: `0 8px 24px ${PURPLE}40` }}>
-              Start gratis proefperiode →
+              Start €1 proefperiode →
             </a>
             <a href="https://www.veloci.online/signup?demo=true" target="_blank" rel="noopener noreferrer"
               style={{ background: 'var(--b8)', color: 'var(--text-primary)', padding: '16px 36px', borderRadius: 14, fontSize: 16, fontWeight: 700, textDecoration: 'none', border: '1px solid rgba(255,255,255,0.08)' }}>
@@ -293,12 +295,12 @@ export default function PartnersPage() {
             Klaar om te stoppen met bestellingen missen?
           </h2>
           <p style={{ color: 'var(--text-secondary)', fontSize: 17, marginBottom: 36, lineHeight: 1.65 }}>
-            Start je gratis 5-daagse proefperiode. Geen creditcard. Opzet in 24 uur. Annuleer wanneer je wilt.
+            Start je €1 proefperiode (5 dagen). Opzet in 24 uur. Opzet in 24 uur. Annuleer wanneer je wilt.
           </p>
           <div style={{ display: 'flex', gap: 14, justifyContent: 'center', flexWrap: 'wrap' }}>
             <a href="https://www.veloci.online/signup" target="_blank" rel="noopener noreferrer"
               style={{ background: `linear-gradient(135deg,${PURPLE},${PINK})`, color: 'white', padding: '16px 40px', borderRadius: 14, fontSize: 16, fontWeight: 800, textDecoration: 'none', boxShadow: `0 8px 28px ${PURPLE}45` }}>
-              Start gratis proefperiode
+              Start €1 proefperiode
             </a>
             <a href="https://www.veloci.online/pricing" target="_blank" rel="noopener noreferrer"
               style={{ background: 'var(--b8)', color: 'var(--text-primary)', padding: '16px 36px', borderRadius: 14, fontSize: 16, fontWeight: 700, textDecoration: 'none', border: '1px solid rgba(255,255,255,0.08)' }}>
@@ -306,7 +308,7 @@ export default function PartnersPage() {
             </a>
           </div>
           <div style={{ display: 'flex', gap: 24, justifyContent: 'center', marginTop: 22, flexWrap: 'wrap' }}>
-            {['5 dagen gratis', 'Geen creditcard', 'Annuleer altijd', '24/7 support'].map(t => (
+            {['€1 · 5 dagen', 'Annuleer altijd', 'Annuleer altijd', '24/7 support'].map(t => (
               <span key={t} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'var(--text-muted)' }}>
                 <span style={{ color: '#22C55E', fontSize: 15 }}>✓</span>{t}
               </span>
