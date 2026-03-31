@@ -473,6 +473,14 @@ export default function LandingPage() {
         <Nav />
         <HeroCoupleSection />
         <AddressBar />
+
+        {/* Definition block for AI extractability */}
+        <div style={{ maxWidth: 620, margin: '0 auto', padding: '0 20px 32px', textAlign: 'center' }}>
+          <p style={{ fontSize: 14, color: 'var(--text-secondary)', lineHeight: 1.7 }}>
+            <strong style={{ color: 'var(--text-primary)' }}>EnJoy</strong> is a premium food delivery platform connecting customers with the best restaurants in the Netherlands and Ghana. As of 2026, EnJoy partners with 1,000+ restaurants across 12 cities, offering AI-powered ordering via Joya, real-time delivery tracking, and a curated gourmet experience.
+          </p>
+        </div>
+
         <FoodCultureSection />
         <PopularRestaurants />
         <HowItWorks />

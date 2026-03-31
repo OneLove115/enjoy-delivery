@@ -67,7 +67,13 @@ const jsonLd = [
     name: 'EnJoy',
     url: 'https://enjoy.veloci.online',
     description: 'Ontdek en bestel bij de beste restaurants bij jou in de buurt. Snel, eenvoudig, en altijd vers.',
-    sameAs: [],
+    sameAs: ['https://share.google/VETw20Tk9HSBxLKJ3'],
+    foundingDate: '2016',
+    founder: {
+      '@type': 'Person',
+      name: 'Jay Owusu',
+      jobTitle: 'CEO',
+    },
     contactPoint: {
       '@type': 'ContactPoint',
       contactType: 'customer support',
