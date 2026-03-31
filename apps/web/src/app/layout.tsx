@@ -8,7 +8,7 @@ import { CookieConsent } from './components/CookieConsent';
 
 export const metadata: Metadata = {
   title: 'EnJoy — Elite Gourmet Delivery | Order Signature Local Favorites',
-  description: 'Discover the finest restaurants near you with EnJoy. Royal delivery from 1000+ partner restaurants, curated gourmet menus, AI-powered ordering with Joya, and a premium food experience — straight to your door.',
+  description: 'Order from 1000+ curated restaurants with EnJoy. AI-powered ordering via Joya, real-time tracking, and royal delivery to your door.',
   keywords: [
     'food delivery', 'order food online', 'restaurant delivery', 'gourmet delivery', 'takeaway',
     'best food delivery app', 'EnJoy delivery', 'eten bestellen', 'bezorgen', 'maaltijdbezorging',
