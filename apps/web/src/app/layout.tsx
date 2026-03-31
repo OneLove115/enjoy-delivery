@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Script from 'next/script';
 import './globals.css';
 import { ThemeProvider } from './context/ThemeContext';
 import { PWAInstall } from './components/PWAInstall';
@@ -78,8 +79,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <head>
-        <script async src="https://www.googletagmanager.com/gtag/js?id=G-DQCX271YXF" />
-        <script dangerouslySetInnerHTML={{ __html: `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-DQCX271YXF');` }} />
+        <Script src="https://www.googletagmanager.com/gtag/js?id=G-DQCX271YXF" strategy="beforeInteractive" />
+        <Script id="gtag-init" strategy="beforeInteractive">{`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-DQCX271YXF');`}</Script>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
         <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
         <link rel="manifest" href="/manifest.json" />
