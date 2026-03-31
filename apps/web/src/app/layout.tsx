@@ -1,5 +1,4 @@
 import type { Metadata } from 'next';
-import Script from 'next/script';
 import './globals.css';
 import { ThemeProvider } from './context/ThemeContext';
 import { PWAInstall } from './components/PWAInstall';
@@ -67,15 +66,24 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <PWAInstall />
           {children}
         </ThemeProvider>
-        <Script src="https://cdn.weglot.com/weglot.min.js" strategy="afterInteractive" />
-        <Script id="weglot-init" strategy="afterInteractive">{`
-          Weglot.initialize({
-            api_key: "wg_69790b255ca245dc694645e23cb984075",
-            auto_switch: true,
-            host_language: "en",
-            destination_languages: ["nl","fr","de","tr","ar","es"]
-          });
-        `}</Script>
+        <script src="https://cdn.weglot.com/weglot.min.js" defer />
+        <script
+          id="weglot-init"
+          dangerouslySetInnerHTML={{
+            __html: `
+              document.addEventListener('DOMContentLoaded', function() {
+                if (typeof Weglot !== 'undefined') {
+                  Weglot.initialize({
+                    api_key: "wg_69790b255ca245dc694645e23cb984075",
+                    auto_switch: true,
+                    host_language: "en",
+                    destination_languages: ["nl","fr","de","tr","ar","es"]
+                  });
+                }
+              });
+            `,
+          }}
+        />
       </body>
     </html>
   );
