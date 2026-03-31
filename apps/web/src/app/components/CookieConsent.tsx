@@ -39,6 +39,8 @@ export function CookieConsent() {
   function accept() {
     localStorage.setItem(CONSENT_KEY, 'granted');
     updateGtagConsent(true);
+    const w = window as unknown as { fbq?: (...args: unknown[]) => void };
+    w.fbq?.('consent', 'grant');
     setVisible(false);
   }
 

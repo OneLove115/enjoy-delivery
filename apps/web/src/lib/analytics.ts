@@ -65,3 +65,34 @@ export const analytics = {
   ctaClicked: (ctaName: string, location: string) =>
     trackEvent('cta_clicked', { cta_name: ctaName, page_location: location }),
 };
+
+// ─── Meta Pixel Events ───
+
+export function trackMetaEvent(name: string, params?: Record<string, unknown>) {
+  if (typeof window === 'undefined') return;
+  const w = window as unknown as { fbq?: (...args: unknown[]) => void };
+  w.fbq?.('track', name, params);
+}
+
+export function trackMetaCustomEvent(name: string, params?: Record<string, unknown>) {
+  if (typeof window === 'undefined') return;
+  const w = window as unknown as { fbq?: (...args: unknown[]) => void };
+  w.fbq?.('trackCustom', name, params);
+}
+
+export function grantMetaConsent() {
+  if (typeof window === 'undefined') return;
+  const w = window as unknown as { fbq?: (...args: unknown[]) => void };
+  w.fbq?.('consent', 'grant');
+}
+
+// ─── Google Ads Conversion ───
+
+export function trackGoogleAdsConversion(conversionId: string, conversionLabel: string, value?: number) {
+  if (typeof window === 'undefined') return;
+  const w = window as unknown as { gtag?: (...args: unknown[]) => void };
+  w.gtag?.('event', 'conversion', {
+    send_to: `${conversionId}/${conversionLabel}`,
+    ...(value ? { value, currency: 'EUR' } : {}),
+  });
+}

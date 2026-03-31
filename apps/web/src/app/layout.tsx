@@ -3,6 +3,7 @@ import './globals.css';
 import { ThemeProvider } from './context/ThemeContext';
 import { PWAInstall } from './components/PWAInstall';
 import { GoogleAnalytics } from './components/GoogleAnalytics';
+import { MetaPixel } from './components/MetaPixel';
 import { CookieConsent } from './components/CookieConsent';
 
 export const metadata: Metadata = {
@@ -109,6 +110,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body style={{ fontFamily: 'Outfit, sans-serif' }}>
         <GoogleAnalytics />
+        <MetaPixel />
         <ThemeProvider>
           <PWAInstall />
           {children}
