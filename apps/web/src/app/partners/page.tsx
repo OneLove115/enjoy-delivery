@@ -65,7 +65,7 @@ const plans = [
     price: '€199.95',
     period: '/maand',
     desc: 'Geavanceerde functies voor groeiende restaurants',
-    perks: ['Onbeperkte bestellingen', 'Alles van Growth', 'WhatsApp bestellen', 'Bezorgbeheer', 'Live kaart volgen', 'Chauffeursbeheer (max 10)', 'Eigen domein', '10 teamleden', '1 telefoonnummer inbegrepen', 'Betaal-per-gebruik communicatietegoed', 'AI telefoon bestellen inbegrepen', 'Bestelnotificaties altijd gratis', 'Prioriteit support'],
+    perks: ['Onbeperkte bestellingen', 'Alles van Growth', 'WhatsApp bestellen', 'Bezorgbeheer', 'Live kaart volgen', 'Chauffeursbeheer (max 10)', '10 teamleden', '1 telefoonnummer inbegrepen', 'Betaal-per-gebruik communicatietegoed', 'AI telefoon bestellen inbegrepen', 'Bestelnotificaties altijd gratis', 'Prioriteit support'],
     cta: 'Start €1 proefperiode',
     href: 'https://www.veloci.online/signup',
     highlight: true,
