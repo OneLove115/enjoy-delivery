@@ -98,6 +98,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
         <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
         <link rel="manifest" href="/manifest.json" />
+        <meta name="msvalidate.01" content="4F0157ECF36BED1E2A38D246D51BAED2" />
         <meta name="theme-color" content="#5A31F4" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
