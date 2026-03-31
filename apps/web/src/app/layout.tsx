@@ -1,5 +1,4 @@
 import type { Metadata } from 'next';
-import Script from 'next/script';
 import './globals.css';
 import { ThemeProvider } from './context/ThemeContext';
 import { PWAInstall } from './components/PWAInstall';
@@ -86,15 +85,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <head>
-        <Script id="consent-defaults" strategy="beforeInteractive">{`
+        <script dangerouslySetInnerHTML={{ __html: `
           window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}
           gtag('consent','default',{ad_storage:'denied',ad_user_data:'denied',ad_personalization:'denied',analytics_storage:'denied',region:['AT','BE','BG','HR','CY','CZ','DK','EE','FI','FR','DE','GR','HU','IE','IT','LV','LT','LU','MT','NL','PL','PT','RO','SK','SI','ES','SE','GB','IS','LI','NO','CH']});
           gtag('consent','default',{ad_storage:'granted',ad_user_data:'granted',ad_personalization:'granted',analytics_storage:'granted'});
           gtag('set','url_passthrough',true);
           gtag('set','ads_data_redaction',true);
-        `}</Script>
-        <Script src="https://www.googletagmanager.com/gtag/js?id=G-DQCX271YXF" strategy="beforeInteractive" />
-        <Script id="gtag-init" strategy="beforeInteractive">{`gtag('js',new Date());gtag('config','G-DQCX271YXF');`}</Script>
+          var s=document.createElement('script');s.async=true;s.src='https://www.googletagmanager.com/gtag/js?id=G-DQCX271YXF';document.head.appendChild(s);
+          gtag('js',new Date());gtag('config','G-DQCX271YXF');
+        `}} />
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
         <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
         <link rel="manifest" href="/manifest.json" />
