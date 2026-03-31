@@ -78,7 +78,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                     api_key: 'wg_69790b255ca245dc694645e23cb984075',
                     auto_switch: true,
                     host_language: 'en',
-                    destination_languages: ['nl','fr','de','tr','ar','es']
+                    destination_languages: ['nl','fr','de','tr','ar','es'],
+                    hide_switcher: true
                   });
                 };
                 document.head.appendChild(s);
