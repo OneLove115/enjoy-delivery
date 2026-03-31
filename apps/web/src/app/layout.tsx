@@ -66,21 +66,23 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <PWAInstall />
           {children}
         </ThemeProvider>
-        <script src="https://cdn.weglot.com/weglot.min.js" defer />
         <script
-          id="weglot-init"
+          id="weglot-loader"
           dangerouslySetInnerHTML={{
             __html: `
-              document.addEventListener('DOMContentLoaded', function() {
-                if (typeof Weglot !== 'undefined') {
+              (function() {
+                var s = document.createElement('script');
+                s.src = 'https://cdn.weglot.com/weglot.min.js';
+                s.onload = function() {
                   Weglot.initialize({
-                    api_key: "wg_69790b255ca245dc694645e23cb984075",
+                    api_key: 'wg_69790b255ca245dc694645e23cb984075',
                     auto_switch: true,
-                    host_language: "en",
-                    destination_languages: ["nl","fr","de","tr","ar","es"]
+                    host_language: 'en',
+                    destination_languages: ['nl','fr','de','tr','ar','es']
                   });
-                }
-              });
+                };
+                document.head.appendChild(s);
+              })();
             `,
           }}
         />
