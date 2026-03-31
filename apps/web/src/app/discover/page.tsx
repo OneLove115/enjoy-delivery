@@ -247,10 +247,10 @@ function CuisineChip({ c, active, onClick }: { c: Cuisine; active: boolean; onCl
 }
 
 /* ─── Restaurant card ─── */
-function RestaurantCard({ r }: { r: RestaurantRow }) {
+function RestaurantCard({ r, hasOrdered }: { r: RestaurantRow; hasOrdered?: boolean }) {
   const emo = RESTAURANT_EMOJIS[r.name] || '🍽️';
   return (
-    <Link href={r.slug ? `/menu/${r.slug}` : '#'} style={{ textDecoration: 'none', display: 'block', marginBottom: 20 }}>
+    <Link href={r.slug ? `/menu/${r.slug}` : '#'} data-track="order-cta" style={{ textDecoration: 'none', display: 'block', marginBottom: 20 }}>
       <div style={{ borderRadius: 16, overflow: 'hidden', background: 'var(--discover-card)' }}>
         {!r.open && r.openTime && (
           <div style={{ background: 'var(--discover-input)', padding: '8px 16px', textAlign: 'center', fontSize: 13, color: 'var(--t58)', fontWeight: 600 }}>
@@ -275,11 +275,26 @@ function RestaurantCard({ r }: { r: RestaurantRow }) {
           )}
         </div>
         <div style={{ padding: '12px 14px 14px' }}>
-          <h3 style={{ fontSize: 15, fontWeight: 800, marginBottom: 2, color: 'var(--text-primary)' }}>{r.name}</h3>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 2 }}>
+            <h3 style={{ fontSize: 15, fontWeight: 800, color: 'var(--text-primary)' }}>{r.name}</h3>
+            {r.open ? (
+              <span className="flex items-center gap-1 text-[10px] font-semibold text-green-400" style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 10, fontWeight: 700, color: '#4ade80', flexShrink: 0 }}>
+                <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#4ade80', display: 'inline-block', animation: 'pulse 2s cubic-bezier(0.4,0,0.6,1) infinite' }} />
+                Open
+              </span>
+            ) : (
+              <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--t40)', flexShrink: 0 }}>Closed</span>
+            )}
+          </div>
           <p style={{ color: 'var(--t45)', fontSize: 12, marginBottom: 8 }}>{r.cuisine}</p>
-          <div style={{ display: 'flex', gap: 12, fontSize: 12 }}>
-            <span style={{ color: 'var(--t40)' }}>🕐 {r.time} min</span>
-            <span style={{ color: r.delivery === 'Gratis' ? '#2ECC71' : 'var(--t40)' }}>{r.delivery === 'Gratis' ? '✓ Gratis' : r.delivery}</span>
+          <div style={{ display: 'flex', gap: 12, fontSize: 12, alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ display: 'flex', gap: 12 }}>
+              <span style={{ color: 'var(--t40)' }}>🕐 {r.time} min</span>
+              <span style={{ color: r.delivery === 'Gratis' ? '#2ECC71' : 'var(--t40)' }}>{r.delivery === 'Gratis' ? '✓ Gratis' : r.delivery}</span>
+            </div>
+            {hasOrdered && (
+              <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--t55)', whiteSpace: 'nowrap' }}>⟳ Quick reorder</span>
+            )}
           </div>
         </div>
       </div>
@@ -385,6 +400,7 @@ function AccountDrawer({ open, onClose }: { open: boolean; onClose: () => void }
 function DiscoverContent() {
   const router = useRouter();
   const [restaurants, setRestaurants]       = useState<RestaurantRow[]>(DEMO);
+  const [orderedRestaurantNames, setOrderedRestaurantNames] = useState<Set<string>>(new Set());
   const [address, setAddress]               = useState('');
   const [search, setSearch]                 = useState('');
   const [sort, setSort]                     = useState('Beste match');
@@ -428,6 +444,17 @@ function DiscoverContent() {
           cuisineCategories: t.cuisineCategories || [],
         }));
         if (real.length > 0) setRestaurants(real);
+      })
+      .catch(() => {});
+
+    // Fetch order history to enable "Quick reorder" indicators
+    fetch('/api/account/orders')
+      .then(r => r.ok ? r.json() : [])
+      .then((data: any[]) => {
+        if (Array.isArray(data)) {
+          const names = new Set(data.map((o: any) => o.restaurantName).filter(Boolean));
+          setOrderedRestaurantNames(names);
+        }
       })
       .catch(() => {});
 
@@ -705,6 +732,9 @@ function DiscoverContent() {
       )}
 
       {/* ══ CONTENT ══ */}
+      <h1 style={{ position: 'absolute', width: 1, height: 1, padding: 0, margin: -1, overflow: 'hidden', clip: 'rect(0,0,0,0)', whiteSpace: 'nowrap', borderWidth: 0 }}>
+        Ontdek Restaurants Bij Jou In De Buurt
+      </h1>
       {isMobile ? (
         /* ─── MOBILE ─── */
         <div style={{ padding: '20px 16px' }}>
@@ -762,7 +792,7 @@ function DiscoverContent() {
             Bestel bij {filtered.length} locaties
           </p>
 
-          {openRestaurants.map((r, i) => <RestaurantCard key={r.slug || r.name + i} r={r} />)}
+          {openRestaurants.map((r, i) => <RestaurantCard key={r.slug || r.name + i} r={r} hasOrdered={orderedRestaurantNames.has(r.name)} />)}
 
           {closedRestaurants.length > 0 && (
             <>
@@ -770,14 +800,16 @@ function DiscoverContent() {
                 <h3 style={{ fontSize: 16, fontWeight: 900 }}>Binnenkort geopend</h3>
                 <div style={{ width: 18, height: 18, borderRadius: '50%', border: '1.5px solid var(--b20)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, color: 'var(--t45)', cursor: 'pointer' }}>i</div>
               </div>
-              {closedRestaurants.map((r, i) => <RestaurantCard key={r.slug || r.name + i} r={r} />)}
+              {closedRestaurants.map((r, i) => <RestaurantCard key={r.slug || r.name + i} r={r} hasOrdered={orderedRestaurantNames.has(r.name)} />)}
             </>
           )}
 
           {filtered.length === 0 && (
             <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--t30)' }}>
               <p style={{ fontSize: 40, marginBottom: 12 }}>🍽️</p>
-              <p style={{ fontSize: 18, fontWeight: 700, color: 'var(--t58)' }}>Geen restaurants gevonden</p>
+              <p style={{ fontSize: 18, fontWeight: 700, color: 'var(--t58)' }}>
+                {search ? `No results for "${search}"` : 'Geen restaurants gevonden'}
+              </p>
               <button onClick={resetAll} style={{ marginTop: 16, padding: '10px 24px', borderRadius: 12, background: `linear-gradient(135deg,${ORANGE},${PINK})`, border: 'none', color: 'white', fontWeight: 700, cursor: 'pointer', fontSize: 14 }}>Reset alles</button>
             </div>
           )}
@@ -858,11 +890,14 @@ function DiscoverContent() {
               {filtered.length === 0 ? (
                 <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '60px 0', color: 'var(--t25)' }}>
                   <p style={{ fontSize: 40, marginBottom: 12 }}>🍽️</p>
-                  <p style={{ fontSize: 18, fontWeight: 700, color: 'var(--t58)' }}>Geen restaurants gevonden</p>
+                  <p style={{ fontSize: 18, fontWeight: 700, color: 'var(--t58)' }}>
+                    {search ? `No results for "${search}"` : 'Geen restaurants gevonden'}
+                  </p>
                   <button onClick={resetAll} style={{ marginTop: 16, padding: '10px 24px', borderRadius: 12, background: `linear-gradient(135deg,${PURPLE},${PINK})`, border: 'none', color: 'white', fontWeight: 700, cursor: 'pointer', fontSize: 14 }}>Reset alles</button>
                 </div>
               ) : filtered.map((r, i) => {
                 const emo = RESTAURANT_EMOJIS[r.name] || '🍽️';
+                const hasOrdered = orderedRestaurantNames.has(r.name);
                 return (
                   <Link key={r.slug || r.name + i} href={r.slug ? `/menu/${r.slug}` : '#'} style={{ textDecoration: 'none' }}>
                     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.03 }}
@@ -883,11 +918,26 @@ function DiscoverContent() {
                         )}
                       </div>
                       <div style={{ padding: '12px 14px 14px' }}>
-                        <h3 style={{ fontSize: 14, fontWeight: 800, marginBottom: 2, color: 'var(--text-primary)' }}>{r.name}</h3>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 2 }}>
+                          <h3 style={{ fontSize: 14, fontWeight: 800, color: 'var(--text-primary)' }}>{r.name}</h3>
+                          {r.open ? (
+                            <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 10, fontWeight: 700, color: '#4ade80', flexShrink: 0 }}>
+                              <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#4ade80', display: 'inline-block', animation: 'pulse 2s cubic-bezier(0.4,0,0.6,1) infinite' }} />
+                              Open
+                            </span>
+                          ) : (
+                            <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--t40)', flexShrink: 0 }}>Closed</span>
+                          )}
+                        </div>
                         <p style={{ color: 'var(--t40)', fontSize: 12, marginBottom: 8 }}>{r.cuisine}</p>
-                        <div style={{ display: 'flex', gap: 12, fontSize: 12 }}>
-                          <span style={{ color: 'var(--t40)' }}>🕐 {r.time} min</span>
-                          <span style={{ color: r.delivery === 'Gratis' ? '#2ECC71' : 'var(--t40)' }}>{r.delivery === 'Gratis' ? '✓ Gratis' : r.delivery}</span>
+                        <div style={{ display: 'flex', gap: 12, fontSize: 12, alignItems: 'center', justifyContent: 'space-between' }}>
+                          <div style={{ display: 'flex', gap: 12 }}>
+                            <span style={{ color: 'var(--t40)' }}>🕐 {r.time} min</span>
+                            <span style={{ color: r.delivery === 'Gratis' ? '#2ECC71' : 'var(--t40)' }}>{r.delivery === 'Gratis' ? '✓ Gratis' : r.delivery}</span>
+                          </div>
+                          {hasOrdered && (
+                            <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--t55)', whiteSpace: 'nowrap' }}>⟳ Quick reorder</span>
+                          )}
                         </div>
                       </div>
                     </motion.div>

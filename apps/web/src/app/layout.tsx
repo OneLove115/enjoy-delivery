@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 import { ThemeProvider } from './context/ThemeContext';
 import { PWAInstall } from './components/PWAInstall';
+import { GoogleAnalytics } from './components/GoogleAnalytics';
 
 export const metadata: Metadata = {
   title: 'EnJoy — Elite Gourmet Delivery | Order Signature Local Favorites',
@@ -21,6 +22,8 @@ export const metadata: Metadata = {
     locale: 'en_US',
     alternateLocale: 'nl_NL',
     siteName: 'EnJoy',
+    url: 'https://enjoy.veloci.online',
+    images: [{ url: 'https://enjoy.veloci.online/food/hero-feast.png', width: 1200, height: 630, alt: 'EnJoy — Elite Gourmet Delivery' }],
   },
   twitter: {
     card: 'summary_large_image',
@@ -28,7 +31,7 @@ export const metadata: Metadata = {
     description: 'Discover the finest restaurants near you. Royal delivery, curated menus, and Joya AI concierge.',
   },
   robots: { index: true, follow: true },
-  alternates: { canonical: 'https://enjoy.delivery' },
+  alternates: { canonical: 'https://enjoy.veloci.online' },
   category: 'Food & Drink',
 };
 
@@ -38,12 +41,38 @@ const themeScript = `(function(){
   if(!dark)document.documentElement.classList.add('light');
 })();`;
 
-const jsonLd = {
-  '@context': 'https://schema.org', '@type': 'WebApplication',
-  name: 'EnJoy', applicationCategory: 'FoodEstablishment', operatingSystem: 'Web, iOS, Android',
-  offers: { '@type': 'Offer', price: '0', priceCurrency: 'EUR' },
-  aggregateRating: { '@type': 'AggregateRating', ratingValue: '4.8', reviewCount: '2450', bestRating: '5' },
-};
+const jsonLd = [
+  {
+    '@context': 'https://schema.org', '@type': 'WebApplication',
+    name: 'EnJoy', applicationCategory: 'FoodEstablishment', operatingSystem: 'Web, iOS, Android',
+    offers: { '@type': 'Offer', price: '0', priceCurrency: 'EUR' },
+    aggregateRating: { '@type': 'AggregateRating', ratingValue: '4.8', reviewCount: '2450', bestRating: '5' },
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: 'EnJoy',
+    url: 'https://enjoy.veloci.online',
+    potentialAction: {
+      '@type': 'SearchAction',
+      target: 'https://enjoy.veloci.online/discover?q={search_term_string}',
+      'query-input': 'required name=search_term_string',
+    },
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: 'EnJoy',
+    url: 'https://enjoy.veloci.online',
+    description: 'Ontdek en bestel bij de beste restaurants bij jou in de buurt. Snel, eenvoudig, en altijd vers.',
+    sameAs: [],
+    contactPoint: {
+      '@type': 'ContactPoint',
+      contactType: 'customer support',
+      availableLanguage: ['Dutch', 'English'],
+    },
+  },
+];
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -58,10 +87,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="apple-mobile-web-app-title" content="EnJoy" />
         <link rel="apple-touch-icon" href="/icons/icon-192.png" />
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
         <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png" />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       </head>
       <body style={{ fontFamily: 'Outfit, sans-serif' }}>
+        <GoogleAnalytics />
         <ThemeProvider>
           <PWAInstall />
           {children}

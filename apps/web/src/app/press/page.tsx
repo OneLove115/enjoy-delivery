@@ -40,7 +40,7 @@ export default function PressPage() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             {articles.map((a, i) => (
               <motion.div key={i} initial={{ opacity: 0, x: -16 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.08 }}
-                style={{ padding: '24px 28px', background: 'var(--bg-card)', borderRadius: 16, border: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 24 }}>
+                style={{ padding: 'clamp(16px,3vw,24px) clamp(16px,3vw,28px)', background: 'var(--bg-card)', borderRadius: 16, border: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
                 <div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
                     <span style={{ fontSize: 13, fontWeight: 800, color: PURPLE }}>{a.outlet}</span>

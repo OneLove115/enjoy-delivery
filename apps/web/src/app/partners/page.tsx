@@ -127,7 +127,7 @@ export default function PartnersPage() {
           </p>
 
           <div style={{ display: 'flex', gap: 14, justifyContent: 'center', flexWrap: 'wrap' }}>
-            <a href="https://www.veloci.online/signup" target="_blank" rel="noopener noreferrer"
+            <a href="https://www.veloci.online/signup" target="_blank" rel="noopener noreferrer" data-track="partner-cta"
               style={{ background: `linear-gradient(135deg,${PURPLE},${PINK})`, color: 'white', padding: '16px 38px', borderRadius: 14, fontSize: 16, fontWeight: 800, textDecoration: 'none', boxShadow: `0 8px 24px ${PURPLE}40` }}>
               Start €1 proefperiode →
             </a>

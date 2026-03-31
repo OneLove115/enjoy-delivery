@@ -137,7 +137,7 @@ export default function RidersPage() {
                 style={{ background: 'var(--bg-card)', borderRadius: 24, border: '1px solid var(--border)', padding: 'clamp(24px,4vw,40px)', display: 'flex', flexDirection: 'column', gap: 18 }}>
 
                 {/* Name row */}
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 14 }}>
                   <div>
                     <label style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-muted)', display: 'block', marginBottom: 6 }}>Voornaam *</label>
                     <input value={form.firstName} onChange={e => set('firstName', e.target.value)} placeholder="Jan" required style={input} />
@@ -149,7 +149,7 @@ export default function RidersPage() {
                 </div>
 
                 {/* Email & Phone */}
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 14 }}>
                   <div>
                     <label style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-muted)', display: 'block', marginBottom: 6 }}>E-mailadres *</label>
                     <input type="email" value={form.email} onChange={e => set('email', e.target.value)} placeholder="jan@example.com" required style={input} />
@@ -161,7 +161,7 @@ export default function RidersPage() {
                 </div>
 
                 {/* City & Vehicle */}
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 14 }}>
                   <div>
                     <label style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-muted)', display: 'block', marginBottom: 6 }}>Stad *</label>
                     <select value={form.city} onChange={e => set('city', e.target.value)} required style={select}>
@@ -211,7 +211,7 @@ export default function RidersPage() {
                   </span>
                 </label>
 
-                <button type="submit" disabled={loading}
+                <button type="submit" data-track="rider-apply" disabled={loading}
                   style={{ background: `linear-gradient(135deg,${ORANGE},${PINK})`, color: 'white', border: 'none', borderRadius: 14, padding: '17px 0', fontSize: 16, fontWeight: 900, cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? 0.7 : 1, marginTop: 4, boxShadow: `0 8px 24px ${ORANGE}35`, letterSpacing: '-0.2px' }}>
                   {loading ? 'Verwerken…' : 'Aanmelding indienen →'}
                 </button>

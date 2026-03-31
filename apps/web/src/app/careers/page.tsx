@@ -159,7 +159,7 @@ export default function CareersPage() {
                 </div>
 
                 {/* Name & Email */}
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 14 }}>
                   <div>
                     <label style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-muted)', display: 'block', marginBottom: 6 }}>Volledige naam *</label>
                     <input value={form.name} onChange={e => set('name', e.target.value)} placeholder="Jan de Vries" required style={input} />
@@ -171,7 +171,7 @@ export default function CareersPage() {
                 </div>
 
                 {/* Phone & LinkedIn */}
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 14 }}>
                   <div>
                     <label style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-muted)', display: 'block', marginBottom: 6 }}>Telefoonnummer</label>
                     <input type="tel" value={form.phone} onChange={e => set('phone', e.target.value)} placeholder="+31 6 12345678" style={input} />

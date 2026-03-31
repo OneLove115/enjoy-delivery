@@ -61,6 +61,18 @@ const sections = [
   },
 ];
 
+const faqSchemaData = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: sections.flatMap(section =>
+    section.faqs.map(faq => ({
+      '@type': 'Question',
+      name: faq.q,
+      acceptedAnswer: { '@type': 'Answer', text: faq.a },
+    }))
+  ),
+};
+
 export default function FAQPage() {
   const [openSection, setOpenSection] = useState<number>(0);
   const [openItem, setOpenItem] = useState<string | null>(null);
@@ -69,6 +81,7 @@ export default function FAQPage() {
 
   return (
     <div style={{ background: 'var(--bg-page)', minHeight: '100vh', color: 'var(--text-primary)', fontFamily: 'Outfit, sans-serif' }}>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchemaData) }} />
       <Nav />
       <div style={{ maxWidth: 800, margin: '0 auto', padding: 'clamp(24px,5vw,60px) clamp(16px,4vw,40px)' }}>
 

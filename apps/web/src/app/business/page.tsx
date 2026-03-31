@@ -148,7 +148,7 @@ export default function BusinessPage() {
                 style={{ background: 'var(--bg-card)', borderRadius: 24, border: '1px solid var(--border)', padding: 'clamp(24px,4vw,40px)', display: 'flex', flexDirection: 'column', gap: 18 }}>
 
                 {/* Company & Name */}
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 14 }}>
                   <div>
                     <label style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-muted)', display: 'block', marginBottom: 6 }}>Bedrijfsnaam *</label>
                     <input value={form.company} onChange={e => set('company', e.target.value)} placeholder="EnJoy BV" required style={inputStyle} />
@@ -160,7 +160,7 @@ export default function BusinessPage() {
                 </div>
 
                 {/* Email & Phone */}
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 14 }}>
                   <div>
                     <label style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-muted)', display: 'block', marginBottom: 6 }}>Zakelijk e-mailadres *</label>
                     <input type="email" value={form.email} onChange={e => set('email', e.target.value)} placeholder="jan@bedrijf.nl" required style={inputStyle} />
@@ -181,7 +181,7 @@ export default function BusinessPage() {
                 </div>
 
                 {/* Use case & Budget */}
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 14 }}>
                   <div>
                     <label style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-muted)', display: 'block', marginBottom: 6 }}>Gebruik *</label>
                     <select value={form.useCase} onChange={e => set('useCase', e.target.value)} required style={selectStyle}>

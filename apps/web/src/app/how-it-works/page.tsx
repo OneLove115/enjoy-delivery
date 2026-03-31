@@ -22,9 +22,34 @@ const faqs = [
   { q: 'What if something is wrong with my order?', a: 'Contact us via the app and we\'ll make it right immediately. No questions asked.' },
 ];
 
+const howToSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'HowTo',
+  name: 'How to order food with EnJoy',
+  description: 'From craving to doorstep in under 40 minutes.',
+  step: steps.map((s, i) => ({
+    '@type': 'HowToStep',
+    position: i + 1,
+    name: s.title,
+    text: s.text,
+  })),
+};
+
+const howItWorksFaqSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: faqs.map(f => ({
+    '@type': 'Question',
+    name: f.q,
+    acceptedAnswer: { '@type': 'Answer', text: f.a },
+  })),
+};
+
 export default function HowItWorksPage() {
   return (
     <div style={{ background: 'var(--bg-page)', minHeight: '100vh', color: 'var(--text-primary)', fontFamily: 'Outfit, sans-serif' }}>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(howItWorksFaqSchema) }} />
       <Nav />
       <section style={{ padding: 'clamp(24px,5vw,60px) clamp(16px,4vw,60px)', textAlign: 'center' }}>
         <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }}>

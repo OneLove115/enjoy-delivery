@@ -148,7 +148,7 @@ export default function BlogPage() {
                 overflow: 'hidden', cursor: 'pointer',
                 transition: 'border-color 0.25s, box-shadow 0.25s',
                 boxShadow: expanded === i ? `0 8px 32px rgba(90,49,244,0.15)` : 'none',
-                gridColumn: expanded === i ? 'span 2' : 'span 1',
+                gridColumn: expanded === i ? 'span 2' : undefined,
               }}
             >
               {/* Image */}
