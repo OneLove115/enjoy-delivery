@@ -37,15 +37,38 @@ export default function BusinessPage() {
   const [form, setForm] = useState({ company: '', name: '', email: '', phone: '', teamSize: '', useCase: '', budget: '', message: '' });
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const set = (k: string, v: string) => setForm(f => ({ ...f, [k]: v }));
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    await new Promise(r => setTimeout(r, 900));
-    setSubmitted(true);
-    setLoading(false);
+    setError('');
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_VP_DOMAIN || 'https://veloci.online';
+      const res = await fetch(`${apiUrl}/api/business/inquire`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          company: form.company,
+          name: form.name,
+          email: form.email,
+          phone: form.phone,
+          teamSize: form.teamSize,
+          useCase: form.useCase,
+          budget: form.budget,
+          message: form.message,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Aanvraag mislukt');
+      setSubmitted(true);
+    } catch (err: any) {
+      setError(err.message || 'Er ging iets mis. Probeer opnieuw.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -204,6 +227,8 @@ export default function BusinessPage() {
                   <textarea value={form.message} onChange={e => set('message', e.target.value)} placeholder="Vertel ons over uw specifieke wensen of vragen…" rows={4}
                     style={{ ...inputStyle, resize: 'vertical' }} />
                 </div>
+
+                {error && <p style={{ color: '#ef4444', fontSize: 14, fontWeight: 600 }}>{error}</p>}
 
                 <button type="submit" disabled={loading}
                   style={{ background: `linear-gradient(135deg,${PURPLE},${PINK})`, color: 'white', border: 'none', borderRadius: 14, padding: '17px 0', fontSize: 16, fontWeight: 900, cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? 0.7 : 1, marginTop: 4, boxShadow: `0 8px 24px ${PURPLE}35`, letterSpacing: '-0.2px' }}>

@@ -4,6 +4,8 @@ Disallow: /api/
 Disallow: /account/
 Disallow: /checkout/
 Disallow: /order/
+Disallow: /forgot-password
+Disallow: /reset-password
 Sitemap: https://enjoy.veloci.online/sitemap.xml
 
 User-agent: Googlebot

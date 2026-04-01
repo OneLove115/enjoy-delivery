@@ -36,18 +36,60 @@ const select: React.CSSProperties = {
 };
 
 export default function RidersPage() {
-  const [form, setForm] = useState({ firstName: '', lastName: '', email: '', phone: '', city: '', vehicle: '', hours: '', iban: '', agreeCheck: false });
+  const [form, setForm] = useState({ firstName: '', lastName: '', email: '', phone: '', city: '', vehicle: '', hours: '', iban: '', password: '', cvFile: null as File | null, agreeCheck: false });
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const set = (k: string, v: string | boolean) => setForm(f => ({ ...f, [k]: v }));
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!form.agreeCheck) return;
     setLoading(true);
-    await new Promise(r => setTimeout(r, 900));
-    setSubmitted(true);
-    setLoading(false);
+    setError('');
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_VP_DOMAIN || 'https://veloci.online';
+      // Step 1: Submit application
+      const res = await fetch(`${apiUrl}/api/riders/apply`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          firstName: form.firstName,
+          lastName: form.lastName,
+          email: form.email,
+          phone: form.phone,
+          city: form.city,
+          vehicle: form.vehicle,
+          hoursPerWeek: form.hours,
+          iban: form.iban,
+          password: form.password,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Aanmelding mislukt');
+
+      // Step 2: Auto-login and redirect to dashboard
+      try {
+        const loginRes = await fetch(`${apiUrl}/api/riders/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: form.email, password: form.password }),
+        });
+        const loginData = await loginRes.json();
+        if (loginRes.ok && loginData.token) {
+          localStorage.setItem('enjoy-rider-token', loginData.token);
+          window.location.href = '/rider-portal/dashboard';
+          return;
+        }
+      } catch {}
+      // Fallback: show success if auto-login fails
+      setSubmitted(true);
+    } catch (err: any) {
+      setError(err.message || 'Er ging iets mis. Probeer opnieuw.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -131,6 +173,9 @@ export default function RidersPage() {
                 <Link href="/discover" style={{ display: 'inline-block', background: `linear-gradient(135deg,${ORANGE},${PINK})`, color: 'white', padding: '14px 32px', borderRadius: 12, fontWeight: 800, fontSize: 15, textDecoration: 'none' }}>
                   Ontdek EnJoy →
                 </Link>
+                <Link href="/rider-portal" style={{ color: PURPLE, fontWeight: 700, textDecoration: 'underline' }}>
+                  Log in op je Rider Portal →
+                </Link>
               </motion.div>
             ) : (
               <form onSubmit={handleSubmit}
@@ -199,6 +244,18 @@ export default function RidersPage() {
                   <input value={form.iban} onChange={e => set('iban', e.target.value)} placeholder="NL00 BANK 0000 0000 00" style={input} />
                 </div>
 
+                {/* Password */}
+                <div>
+                  <label style={{ fontSize: 13, fontWeight: 700, marginBottom: 6, display: 'block' }}>Kies een wachtwoord *</label>
+                  <input type="password" required minLength={8} value={form.password} onChange={e => set('password', e.target.value)} placeholder="Min. 8 tekens" style={input} />
+                </div>
+
+                {/* CV Upload */}
+                <div>
+                  <label style={{ fontSize: 13, fontWeight: 700, marginBottom: 6, display: 'block' }}>Upload je CV (PDF, optioneel)</label>
+                  <input type="file" accept=".pdf,.doc,.docx" onChange={e => setForm(f => ({ ...f, cvFile: e.target.files?.[0] || null }))} style={{ ...input, padding: '10px 18px' }} />
+                </div>
+
                 {/* Agreement */}
                 <label style={{ display: 'flex', alignItems: 'flex-start', gap: 12, cursor: 'pointer', fontSize: 14, color: 'var(--text-secondary)', lineHeight: 1.5 }}>
                   <input type="checkbox" checked={form.agreeCheck} onChange={e => set('agreeCheck', e.target.checked)} required
@@ -210,6 +267,8 @@ export default function RidersPage() {
                     <Link href="/privacy" style={{ color: PURPLE, textDecoration: 'none', fontWeight: 700 }}>Privacybeleid</Link> van EnJoy.
                   </span>
                 </label>
+
+                {error && <p style={{ color: '#ef4444', fontSize: 14, fontWeight: 600 }}>{error}</p>}
 
                 <button type="submit" data-track="rider-apply" disabled={loading}
                   style={{ background: `linear-gradient(135deg,${ORANGE},${PINK})`, color: 'white', border: 'none', borderRadius: 14, padding: '17px 0', fontSize: 16, fontWeight: 900, cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? 0.7 : 1, marginTop: 4, boxShadow: `0 8px 24px ${ORANGE}35`, letterSpacing: '-0.2px' }}>
