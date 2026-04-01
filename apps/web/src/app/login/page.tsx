@@ -46,7 +46,7 @@ export default function LoginPage() {
       <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }}
         style={{ width: '100%', maxWidth: 440, background: 'var(--bg-elevated)', border: '1px solid var(--border-strong)', borderRadius: 24, padding: '48px 40px', position: 'relative', zIndex: 1 }}>
         <Link href="/" style={{ textDecoration: 'none', display: 'block', textAlign: 'center', marginBottom: 32 }}>
-          <span translate="no" style={{ fontSize: 28, fontWeight: 900 }}>En<span style={{ background: `linear-gradient(135deg,${PURPLE},${PINK})`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Joy</span></span>
+          <img src="/logo-enjoy.png" alt="EnJoy" style={{ height: 48 }} />
         </Link>
         <h1 style={{ fontSize: 26, fontWeight: 900, textAlign: 'center', marginBottom: 8 }}>Welcome back</h1>
         <p style={{ color: 'var(--text-muted)', textAlign: 'center', fontSize: 14, marginBottom: 32 }}>Sign in to your EnJoy account</p>

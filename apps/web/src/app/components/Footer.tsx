@@ -53,9 +53,7 @@ export function Footer() {
           {/* Brand */}
           <div style={{ maxWidth: 260, marginBottom: 8 }}>
             <Link href="/" style={{ textDecoration: 'none' }}>
-              <span translate="no" style={{ fontSize: 24, fontWeight: 900, color: 'var(--text-primary)' }}>
-                En<span style={{ background: `linear-gradient(135deg,${PURPLE},${PINK})`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Joy</span>
-              </span>
+              <img src="/logo-enjoy.png" alt="EnJoy" style={{ height: 32 }} />
             </Link>
             <p style={{ color: 'var(--text-muted)', marginTop: 12, fontSize: 14, lineHeight: 1.6 }}>
               Elite gourmet delivery. Royally crafted, impeccably delivered.

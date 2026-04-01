@@ -121,9 +121,7 @@ export default function BusinessPortalLayout({ children }: { children: React.Rea
         {/* Sidebar header */}
         <div style={{ padding: '28px 24px 20px', borderBottom: '1px solid var(--border)' }}>
           <Link href="/" style={{ textDecoration: 'none', display: 'block', marginBottom: 20 }}>
-            <span translate="no" style={{ fontSize: 20, fontWeight: 900 }}>
-              En<span style={{ background: `linear-gradient(135deg,${PURPLE},${PINK})`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Joy</span>
-            </span>
+            <img src="/logo-enjoy.png" alt="EnJoy" style={{ height: 32 }} />
           </Link>
           <div style={{
             display: 'flex', alignItems: 'center', gap: 12,

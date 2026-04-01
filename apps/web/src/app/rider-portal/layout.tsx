@@ -124,9 +124,7 @@ export default function RiderPortalLayout({ children }: { children: React.ReactN
         {/* Logo */}
         <div style={{ padding: '24px 24px 20px', borderBottom: '1px solid var(--border)' }}>
           <Link href="/" style={{ textDecoration: 'none' }}>
-            <span style={{ fontSize: 22, fontWeight: 900, color: 'var(--text-primary)' }}>
-              En<span style={{ background: `linear-gradient(135deg,${PURPLE},${PINK})`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Joy</span>
-            </span>
+            <img src="/logo-enjoy.png" alt="EnJoy" style={{ height: 32 }} />
           </Link>
           <div style={{ marginTop: 6, display: 'flex', alignItems: 'center', gap: 6 }}>
             <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#22c55e' }} />
