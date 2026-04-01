@@ -1,19 +1,69 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
 const PURPLE = '#5A31F4';
 const PINK = '#FF0080';
 const ORANGE = '#FF6B00';
 
-const INVOICES = [
-  { id: 'INV-2026-003', period: 'Maart 2026',    amount: 2340, status: 'Open',    date: '1 apr 2026' },
-  { id: 'INV-2026-002', period: 'Februari 2026', amount: 1890, status: 'Betaald', date: '1 mrt 2026' },
-  { id: 'INV-2026-001', period: 'Januari 2026',  amount: 2150, status: 'Betaald', date: '1 feb 2026' },
-];
+const API_URL = process.env.NEXT_PUBLIC_VP_DOMAIN || 'https://veloci.online';
+
+interface Invoice {
+  id: string;
+  period: string;
+  amount: number;
+  status: string;
+  date: string;
+  downloadUrl?: string;
+}
+
+function Spinner() {
+  return (
+    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '60px 0' }}>
+      <div style={{
+        width: 32, height: 32, borderRadius: '50%',
+        border: `3px solid rgba(90,49,244,0.15)`,
+        borderTopColor: PURPLE,
+        animation: 'spin 0.7s linear infinite',
+      }} />
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+    </div>
+  );
+}
 
 export default function InvoicesPage() {
+  const router = useRouter();
+  const [invoices, setInvoices] = useState<Invoice[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [paying, setPaying] = useState<string | null>(null);
   const [paid, setPaid] = useState<string[]>([]);
+
+  useEffect(() => {
+    const token = localStorage.getItem('enjoy-business-token');
+    if (!token) {
+      router.replace('/business-portal');
+      return;
+    }
+
+    fetch(`${API_URL}/api/business-portal/invoices`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then(async res => {
+        if (res.status === 401) {
+          localStorage.removeItem('enjoy-business-token');
+          router.replace('/business-portal');
+          return;
+        }
+        if (!res.ok) throw new Error('Fout bij ophalen facturen');
+        return res.json();
+      })
+      .then(json => {
+        if (json) setInvoices(json.invoices ?? []);
+      })
+      .catch(err => setError(err.message || 'Netwerkfout'))
+      .finally(() => setLoading(false));
+  }, [router]);
 
   const handlePay = async (id: string) => {
     setPaying(id);
@@ -22,11 +72,13 @@ export default function InvoicesPage() {
     setPaying(null);
   };
 
-  const totalPaid = INVOICES.filter(inv => inv.status === 'Betaald' || paid.includes(inv.id))
-    .reduce((s, inv) => s + inv.amount, 0);
+  const totalPaid = invoices
+    .filter(inv => inv.status === 'Betaald' || paid.includes(inv.id))
+    .reduce((s, inv) => s + Number(inv.amount), 0);
 
-  const openAmount = INVOICES.filter(inv => inv.status === 'Open' && !paid.includes(inv.id))
-    .reduce((s, inv) => s + inv.amount, 0);
+  const openAmount = invoices
+    .filter(inv => inv.status !== 'Betaald' && !paid.includes(inv.id))
+    .reduce((s, inv) => s + Number(inv.amount), 0);
 
   return (
     <div style={{ padding: 'clamp(20px,3vw,40px)', maxWidth: 900, margin: '0 auto' }}>
@@ -61,7 +113,7 @@ export default function InvoicesPage() {
         </div>
         <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 16, padding: '20px 22px' }}>
           <p style={{ color: 'var(--text-muted)', fontSize: 13, fontWeight: 600, marginBottom: 8 }}>Aantal facturen</p>
-          <p style={{ fontSize: 28, fontWeight: 950, margin: 0, color: PURPLE }}>{INVOICES.length}</p>
+          <p style={{ fontSize: 28, fontWeight: 950, margin: 0, color: PURPLE }}>{invoices.length}</p>
         </div>
       </div>
 
@@ -71,94 +123,109 @@ export default function InvoicesPage() {
           <h2 style={{ fontSize: 16, fontWeight: 800, margin: 0 }}>Factuuroverzicht</h2>
         </div>
 
-        <div style={{ overflowX: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
-            <thead>
-              <tr style={{ borderBottom: '1px solid var(--border)' }}>
-                {['Factuurnr', 'Periode', 'Datum', 'Bedrag', 'Status', 'Download', 'Actie'].map(h => (
-                  <th key={h} style={{ padding: '12px 16px', textAlign: 'left', color: 'var(--text-muted)', fontSize: 12, fontWeight: 700, whiteSpace: 'nowrap' }}>{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {INVOICES.map((inv, i) => {
-                const isPaid = inv.status === 'Betaald' || paid.includes(inv.id);
-                const isPayingNow = paying === inv.id;
-                return (
-                  <tr key={inv.id} style={{ borderBottom: i < INVOICES.length - 1 ? '1px solid var(--border)' : 'none' }}>
-                    <td style={{ padding: '18px 16px', fontWeight: 700, color: PURPLE }}>{inv.id}</td>
-                    <td style={{ padding: '18px 16px', fontWeight: 600 }}>{inv.period}</td>
-                    <td style={{ padding: '18px 16px', color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>{inv.date}</td>
-                    <td style={{ padding: '18px 16px', fontWeight: 800, fontSize: 15 }}>
-                      €{inv.amount.toLocaleString('nl-NL', { minimumFractionDigits: 2 })}
-                    </td>
-                    <td style={{ padding: '18px 16px' }}>
-                      <span style={{
-                        padding: '4px 10px', borderRadius: 20, fontSize: 12, fontWeight: 700,
-                        background: isPaid ? 'rgba(34,197,94,0.12)' : 'rgba(255,107,0,0.12)',
-                        color: isPaid ? '#22c55e' : ORANGE,
-                      }}>
-                        {isPaid ? 'Betaald' : 'Open'}
-                      </span>
-                    </td>
-                    <td style={{ padding: '18px 16px' }}>
-                      <button
-                        style={{
-                          background: 'transparent', border: `1px solid ${PURPLE}40`,
-                          color: PURPLE, borderRadius: 8, padding: '6px 12px',
-                          cursor: 'pointer', fontSize: 12, fontWeight: 700,
-                          fontFamily: 'Outfit, sans-serif', display: 'flex', alignItems: 'center', gap: 6,
-                        }}
-                        onClick={() => {}}
-                      >
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
-                          <polyline points="7,10 12,15 17,10" />
-                          <line x1="12" y1="15" x2="12" y2="3" />
-                        </svg>
-                        PDF
-                      </button>
-                    </td>
-                    <td style={{ padding: '18px 16px' }}>
-                      {!isPaid ? (
-                        <button
-                          onClick={() => handlePay(inv.id)}
-                          disabled={isPayingNow}
-                          style={{
-                            background: `linear-gradient(135deg,${PURPLE},${PINK})`,
-                            color: 'white', border: 'none', borderRadius: 10,
-                            padding: '8px 16px', cursor: isPayingNow ? 'not-allowed' : 'pointer',
-                            fontSize: 13, fontWeight: 700, fontFamily: 'Outfit, sans-serif',
-                            opacity: isPayingNow ? 0.7 : 1,
-                            boxShadow: `0 4px 14px ${PURPLE}35`,
-                          }}
-                        >
-                          {isPayingNow ? 'Bezig…' : 'Betaal nu'}
-                        </button>
-                      ) : (
-                        <span style={{ color: 'var(--text-muted)', fontSize: 13 }}>—</span>
-                      )}
-                    </td>
+        {loading ? (
+          <Spinner />
+        ) : error ? (
+          <div style={{ padding: '24px', color: '#ef4444', fontWeight: 600 }}>{error}</div>
+        ) : invoices.length === 0 ? (
+          <div style={{ padding: '48px 24px', textAlign: 'center', color: 'var(--text-muted)' }}>
+            <p style={{ fontSize: 16, fontWeight: 700, marginBottom: 8 }}>Nog geen facturen</p>
+            <p style={{ fontSize: 14 }}>Facturen worden automatisch aangemaakt op de eerste van de maand.</p>
+          </div>
+        ) : (
+          <>
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
+                <thead>
+                  <tr style={{ borderBottom: '1px solid var(--border)' }}>
+                    {['Factuurnr', 'Periode', 'Datum', 'Bedrag', 'Status', 'Download', 'Actie'].map(h => (
+                      <th key={h} style={{ padding: '12px 16px', textAlign: 'left', color: 'var(--text-muted)', fontSize: 12, fontWeight: 700, whiteSpace: 'nowrap' }}>{h}</th>
+                    ))}
                   </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+                </thead>
+                <tbody>
+                  {invoices.map((inv, i) => {
+                    const isPaid = inv.status === 'Betaald' || paid.includes(inv.id);
+                    const isPayingNow = paying === inv.id;
+                    return (
+                      <tr key={inv.id} style={{ borderBottom: i < invoices.length - 1 ? '1px solid var(--border)' : 'none' }}>
+                        <td style={{ padding: '18px 16px', fontWeight: 700, color: PURPLE }}>{inv.id}</td>
+                        <td style={{ padding: '18px 16px', fontWeight: 600 }}>{inv.period}</td>
+                        <td style={{ padding: '18px 16px', color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>{inv.date}</td>
+                        <td style={{ padding: '18px 16px', fontWeight: 800, fontSize: 15 }}>
+                          €{Number(inv.amount).toLocaleString('nl-NL', { minimumFractionDigits: 2 })}
+                        </td>
+                        <td style={{ padding: '18px 16px' }}>
+                          <span style={{
+                            padding: '4px 10px', borderRadius: 20, fontSize: 12, fontWeight: 700,
+                            background: isPaid ? 'rgba(34,197,94,0.12)' : 'rgba(255,107,0,0.12)',
+                            color: isPaid ? '#22c55e' : ORANGE,
+                          }}>
+                            {isPaid ? 'Betaald' : 'Open'}
+                          </span>
+                        </td>
+                        <td style={{ padding: '18px 16px' }}>
+                          <button
+                            style={{
+                              background: 'transparent', border: `1px solid ${PURPLE}40`,
+                              color: PURPLE, borderRadius: 8, padding: '6px 12px',
+                              cursor: 'pointer', fontSize: 12, fontWeight: 700,
+                              fontFamily: 'Outfit, sans-serif', display: 'flex', alignItems: 'center', gap: 6,
+                            }}
+                            onClick={() => {
+                              if (inv.downloadUrl) window.open(inv.downloadUrl, '_blank');
+                            }}
+                          >
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                              <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
+                              <polyline points="7,10 12,15 17,10" />
+                              <line x1="12" y1="15" x2="12" y2="3" />
+                            </svg>
+                            PDF
+                          </button>
+                        </td>
+                        <td style={{ padding: '18px 16px' }}>
+                          {!isPaid ? (
+                            <button
+                              onClick={() => handlePay(inv.id)}
+                              disabled={isPayingNow}
+                              style={{
+                                background: `linear-gradient(135deg,${PURPLE},${PINK})`,
+                                color: 'white', border: 'none', borderRadius: 10,
+                                padding: '8px 16px', cursor: isPayingNow ? 'not-allowed' : 'pointer',
+                                fontSize: 13, fontWeight: 700, fontFamily: 'Outfit, sans-serif',
+                                opacity: isPayingNow ? 0.7 : 1,
+                                boxShadow: `0 4px 14px ${PURPLE}35`,
+                              }}
+                            >
+                              {isPayingNow ? 'Bezig…' : 'Betaal nu'}
+                            </button>
+                          ) : (
+                            <span style={{ color: 'var(--text-muted)', fontSize: 13 }}>—</span>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
 
-        {/* Footer */}
-        <div style={{
-          padding: '16px 24px', borderTop: '1px solid var(--border)',
-          background: 'rgba(255,255,255,0.02)',
-          display: 'flex', justifyContent: 'flex-end',
-        }}>
-          <span style={{ fontWeight: 900, fontSize: 15 }}>
-            Totaal betaald YTD:&nbsp;
-            <span style={{ color: '#22c55e' }}>
-              €{totalPaid.toLocaleString('nl-NL', { minimumFractionDigits: 2 })}
-            </span>
-          </span>
-        </div>
+            {/* Footer */}
+            <div style={{
+              padding: '16px 24px', borderTop: '1px solid var(--border)',
+              background: 'rgba(255,255,255,0.02)',
+              display: 'flex', justifyContent: 'flex-end',
+            }}>
+              <span style={{ fontWeight: 900, fontSize: 15 }}>
+                Totaal betaald YTD:&nbsp;
+                <span style={{ color: '#22c55e' }}>
+                  €{totalPaid.toLocaleString('nl-NL', { minimumFractionDigits: 2 })}
+                </span>
+              </span>
+            </div>
+          </>
+        )}
       </div>
 
       {/* Info box */}

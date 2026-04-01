@@ -9,6 +9,8 @@ const PURPLE = '#5A31F4';
 const PINK = '#FF0080';
 const ORANGE = '#FF6B00';
 
+const API_URL = process.env.NEXT_PUBLIC_VP_DOMAIN || 'https://veloci.online';
+
 const inputStyle: React.CSSProperties = {
   width: '100%',
   background: 'rgba(255,255,255,0.04)',
@@ -54,10 +56,20 @@ export default function BusinessPortalPage() {
     setLoginLoading(true);
     setLoginError('');
     try {
-      await new Promise(r => setTimeout(r, 600));
-      if (!loginEmail || !loginPassword) throw new Error('Vul alle velden in');
-      localStorage.setItem('enjoy-business-token', 'mock-business-token-' + Date.now());
-      localStorage.setItem('enjoy-business-company', 'TechCorp BV');
+      const res = await fetch(`${API_URL}/api/business-portal/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: loginEmail, password: loginPassword }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || err.error || 'Inloggen mislukt. Controleer je gegevens.');
+      }
+      const data = await res.json();
+      localStorage.setItem('enjoy-business-token', data.token);
+      if (data.account?.companyName) {
+        localStorage.setItem('enjoy-business-company', data.account.companyName);
+      }
       router.push('/business-portal/dashboard');
     } catch (err: any) {
       setLoginError(err.message || 'Inloggen mislukt. Probeer opnieuw.');
@@ -71,12 +83,26 @@ export default function BusinessPortalPage() {
     setSignupLoading(true);
     setSignupError('');
     try {
-      await new Promise(r => setTimeout(r, 700));
-      if (!companyName || !contactName || !signupEmail || !signupPassword) {
-        throw new Error('Vul alle verplichte velden in');
+      const res = await fetch(`${API_URL}/api/business-portal/signup`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          companyName,
+          contactName,
+          email: signupEmail,
+          password: signupPassword,
+          teamSize,
+        }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || err.error || 'Registratie mislukt. Probeer opnieuw.');
       }
-      localStorage.setItem('enjoy-business-token', 'mock-business-token-' + Date.now());
-      localStorage.setItem('enjoy-business-company', companyName || 'TechCorp BV');
+      const data = await res.json();
+      localStorage.setItem('enjoy-business-token', data.token);
+      if (data.account?.companyName) {
+        localStorage.setItem('enjoy-business-company', data.account.companyName);
+      }
       router.push('/business-portal/dashboard');
     } catch (err: any) {
       setSignupError(err.message || 'Registratie mislukt. Probeer opnieuw.');

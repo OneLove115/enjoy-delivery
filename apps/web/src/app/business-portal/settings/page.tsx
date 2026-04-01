@@ -1,6 +1,8 @@
 'use client';
 import { useState } from 'react';
 
+// TODO: wire to /api/business-portal/settings when available
+
 const PURPLE = '#5A31F4';
 const PINK = '#FF0080';
 const ORANGE = '#FF6B00';

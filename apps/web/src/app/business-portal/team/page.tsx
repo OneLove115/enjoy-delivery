@@ -1,73 +1,168 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 
 const PURPLE = '#5A31F4';
 const PINK = '#FF0080';
 const ORANGE = '#FF6B00';
 
+const API_URL = process.env.NEXT_PUBLIC_VP_DOMAIN || 'https://veloci.online';
+
 interface Member {
-  id: number;
+  id: string | number;
   name: string;
   email: string;
-  dept: string;
-  budget: number;
-  lastOrder: string;
-  active: boolean;
+  dept?: string;
+  department?: string;
+  budget?: number;
+  monthlyBudget?: number;
+  lastOrder?: string;
+  isActive?: boolean;
+  active?: boolean;
 }
 
-const INITIAL_MEMBERS: Member[] = [
-  { id: 1, name: 'Jan de Vries',     email: 'jan@techcorp.nl',    dept: 'Engineering', budget: 500, lastOrder: '31 mrt', active: true },
-  { id: 2, name: 'Lisa Bakker',      email: 'lisa@techcorp.nl',   dept: 'Marketing',   budget: 500, lastOrder: '30 mrt', active: true },
-  { id: 3, name: 'Ahmed Hassan',     email: 'ahmed@techcorp.nl',  dept: 'Engineering', budget: 500, lastOrder: '28 mrt', active: true },
-  { id: 4, name: 'Sophie Mulder',    email: 'sophie@techcorp.nl', dept: 'Design',      budget: 500, lastOrder: '27 mrt', active: true },
-  { id: 5, name: 'Tim van den Berg', email: 'tim@techcorp.nl',    dept: 'Sales',       budget: 500, lastOrder: '25 mrt', active: true },
-  { id: 6, name: 'Emma Visser',      email: 'emma@techcorp.nl',   dept: 'HR',          budget: 400, lastOrder: '21 mrt', active: true },
-  { id: 7, name: 'Daan Smit',        email: 'daan@techcorp.nl',   dept: 'Finance',     budget: 400, lastOrder: '18 mrt', active: false },
-  { id: 8, name: 'Noor Jansen',      email: 'noor@techcorp.nl',   dept: 'Engineering', budget: 500, lastOrder: '14 mrt', active: true },
-];
-
 const EMPTY_FORM = { name: '', email: '', dept: '', budget: '' };
-
 const DEPTS = ['Engineering', 'Marketing', 'Design', 'Sales', 'HR', 'Finance', 'Operations', 'Legal'];
 
+function Spinner() {
+  return (
+    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '60px 0' }}>
+      <div style={{
+        width: 32, height: 32, borderRadius: '50%',
+        border: `3px solid rgba(90,49,244,0.15)`,
+        borderTopColor: PURPLE,
+        animation: 'spin 0.7s linear infinite',
+      }} />
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+    </div>
+  );
+}
+
+function isMemberActive(m: Member): boolean {
+  if (typeof m.isActive === 'boolean') return m.isActive;
+  if (typeof m.active === 'boolean') return m.active;
+  return true;
+}
+
+function getMemberBudget(m: Member): number {
+  return Number(m.monthlyBudget ?? m.budget ?? 0);
+}
+
+function getMemberDept(m: Member): string {
+  return m.dept ?? m.department ?? '—';
+}
+
 export default function TeamPage() {
-  const [members, setMembers] = useState<Member[]>(INITIAL_MEMBERS);
+  const router = useRouter();
+  const [members, setMembers] = useState<Member[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState(EMPTY_FORM);
   const [formError, setFormError] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
   const set = (key: string, val: string) => setForm(prev => ({ ...prev, [key]: val }));
 
-  const toggleActive = (id: number) => {
-    setMembers(prev => prev.map(m => m.id === id ? { ...m, active: !m.active } : m));
+  const fetchMembers = useCallback(() => {
+    const token = localStorage.getItem('enjoy-business-token');
+    if (!token) {
+      router.replace('/business-portal');
+      return;
+    }
+
+    fetch(`${API_URL}/api/business-portal/team`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then(async res => {
+        if (res.status === 401) {
+          localStorage.removeItem('enjoy-business-token');
+          router.replace('/business-portal');
+          return;
+        }
+        if (!res.ok) throw new Error('Fout bij ophalen teamleden');
+        return res.json();
+      })
+      .then(json => {
+        if (json) setMembers(json.members ?? []);
+      })
+      .catch(err => setError(err.message || 'Netwerkfout'))
+      .finally(() => setLoading(false));
+  }, [router]);
+
+  useEffect(() => { fetchMembers(); }, [fetchMembers]);
+
+  const toggleActive = async (m: Member) => {
+    const token = localStorage.getItem('enjoy-business-token');
+    const newActive = !isMemberActive(m);
+    // Optimistic update
+    setMembers(prev => prev.map(x => String(x.id) === String(m.id)
+      ? { ...x, isActive: newActive, active: newActive }
+      : x
+    ));
+    try {
+      const res = await fetch(`${API_URL}/api/business-portal/team`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ id: m.id, isActive: newActive }),
+      });
+      if (!res.ok) {
+        // Revert on failure
+        setMembers(prev => prev.map(x => String(x.id) === String(m.id)
+          ? { ...x, isActive: !newActive, active: !newActive }
+          : x
+        ));
+      }
+    } catch {
+      // Revert on network error
+      setMembers(prev => prev.map(x => String(x.id) === String(m.id)
+        ? { ...x, isActive: !newActive, active: !newActive }
+        : x
+      ));
+    }
   };
 
-  const removeMember = (id: number) => {
-    setMembers(prev => prev.filter(m => m.id !== id));
-  };
-
-  const addMember = () => {
+  const addMember = async () => {
     setFormError('');
     if (!form.name || !form.email || !form.dept) {
       setFormError('Vul naam, e-mail en afdeling in.');
       return;
     }
-    const newMember: Member = {
-      id: Date.now(),
-      name: form.name,
-      email: form.email,
-      dept: form.dept,
-      budget: Number(form.budget) || 500,
-      lastOrder: '—',
-      active: true,
-    };
-    setMembers(prev => [...prev, newMember]);
-    setForm(EMPTY_FORM);
-    setShowForm(false);
+    setSubmitting(true);
+    const token = localStorage.getItem('enjoy-business-token');
+    try {
+      const res = await fetch(`${API_URL}/api/business-portal/team`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          name: form.name,
+          email: form.email,
+          department: form.dept,
+          monthlyBudget: Number(form.budget) || 500,
+        }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || err.error || 'Toevoegen mislukt');
+      }
+      setForm(EMPTY_FORM);
+      setShowForm(false);
+      fetchMembers();
+    } catch (err: any) {
+      setFormError(err.message || 'Medewerker toevoegen mislukt');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
-  const active = members.filter(m => m.active);
-  const inactive = members.filter(m => !m.active);
+  const active = members.filter(isMemberActive);
+  const inactive = members.filter(m => !isMemberActive(m));
 
   const inputStyle: React.CSSProperties = {
     width: '100%', background: 'rgba(255,255,255,0.05)',
@@ -82,70 +177,62 @@ export default function TeamPage() {
     display: 'block', marginBottom: 6, textTransform: 'uppercase', letterSpacing: 0.5,
   };
 
-  const MemberRow = ({ m }: { m: Member }) => (
-    <tr style={{ borderBottom: '1px solid var(--border)', opacity: m.active ? 1 : 0.5 }}>
-      <td style={{ padding: '14px 16px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <div style={{
-            width: 36, height: 36, borderRadius: 10, flexShrink: 0,
-            background: m.active ? `linear-gradient(135deg,${PURPLE},${PINK})` : 'rgba(255,255,255,0.1)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: 14, fontWeight: 900, color: 'white',
+  const MemberRow = ({ m }: { m: Member }) => {
+    const isActive = isMemberActive(m);
+    return (
+      <tr style={{ borderBottom: '1px solid var(--border)', opacity: isActive ? 1 : 0.5 }}>
+        <td style={{ padding: '14px 16px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <div style={{
+              width: 36, height: 36, borderRadius: 10, flexShrink: 0,
+              background: isActive ? `linear-gradient(135deg,${PURPLE},${PINK})` : 'rgba(255,255,255,0.1)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: 14, fontWeight: 900, color: 'white',
+            }}>
+              {m.name[0]}
+            </div>
+            <div>
+              <p style={{ fontWeight: 700, fontSize: 14, margin: 0 }}>{m.name}</p>
+              {!isActive && <span style={{ fontSize: 11, color: ORANGE, fontWeight: 600 }}>Inactief</span>}
+            </div>
+          </div>
+        </td>
+        <td style={{ padding: '14px 16px', color: 'var(--text-secondary)', fontSize: 13 }}>{m.email}</td>
+        <td style={{ padding: '14px 16px' }}>
+          <span style={{
+            background: 'rgba(90,49,244,0.1)', color: PURPLE,
+            padding: '4px 10px', borderRadius: 20, fontSize: 12, fontWeight: 700,
           }}>
-            {m.name[0]}
+            {getMemberDept(m)}
+          </span>
+        </td>
+        <td style={{ padding: '14px 16px', fontWeight: 700 }}>€{getMemberBudget(m)}/mnd</td>
+        <td style={{ padding: '14px 16px', color: 'var(--text-secondary)', fontSize: 13 }}>
+          {m.lastOrder ?? '—'}
+        </td>
+        <td style={{ padding: '14px 16px' }}>
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            {/* Active toggle */}
+            <button
+              onClick={() => toggleActive(m)}
+              title={isActive ? 'Deactiveren' : 'Activeren'}
+              style={{
+                width: 40, height: 22, borderRadius: 11, border: 'none', cursor: 'pointer',
+                background: isActive ? `linear-gradient(90deg,${PURPLE},${PINK})` : 'rgba(255,255,255,0.1)',
+                position: 'relative', transition: 'background 0.2s', flexShrink: 0,
+              }}
+            >
+              <span style={{
+                position: 'absolute', top: 3, width: 16, height: 16, borderRadius: '50%',
+                background: 'white', transition: 'left 0.2s',
+                left: isActive ? 21 : 3,
+              }} />
+            </button>
           </div>
-          <div>
-            <p style={{ fontWeight: 700, fontSize: 14, margin: 0 }}>{m.name}</p>
-            {!m.active && <span style={{ fontSize: 11, color: ORANGE, fontWeight: 600 }}>Inactief</span>}
-          </div>
-        </div>
-      </td>
-      <td style={{ padding: '14px 16px', color: 'var(--text-secondary)', fontSize: 13 }}>{m.email}</td>
-      <td style={{ padding: '14px 16px' }}>
-        <span style={{
-          background: 'rgba(90,49,244,0.1)', color: PURPLE,
-          padding: '4px 10px', borderRadius: 20, fontSize: 12, fontWeight: 700,
-        }}>
-          {m.dept}
-        </span>
-      </td>
-      <td style={{ padding: '14px 16px', fontWeight: 700 }}>€{m.budget}/mnd</td>
-      <td style={{ padding: '14px 16px', color: 'var(--text-secondary)', fontSize: 13 }}>{m.lastOrder}</td>
-      <td style={{ padding: '14px 16px' }}>
-        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-          {/* Active toggle */}
-          <button
-            onClick={() => toggleActive(m.id)}
-            title={m.active ? 'Deactiveren' : 'Activeren'}
-            style={{
-              width: 40, height: 22, borderRadius: 11, border: 'none', cursor: 'pointer',
-              background: m.active ? `linear-gradient(90deg,${PURPLE},${PINK})` : 'rgba(255,255,255,0.1)',
-              position: 'relative', transition: 'background 0.2s', flexShrink: 0,
-            }}
-          >
-            <span style={{
-              position: 'absolute', top: 3, width: 16, height: 16, borderRadius: '50%',
-              background: 'white', transition: 'left 0.2s',
-              left: m.active ? 21 : 3,
-            }} />
-          </button>
-          {/* Remove */}
-          <button
-            onClick={() => removeMember(m.id)}
-            title="Verwijderen"
-            style={{
-              background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)',
-              color: '#ef4444', borderRadius: 8, padding: '5px 10px',
-              cursor: 'pointer', fontSize: 12, fontWeight: 700,
-              fontFamily: 'Outfit, sans-serif',
-            }}
-          >
-            ✕
-          </button>
-        </div>
-      </td>
-    </tr>
-  );
+        </td>
+      </tr>
+    );
+  };
 
   return (
     <div style={{ padding: 'clamp(20px,3vw,40px)', maxWidth: 1050, margin: '0 auto' }}>
@@ -191,7 +278,7 @@ export default function TeamPage() {
             </div>
             <div>
               <label style={labelStyle}>E-mail *</label>
-              <input type="email" value={form.email} onChange={e => set('email', e.target.value)} placeholder="naam@techcorp.nl" style={inputStyle} />
+              <input type="email" value={form.email} onChange={e => set('email', e.target.value)} placeholder="naam@bedrijf.nl" style={inputStyle} />
             </div>
             <div>
               <label style={labelStyle}>Afdeling *</label>
@@ -209,14 +296,16 @@ export default function TeamPage() {
           <div style={{ display: 'flex', gap: 10, marginTop: 18 }}>
             <button
               onClick={addMember}
+              disabled={submitting}
               style={{
                 background: `linear-gradient(135deg,${PURPLE},${PINK})`,
                 color: 'white', border: 'none', borderRadius: 10,
-                padding: '12px 22px', cursor: 'pointer',
+                padding: '12px 22px', cursor: submitting ? 'not-allowed' : 'pointer',
                 fontSize: 14, fontWeight: 700, fontFamily: 'Outfit, sans-serif',
+                opacity: submitting ? 0.7 : 1,
               }}
             >
-              Toevoegen
+              {submitting ? 'Toevoegen…' : 'Toevoegen'}
             </button>
             <button
               onClick={() => { setForm(EMPTY_FORM); setShowForm(false); setFormError(''); }}
@@ -235,32 +324,43 @@ export default function TeamPage() {
 
       {/* Members table */}
       <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 18, overflow: 'hidden' }}>
-        <div style={{ overflowX: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
-            <thead>
-              <tr style={{ borderBottom: '1px solid var(--border)' }}>
-                {['Naam', 'E-mail', 'Afdeling', 'Budget', 'Laatste bestelling', 'Actie'].map(h => (
-                  <th key={h} style={{ padding: '12px 16px', textAlign: 'left', color: 'var(--text-muted)', fontSize: 12, fontWeight: 700, whiteSpace: 'nowrap' }}>{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {active.map(m => <MemberRow key={m.id} m={m} />)}
-              {inactive.length > 0 && (
-                <>
-                  <tr>
-                    <td colSpan={6} style={{ padding: '10px 16px', background: 'rgba(255,255,255,0.02)' }}>
-                      <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 0.8 }}>
-                        Inactief ({inactive.length})
-                      </span>
-                    </td>
-                  </tr>
-                  {inactive.map(m => <MemberRow key={m.id} m={m} />)}
-                </>
-              )}
-            </tbody>
-          </table>
-        </div>
+        {loading ? (
+          <Spinner />
+        ) : error ? (
+          <div style={{ padding: '24px', color: '#ef4444', fontWeight: 600 }}>{error}</div>
+        ) : members.length === 0 ? (
+          <div style={{ padding: '48px 24px', textAlign: 'center', color: 'var(--text-muted)' }}>
+            <p style={{ fontSize: 16, fontWeight: 700, marginBottom: 8 }}>Nog geen teamleden</p>
+            <p style={{ fontSize: 14 }}>Voeg je eerste medewerker toe via de knop hierboven.</p>
+          </div>
+        ) : (
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
+              <thead>
+                <tr style={{ borderBottom: '1px solid var(--border)' }}>
+                  {['Naam', 'E-mail', 'Afdeling', 'Budget', 'Laatste bestelling', 'Actie'].map(h => (
+                    <th key={h} style={{ padding: '12px 16px', textAlign: 'left', color: 'var(--text-muted)', fontSize: 12, fontWeight: 700, whiteSpace: 'nowrap' }}>{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {active.map(m => <MemberRow key={String(m.id)} m={m} />)}
+                {inactive.length > 0 && (
+                  <>
+                    <tr>
+                      <td colSpan={6} style={{ padding: '10px 16px', background: 'rgba(255,255,255,0.02)' }}>
+                        <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 0.8 }}>
+                          Inactief ({inactive.length})
+                        </span>
+                      </td>
+                    </tr>
+                    {inactive.map(m => <MemberRow key={String(m.id)} m={m} />)}
+                  </>
+                )}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </div>
   );
