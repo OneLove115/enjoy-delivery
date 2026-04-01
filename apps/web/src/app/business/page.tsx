@@ -160,9 +160,13 @@ export default function BusinessPage() {
                 <div style={{ fontSize: 64, marginBottom: 20 }}>🎊</div>
                 <h3 style={{ fontSize: 26, fontWeight: 900, marginBottom: 12 }}>Aanvraag ontvangen!</h3>
                 <p style={{ color: 'var(--text-secondary)', fontSize: 16, lineHeight: 1.7, marginBottom: 28 }}>
-                  Bedankt {form.name}! Een account manager van EnJoy Business neemt binnen <strong>24 uur</strong> contact op via {form.email}.
+                  U kunt nu een account aanmaken om toegang te krijgen tot uw Business Dashboard.
                 </p>
-                <Link href="/discover" style={{ display: 'inline-block', background: `linear-gradient(135deg,${PURPLE},${PINK})`, color: 'white', padding: '14px 32px', borderRadius: 12, fontWeight: 800, fontSize: 15, textDecoration: 'none' }}>
+                <Link href="/business-portal" style={{ display: 'inline-block', background: `linear-gradient(135deg,${PURPLE},${PINK})`, color: 'white', padding: '14px 32px', borderRadius: 12, fontWeight: 800, fontSize: 15, textDecoration: 'none', marginBottom: 16 }}>
+                  Account aanmaken →
+                </Link>
+                <br />
+                <Link href="/discover" style={{ color: PURPLE, fontWeight: 700, textDecoration: 'none', fontSize: 14 }}>
                   Ontdek EnJoy →
                 </Link>
               </motion.div>

@@ -121,7 +121,7 @@ export default function BusinessPortalLayout({ children }: { children: React.Rea
         {/* Sidebar header */}
         <div style={{ padding: '28px 24px 20px', borderBottom: '1px solid var(--border)' }}>
           <Link href="/" style={{ textDecoration: 'none', display: 'block', marginBottom: 20 }}>
-            <img src="/logo-enjoy.png" alt="EnJoy" style={{ height: 32 }} />
+            <img src="/logo-enjoy.png" alt="EnJoy" style={{ height: 40 }} />
           </Link>
           <div style={{
             display: 'flex', alignItems: 'center', gap: 12,

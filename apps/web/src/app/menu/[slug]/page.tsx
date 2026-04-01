@@ -263,7 +263,7 @@ export default function MenuPage() {
           <span>←</span><span className="hide-mobile">Ontdekken</span>
         </Link>
         <Link href="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center' }}>
-          <img src="/logo-enjoy.png" alt="EnJoy" style={{ height: 32 }} />
+          <img src="/logo-enjoy.png" alt="EnJoy" style={{ height: 40 }} />
         </Link>
         <button onClick={() => setCartOpen(true)} style={{
           position: 'relative', width: 40, height: 40, borderRadius: 10,

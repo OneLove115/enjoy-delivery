@@ -110,7 +110,7 @@ const RESTAURANT_EMOJIS: Record<string, string> = {
 function EnJoyLogo() {
   return (
     <Link href="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', flexShrink: 0 }}>
-      <img src="/logo-enjoy.png" alt="EnJoy" style={{ height: 32 }} />
+      <img src="/logo-enjoy.png" alt="EnJoy" style={{ height: 40 }} />
     </Link>
   );
 }
@@ -618,7 +618,7 @@ function DiscoverContent() {
           {/* Row 1: Logo + Address pill + Hamburger */}
           <div style={{ padding: '12px 16px 10px', display: 'flex', alignItems: 'center', gap: 10 }}>
             <Link href="/" style={{ textDecoration: 'none', flexShrink: 0 }}>
-              <img src="/logo-enjoy.png" alt="EnJoy" style={{ height: 32 }} />
+              <img src="/logo-enjoy.png" alt="EnJoy" style={{ height: 40 }} />
             </Link>
             <Link href="/" style={{ flex: 1, minWidth: 0, textDecoration: 'none' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 5, background: 'var(--discover-input)', borderRadius: 22, padding: '7px 12px', border: '1px solid var(--border-strong)' }}>

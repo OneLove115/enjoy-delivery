@@ -36,7 +36,7 @@ const select: React.CSSProperties = {
 };
 
 export default function RidersPage() {
-  const [form, setForm] = useState({ firstName: '', lastName: '', email: '', phone: '', city: '', vehicle: '', hours: '', iban: '', password: '', cvFile: null as File | null, agreeCheck: false });
+  const [form, setForm] = useState({ firstName: '', lastName: '', email: '', phone: '', city: '', vehicle: '', hours: '', iban: '', cvFile: null as File | null, agreeCheck: false });
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -50,7 +50,6 @@ export default function RidersPage() {
     setError('');
     try {
       const apiUrl = process.env.NEXT_PUBLIC_VP_DOMAIN || 'https://veloci.online';
-      // Step 1: Submit application
       const res = await fetch(`${apiUrl}/api/riders/apply`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -63,30 +62,13 @@ export default function RidersPage() {
           vehicle: form.vehicle,
           hoursPerWeek: form.hours,
           iban: form.iban,
-          password: form.password,
         }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Aanmelding mislukt');
-
-      // Step 2: Auto-login and redirect to dashboard
-      try {
-        const loginRes = await fetch(`${apiUrl}/api/riders/login`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: form.email, password: form.password }),
-        });
-        const loginData = await loginRes.json();
-        if (loginRes.ok && loginData.token) {
-          localStorage.setItem('enjoy-rider-token', loginData.token);
-          window.location.href = '/rider-portal/dashboard';
-          return;
-        }
-      } catch {}
-      // Fallback: show success if auto-login fails
       setSubmitted(true);
     } catch (err: any) {
-      setError(err.message || 'Er ging iets mis. Probeer opnieuw.');
+      setError(err.message || 'Er ging iets mis.');
     } finally {
       setLoading(false);
     }
@@ -168,13 +150,14 @@ export default function RidersPage() {
                 <div style={{ fontSize: 64, marginBottom: 20 }}>🎉</div>
                 <h3 style={{ fontSize: 26, fontWeight: 900, marginBottom: 12 }}>Aanmelding ontvangen!</h3>
                 <p style={{ color: 'var(--text-secondary)', fontSize: 16, lineHeight: 1.7, marginBottom: 28 }}>
-                  Bedankt {form.firstName}! We verifiëren je gegevens en nemen binnen <strong>24 uur</strong> contact op via {form.email}.
+                  We hebben een e-mail gestuurd naar <strong>{form.email}</strong> om je wachtwoord in te stellen en toegang te krijgen tot je Rider Dashboard.
                 </p>
-                <Link href="/discover" style={{ display: 'inline-block', background: `linear-gradient(135deg,${ORANGE},${PINK})`, color: 'white', padding: '14px 32px', borderRadius: 12, fontWeight: 800, fontSize: 15, textDecoration: 'none' }}>
-                  Ontdek EnJoy →
+                <Link href="/rider-portal" style={{ display: 'inline-block', background: `linear-gradient(135deg,${ORANGE},${PINK})`, color: 'white', padding: '14px 32px', borderRadius: 12, fontWeight: 800, fontSize: 15, textDecoration: 'none', marginBottom: 16 }}>
+                  Ga naar Rider Portal →
                 </Link>
-                <Link href="/rider-portal" style={{ color: PURPLE, fontWeight: 700, textDecoration: 'underline' }}>
-                  Log in op je Rider Portal →
+                <br />
+                <Link href="/discover" style={{ color: PURPLE, fontWeight: 700, textDecoration: 'none', fontSize: 14 }}>
+                  Ontdek EnJoy →
                 </Link>
               </motion.div>
             ) : (
@@ -242,12 +225,6 @@ export default function RidersPage() {
                     IBAN rekeningnummer <span style={{ fontWeight: 400, color: 'var(--text-muted)', opacity: 0.6 }}>(optioneel — voor snellere uitbetaling)</span>
                   </label>
                   <input value={form.iban} onChange={e => set('iban', e.target.value)} placeholder="NL00 BANK 0000 0000 00" style={input} />
-                </div>
-
-                {/* Password */}
-                <div>
-                  <label style={{ fontSize: 13, fontWeight: 700, marginBottom: 6, display: 'block' }}>Kies een wachtwoord *</label>
-                  <input type="password" required minLength={8} value={form.password} onChange={e => set('password', e.target.value)} placeholder="Min. 8 tekens" style={input} />
                 </div>
 
                 {/* CV Upload */}

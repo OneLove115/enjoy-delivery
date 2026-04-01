@@ -571,7 +571,7 @@ export function JoyaChatWidget({ triggerOpen = 0 }: { triggerOpen?: number }) {
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
               <span style={{ color: '#fff', fontWeight: 800, fontSize: 15 }}>Joya</span>
               <span translate="no" style={{ fontSize: 11, fontWeight: 900, color: 'rgba(255,255,255,0.55)', letterSpacing: '0.5px', display: 'inline-flex', alignItems: 'center', gap: 3 }}>
-                by <img src="/logo-enjoy.png" alt="EnJoy" style={{ height: 14 }} />
+                by <img src="/logo-enjoy.png" alt="EnJoy" style={{ height: 18 }} />
               </span>
             </div>
             <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: 11 }}>
