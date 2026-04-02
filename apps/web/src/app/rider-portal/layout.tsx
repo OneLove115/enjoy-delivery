@@ -66,29 +66,44 @@ export default function RiderPortalLayout({ children }: { children: React.ReactN
   const pathname = usePathname();
   const [checked, setChecked] = useState(false);
 
-  // Login page does not use this layout shell
+  // Login page and set-password page do not use this layout shell
   const isLoginPage = pathname === '/rider-portal';
+  const isSetPasswordPage = pathname === '/rider-portal/set-password';
 
   useEffect(() => {
-    if (isLoginPage) {
+    if (isLoginPage || isSetPasswordPage) {
       setChecked(true);
       return;
     }
     const token = typeof window !== 'undefined' ? localStorage.getItem('enjoy-rider-token') : null;
     if (!token) {
       router.replace('/rider-portal');
-    } else {
-      setChecked(true);
+      return;
     }
-  }, [isLoginPage, router]);
+    // Validate token by calling status API
+    const apiUrl = process.env.NEXT_PUBLIC_VP_DOMAIN || 'https://veloci.online';
+    fetch(`${apiUrl}/api/riders/status`, { headers: { Authorization: `Bearer ${token}` } })
+      .then(r => {
+        if (!r.ok) {
+          localStorage.removeItem('enjoy-rider-token');
+          router.replace('/rider-portal?expired=true');
+        } else {
+          setChecked(true);
+        }
+      })
+      .catch(() => {
+        localStorage.removeItem('enjoy-rider-token');
+        router.replace('/rider-portal?expired=true');
+      });
+  }, [pathname, router, isLoginPage, isSetPasswordPage]);
 
   const handleLogout = () => {
     localStorage.removeItem('enjoy-rider-token');
     router.push('/rider-portal');
   };
 
-  // Login page: render plain (no sidebar)
-  if (isLoginPage) {
+  // Login / set-password page: render plain (no sidebar)
+  if (isLoginPage || isSetPasswordPage) {
     return <>{children}</>;
   }
 

@@ -85,8 +85,13 @@ export default function BusinessPortalLayout({ children }: { children: React.Rea
   const [company, setCompany] = useState('TechCorp BV');
   const [mounted, setMounted] = useState(false);
 
+  const isLoginPage = pathname === '/business-portal';
+
   useEffect(() => {
     setMounted(true);
+
+    if (isLoginPage) return;
+
     const token = localStorage.getItem('enjoy-business-token');
     if (!token) {
       router.replace('/business-portal');
@@ -94,7 +99,23 @@ export default function BusinessPortalLayout({ children }: { children: React.Rea
     }
     const storedCompany = localStorage.getItem('enjoy-business-company');
     if (storedCompany) setCompany(storedCompany);
-  }, [router]);
+
+    // Validate token by calling dashboard API
+    const apiUrl = process.env.NEXT_PUBLIC_VP_DOMAIN || 'https://veloci.online';
+    fetch(`${apiUrl}/api/business-portal/dashboard`, { headers: { Authorization: `Bearer ${token}` } })
+      .then(r => {
+        if (!r.ok) {
+          localStorage.removeItem('enjoy-business-token');
+          localStorage.removeItem('enjoy-business-company');
+          router.replace('/business-portal?expired=true');
+        }
+      })
+      .catch(() => {
+        localStorage.removeItem('enjoy-business-token');
+        localStorage.removeItem('enjoy-business-company');
+        router.replace('/business-portal?expired=true');
+      });
+  }, [router, isLoginPage]);
 
   const handleLogout = () => {
     localStorage.removeItem('enjoy-business-token');
@@ -105,6 +126,11 @@ export default function BusinessPortalLayout({ children }: { children: React.Rea
   if (!mounted) return null;
 
   const isActive = (href: string) => pathname === href || pathname.startsWith(href + '/');
+
+  // Login page: render plain (no sidebar)
+  if (isLoginPage) {
+    return <>{children}</>;
+  }
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg-page)', fontFamily: 'Outfit, sans-serif', color: 'var(--text-primary)' }}>
