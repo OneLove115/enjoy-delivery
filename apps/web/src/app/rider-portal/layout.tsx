@@ -139,7 +139,7 @@ export default function RiderPortalLayout({ children }: { children: React.ReactN
         {/* Logo */}
         <div style={{ padding: '24px 24px 20px', borderBottom: '1px solid var(--border)' }}>
           <Link href="/" style={{ textDecoration: 'none' }}>
-            <img src="/logo-enjoy.png" alt="EnJoy" style={{ height: 40 }} />
+            <img src="/logo-enjoy.png" alt="EnJoy" style={{ height: 40, width: 'auto' }} width={128} height={40} />
           </Link>
           <div style={{ marginTop: 6, display: 'flex', alignItems: 'center', gap: 6 }}>
             <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#22c55e' }} />

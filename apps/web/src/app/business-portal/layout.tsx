@@ -123,7 +123,15 @@ export default function BusinessPortalLayout({ children }: { children: React.Rea
     router.push('/business-portal');
   };
 
-  if (!mounted) return null;
+  if (!mounted) return (
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-page)', color: 'var(--text-secondary)', fontFamily: 'Outfit, sans-serif' }}>
+      <div style={{ textAlign: 'center' }}>
+        <div style={{ display: 'inline-block', width: 40, height: 40, border: '3px solid rgba(90,49,244,0.2)', borderTopColor: '#5A31F4', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+        <style>{'@keyframes spin { to { transform: rotate(360deg); } }'}</style>
+        <p style={{ marginTop: 16, fontSize: 14 }}>Laden...</p>
+      </div>
+    </div>
+  );
 
   const isActive = (href: string) => pathname === href || pathname.startsWith(href + '/');
 
@@ -147,7 +155,7 @@ export default function BusinessPortalLayout({ children }: { children: React.Rea
         {/* Sidebar header */}
         <div style={{ padding: '28px 24px 20px', borderBottom: '1px solid var(--border)' }}>
           <Link href="/" style={{ textDecoration: 'none', display: 'block', marginBottom: 20 }}>
-            <img src="/logo-enjoy.png" alt="EnJoy" style={{ height: 40 }} />
+            <img src="/logo-enjoy.png" alt="EnJoy" style={{ height: 40, width: 'auto' }} width={128} height={40} />
           </Link>
           <div style={{
             display: 'flex', alignItems: 'center', gap: 12,

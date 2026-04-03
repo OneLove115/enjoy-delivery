@@ -54,7 +54,7 @@ export function Footer() {
           {/* Brand */}
           <div style={{ maxWidth: 260, marginBottom: 8 }}>
             <Link href="/" style={{ textDecoration: 'none' }}>
-              <img src="/logo-enjoy.png" alt="EnJoy" style={{ height: 40 }} />
+              <img src="/logo-enjoy.png" alt="EnJoy" style={{ height: 40, width: 'auto' }} width={128} height={40} />
             </Link>
             <p style={{ color: 'var(--text-muted)', marginTop: 12, fontSize: 14, lineHeight: 1.6 }}>
               Elite gourmet delivery. Royally crafted, impeccably delivered.
@@ -85,12 +85,21 @@ export function Footer() {
                   {title}
                 </h4>
                 {links.map(l => (
-                  <Link key={l.href} href={l.href} style={{
-                    display: 'block', color: 'var(--text-muted)', fontSize: 14,
-                    marginBottom: 10, transition: 'color 0.2s',
-                  }}>
-                    {l.label}
-                  </Link>
+                  l.href.startsWith('http') ? (
+                    <a key={l.href} href={l.href} target="_blank" rel="noopener noreferrer" style={{
+                      display: 'block', color: 'var(--text-muted)', fontSize: 14,
+                      marginBottom: 10, transition: 'color 0.2s', textDecoration: 'none',
+                    }}>
+                      {l.label}
+                    </a>
+                  ) : (
+                    <Link key={l.href} href={l.href} style={{
+                      display: 'block', color: 'var(--text-muted)', fontSize: 14,
+                      marginBottom: 10, transition: 'color 0.2s',
+                    }}>
+                      {l.label}
+                    </Link>
+                  )
                 ))}
               </div>
             ))}

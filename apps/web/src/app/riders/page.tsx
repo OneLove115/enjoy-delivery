@@ -36,7 +36,7 @@ const select: React.CSSProperties = {
 };
 
 export default function RidersPage() {
-  const [form, setForm] = useState({ firstName: '', lastName: '', email: '', phone: '', city: '', vehicle: '', hours: '', iban: '', cvFile: null as File | null, agreeCheck: false });
+  const [form, setForm] = useState({ firstName: '', lastName: '', email: '', phone: '', city: '', vehicle: '', hours: '', iban: '', agreeCheck: false });
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -46,6 +46,13 @@ export default function RidersPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.agreeCheck) return;
+    if (form.iban && form.iban.trim().length > 0) {
+      const cleaned = form.iban.replace(/\s/g, '').toUpperCase();
+      if (cleaned.length < 15 || cleaned.length > 34 || !/^[A-Z]{2}\d{2}/.test(cleaned)) {
+        setError('Voer een geldig IBAN-nummer in (bijv. NL00 ABCD 0123 4567 89)');
+        return;
+      }
+    }
     setLoading(true);
     setError('');
     try {
@@ -224,13 +231,7 @@ export default function RidersPage() {
                   <label style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-muted)', display: 'block', marginBottom: 6 }}>
                     IBAN rekeningnummer <span style={{ fontWeight: 400, color: 'var(--text-muted)', opacity: 0.6 }}>(optioneel — voor snellere uitbetaling)</span>
                   </label>
-                  <input value={form.iban} onChange={e => set('iban', e.target.value)} placeholder="NL00 BANK 0000 0000 00" style={input} />
-                </div>
-
-                {/* CV Upload */}
-                <div>
-                  <label style={{ fontSize: 13, fontWeight: 700, marginBottom: 6, display: 'block' }}>Upload je CV (PDF, optioneel)</label>
-                  <input type="file" accept=".pdf,.doc,.docx" onChange={e => setForm(f => ({ ...f, cvFile: e.target.files?.[0] || null }))} style={{ ...input, padding: '10px 18px' }} />
+                  <input value={form.iban} onChange={e => set('iban', e.target.value)} placeholder="NL00 ABCD 0123 4567 89" style={input} />
                 </div>
 
                 {/* Agreement */}

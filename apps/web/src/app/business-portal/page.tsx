@@ -39,6 +39,12 @@ function BusinessPortalForm() {
   const isExpired = searchParams.get('expired') === 'true';
   const initialTab = searchParams.get('tab') === 'signup' ? 'signup' : 'login';
 
+  useEffect(() => {
+    if (isExpired) {
+      window.history.replaceState({}, '', '/business-portal');
+    }
+  }, [isExpired]);
+
   const [tab, setTab] = useState<'login' | 'signup'>(initialTab);
 
   // Login state

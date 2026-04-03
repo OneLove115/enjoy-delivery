@@ -52,31 +52,10 @@ function formatDate(iso: string): string {
   }
 }
 
-const mockRestaurant = {
-  name: 'Pizzeria Napoli',
-  locatie: 'Amsterdam Centrum',
-  contact: 'Marco',
-  telefoon: '+31 20 123 4567',
-  startDatum: '15 april 2026',
-};
-
-const mockShifts = [
-  { dag: 'Ma 14 apr', tijd: '17:00 - 21:00', gebied: 'Amsterdam Zuid', status: 'Bevestigd' as const },
-  { dag: 'Di 15 apr', tijd: '12:00 - 15:00', gebied: 'Amsterdam Centrum', status: 'Open' as const },
-  { dag: 'Do 17 apr', tijd: '17:00 - 22:00', gebied: 'Amsterdam West', status: 'Bevestigd' as const },
-];
-
-const mockEarnings = {
-  dezeWeek: '€187,50',
-  dezeMaand: '€612,00',
-  totaal: '€2.450,00',
-  weekProgress: 62, // percentage toward weekly goal (€300)
-};
-
-const mockStats = [
-  { label: 'Bestellingen vandaag', value: '8' },
-  { label: 'Gem. levertijd', value: '22 min' },
-  { label: 'Beoordeling', value: '4.8/5' },
+const quickStats = [
+  { label: 'Bestellingen vandaag', value: '—' },
+  { label: 'Gem. levertijd', value: '—' },
+  { label: 'Beoordeling', value: '—' },
 ];
 
 function StatusStepper({ status }: { status: ApplicationStatus }) {
@@ -210,9 +189,9 @@ export default function RiderDashboardPage() {
 
               {/* Quick stats row */}
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 16, marginBottom: 24 }}>
-                {mockStats.map(stat => (
+                {quickStats.map(stat => (
                   <div key={stat.label} style={{ background: 'var(--bg-card)', borderRadius: 16, border: '1px solid var(--border)', padding: '20px 22px' }}>
-                    <p style={{ fontSize: 28, fontWeight: 950, letterSpacing: -1, margin: '0 0 4px', background: `linear-gradient(135deg,${PURPLE},${PINK})`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+                    <p style={{ fontSize: 28, fontWeight: 950, letterSpacing: -1, margin: '0 0 4px', color: 'var(--text-muted)' }}>
                       {stat.value}
                     </p>
                     <p style={{ fontSize: 12, color: 'var(--text-muted)', fontWeight: 600, margin: 0 }}>{stat.label}</p>
@@ -231,50 +210,37 @@ export default function RiderDashboardPage() {
                 {/* Earnings card */}
                 <div style={card}>
                   <p style={sectionLabel}>Verdiensten</p>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                    {[
-                      { label: 'Deze week', value: mockEarnings.dezeWeek, highlight: true },
-                      { label: 'Deze maand', value: mockEarnings.dezeMaand, highlight: false },
-                      { label: 'Totaal', value: mockEarnings.totaal, highlight: false },
-                    ].map(item => (
-                      <div key={item.label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <span style={{ fontSize: 14, color: 'var(--text-secondary)', fontWeight: 600 }}>{item.label}</span>
-                        <span style={{ fontSize: item.highlight ? 22 : 16, fontWeight: 800, color: item.highlight ? 'var(--text-primary)' : 'var(--text-secondary)' }}>{item.value}</span>
-                      </div>
-                    ))}
-
-                    {/* Progress bar: weekly goal */}
-                    <div style={{ marginTop: 8 }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-                        <span style={{ fontSize: 12, color: 'var(--text-muted)', fontWeight: 600 }}>Weekdoel (€300)</span>
-                        <span style={{ fontSize: 12, color: PURPLE, fontWeight: 700 }}>{mockEarnings.weekProgress}%</span>
-                      </div>
-                      <div style={{ height: 6, background: 'rgba(255,255,255,0.08)', borderRadius: 99, overflow: 'hidden' }}>
-                        <div style={{ height: '100%', width: `${mockEarnings.weekProgress}%`, background: `linear-gradient(90deg,${PURPLE},${PINK})`, borderRadius: 99 }} />
-                      </div>
-                    </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 12, padding: '24px 0', textAlign: 'center' }}>
+                    <div style={{ fontSize: 36 }}>💰</div>
+                    <p style={{ fontSize: 15, fontWeight: 700, margin: 0 }}>Nog niet beschikbaar</p>
+                    <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: 0, lineHeight: 1.6 }}>
+                      Verdiensten worden beschikbaar zodra je actief bent.
+                    </p>
                   </div>
                 </div>
 
               </div>
 
-              {/* Assigned restaurant (shown when matched/active) */}
+              {/* Assigned restaurant placeholder */}
               {(rider.status === 'matched' || rider.status === 'active') && (
                 <div style={{ ...card, background: `linear-gradient(135deg, ${PURPLE}10, ${PINK}08)`, border: `1px solid ${PURPLE}25` }}>
                   <p style={sectionLabel}>Gekoppeld restaurant</p>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 20 }}>
-                    {[
-                      { label: 'Restaurant', value: mockRestaurant.name },
-                      { label: 'Locatie', value: mockRestaurant.locatie },
-                      { label: 'Contact', value: mockRestaurant.contact },
-                      { label: 'Telefoon', value: mockRestaurant.telefoon },
-                      { label: 'Startdatum', value: mockRestaurant.startDatum },
-                    ].map(item => (
-                      <div key={item.label}>
-                        <p style={{ fontSize: 12, color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 4 }}>{item.label}</p>
-                        <p style={{ fontSize: 15, fontWeight: 700, margin: 0 }}>{item.value}</p>
-                      </div>
-                    ))}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                    <div style={{ fontSize: 32, flexShrink: 0 }}>🍕</div>
+                    <p style={{ fontSize: 14, color: 'var(--text-secondary)', margin: 0, lineHeight: 1.6 }}>
+                      Je wordt binnenkort gekoppeld aan een restaurant. We nemen contact met je op zodra dit is geregeld.
+                    </p>
+                  </div>
+                </div>
+              )}
+              {(rider.status === 'pending' || rider.status === 'in_review') && (
+                <div style={{ ...card }}>
+                  <p style={sectionLabel}>Gekoppeld restaurant</p>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                    <div style={{ fontSize: 32, flexShrink: 0 }}>🍕</div>
+                    <p style={{ fontSize: 14, color: 'var(--text-secondary)', margin: 0, lineHeight: 1.6 }}>
+                      Je wordt binnenkort gekoppeld aan een restaurant.
+                    </p>
                   </div>
                 </div>
               )}
@@ -282,27 +248,12 @@ export default function RiderDashboardPage() {
               {/* Upcoming shifts */}
               <div style={card}>
                 <p style={sectionLabel}>Aankomende diensten</p>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr auto', gap: 12, padding: '0 0 10px', borderBottom: '1px solid var(--border)', marginBottom: 4 }}>
-                    {['Dag', 'Tijd', 'Gebied', 'Status'].map(h => (
-                      <span key={h} style={{ fontSize: 11, fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 0.8 }}>{h}</span>
-                    ))}
-                  </div>
-                  {mockShifts.map((shift, i) => (
-                    <div key={i} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr auto', gap: 12, padding: '14px 0', borderBottom: i < mockShifts.length - 1 ? '1px solid var(--border)' : 'none', alignItems: 'center' }}>
-                      <span style={{ fontSize: 14, fontWeight: 700 }}>{shift.dag}</span>
-                      <span style={{ fontSize: 14, color: 'var(--text-secondary)' }}>{shift.tijd}</span>
-                      <span style={{ fontSize: 14, color: 'var(--text-secondary)' }}>{shift.gebied}</span>
-                      <span style={{
-                        fontSize: 12, fontWeight: 700, padding: '4px 10px', borderRadius: 99,
-                        background: shift.status === 'Bevestigd' ? `${PURPLE}20` : `${ORANGE}20`,
-                        color: shift.status === 'Bevestigd' ? PURPLE : ORANGE,
-                        whiteSpace: 'nowrap',
-                      }}>
-                        {shift.status}
-                      </span>
-                    </div>
-                  ))}
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 12, padding: '24px 0', textAlign: 'center' }}>
+                  <div style={{ fontSize: 36 }}>📅</div>
+                  <p style={{ fontSize: 15, fontWeight: 700, margin: 0 }}>Nog geen diensten gepland</p>
+                  <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: 0, lineHeight: 1.6 }}>
+                    Diensten worden beschikbaar zodra je bent goedgekeurd.
+                  </p>
                 </div>
               </div>
 

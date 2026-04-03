@@ -37,6 +37,15 @@ interface DashboardData {
   nextEvent?: NextEvent | null;
 }
 
+const statusColor = (s: string) => {
+  switch (s.toLowerCase()) {
+    case 'bezorgd': case 'delivered': case 'completed': return { bg: 'rgba(34,197,94,0.12)', color: '#22c55e' };
+    case 'pending': case 'in behandeling': return { bg: 'rgba(234,179,8,0.12)', color: '#ca8a04' };
+    case 'cancelled': case 'geannuleerd': return { bg: 'rgba(239,68,68,0.12)', color: '#ef4444' };
+    default: return { bg: 'rgba(148,163,184,0.12)', color: '#94a3b8' };
+  }
+};
+
 function Spinner() {
   return (
     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 200 }}>
@@ -244,7 +253,7 @@ export default function BusinessDashboardPage() {
                       <td style={{ padding: '14px 16px', fontWeight: 700 }}>{o.amount}</td>
                       <td style={{ padding: '14px 16px' }}>
                         <span style={{
-                          background: 'rgba(34,197,94,0.12)', color: '#22c55e',
+                          background: statusColor(o.status).bg, color: statusColor(o.status).color,
                           padding: '4px 10px', borderRadius: 20, fontSize: 12, fontWeight: 700,
                         }}>
                           {o.status}

@@ -48,13 +48,13 @@ function SetPasswordForm() {
     }
   };
 
-  if (!token) {
+  if (!token || token.trim().length < 20) {
     return (
       <div style={{ textAlign: 'center', padding: '80px 20px' }}>
         <div style={{ fontSize: 48, marginBottom: 16 }}>⚠️</div>
         <h2 style={{ fontSize: 24, fontWeight: 800, marginBottom: 12 }}>Ongeldige link</h2>
         <p style={{ color: 'var(--text-secondary)', marginBottom: 24 }}>Deze link is ongeldig of verlopen.</p>
-        <Link href="/rider-portal" style={{ color: PURPLE, fontWeight: 700 }}>Ga naar Rider Portal →</Link>
+        <Link href="/rider-portal" style={{ color: PURPLE, fontWeight: 700, textDecoration: 'none' }}>Ga naar Rider Portal →</Link>
       </div>
     );
   }

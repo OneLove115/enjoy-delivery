@@ -1,5 +1,5 @@
 'use client';
-import { useState, Suspense } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Nav } from '../components/Nav';
@@ -26,6 +26,12 @@ function RiderPortalForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const isExpired = searchParams.get('expired') === 'true';
+
+  useEffect(() => {
+    if (isExpired) {
+      window.history.replaceState({}, '', '/rider-portal');
+    }
+  }, [isExpired]);
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
