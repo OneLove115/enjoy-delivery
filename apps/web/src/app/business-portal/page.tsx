@@ -9,7 +9,7 @@ const PURPLE = '#5A31F4';
 const PINK = '#FF0080';
 const ORANGE = '#FF6B00';
 
-const API_URL = process.env.NEXT_PUBLIC_VP_DOMAIN || 'https://veloci.online';
+const API_URL = process.env.NEXT_PUBLIC_VP_DOMAIN || 'https://www.veloci.online';
 
 const inputStyle: React.CSSProperties = {
   width: '100%',

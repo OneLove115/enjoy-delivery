@@ -30,7 +30,7 @@ function SetPasswordForm() {
     setLoading(true);
     setError('');
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_VP_DOMAIN || 'https://veloci.online';
+      const apiUrl = process.env.NEXT_PUBLIC_VP_DOMAIN || 'https://www.veloci.online';
       const res = await fetch(`${apiUrl}/api/riders/set-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

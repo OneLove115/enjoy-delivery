@@ -12,6 +12,7 @@ const PINK = '#FF0080';
 type Order = {
   id: string;
   restaurantName: string;
+  restaurantSlug?: string;
   total: number;
   status: string;
   createdAt: string;
@@ -62,21 +63,40 @@ export default function AccountOrdersPage() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             {orders.map((o, i) => (
               <motion.div key={o.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.06 }}>
-                <Link href={`/order/${o.id}`} style={{ display: 'block', padding: '24px 28px', background: 'var(--bg-card)', borderRadius: 20, border: '1px solid var(--border)', textDecoration: 'none', color: 'var(--text-primary)' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
-                    <div>
-                      <h3 style={{ fontSize: 18, fontWeight: 800, marginBottom: 4 }}>{o.restaurantName}</h3>
-                      <p style={{ color: 'var(--text-muted)', fontSize: 14 }}>{new Date(o.createdAt).toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
+                <div style={{ padding: '24px 28px', background: 'var(--bg-card)', borderRadius: 20, border: '1px solid var(--border)', color: 'var(--text-primary)' }}>
+                  <Link href={`/order/${o.id}`} style={{ display: 'block', textDecoration: 'none', color: 'inherit' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
+                      <div>
+                        <h3 style={{ fontSize: 18, fontWeight: 800, marginBottom: 4 }}>{o.restaurantName}</h3>
+                        <p style={{ color: 'var(--text-muted)', fontSize: 14 }}>{new Date(o.createdAt).toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
+                      </div>
+                      <div style={{ textAlign: 'right' }}>
+                        <div style={{ fontSize: 18, fontWeight: 800, marginBottom: 4 }}>€{(o.total / 100).toFixed(2)}</div>
+                        <span style={{ fontSize: 12, padding: '3px 10px', borderRadius: 20, background: `${statusColors[o.status] ?? '#888'}20`, color: statusColors[o.status] ?? '#888', fontWeight: 700 }}>
+                          {o.status.replace('_', ' ')}
+                        </span>
+                      </div>
                     </div>
-                    <div style={{ textAlign: 'right' }}>
-                      <div style={{ fontSize: 18, fontWeight: 800, marginBottom: 4 }}>€{(o.total / 100).toFixed(2)}</div>
-                      <span style={{ fontSize: 12, padding: '3px 10px', borderRadius: 20, background: `${statusColors[o.status] ?? '#888'}20`, color: statusColors[o.status] ?? '#888', fontWeight: 700 }}>
-                        {o.status.replace('_', ' ')}
-                      </span>
-                    </div>
+                    <p style={{ color: 'var(--text-muted)', fontSize: 14 }}>{o.items.map(it => `${it.quantity}× ${it.name}`).join(', ')}</p>
+                  </Link>
+                  <div style={{ marginTop: 16, display: 'flex', justifyContent: 'flex-end' }}>
+                    <Link
+                      href={o.restaurantSlug ? `/menu/${o.restaurantSlug}` : '/discover'}
+                      style={{
+                        display: 'inline-block',
+                        background: `linear-gradient(135deg,${PURPLE},${PINK})`,
+                        color: 'white',
+                        padding: '10px 22px',
+                        borderRadius: 12,
+                        fontSize: 14,
+                        fontWeight: 700,
+                        textDecoration: 'none',
+                      }}
+                    >
+                      Reorder
+                    </Link>
                   </div>
-                  <p style={{ color: 'var(--text-muted)', fontSize: 14 }}>{o.items.map(it => `${it.quantity}× ${it.name}`).join(', ')}</p>
-                </Link>
+                </div>
               </motion.div>
             ))}
           </div>

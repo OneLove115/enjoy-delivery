@@ -101,7 +101,7 @@ export default function BusinessPortalLayout({ children }: { children: React.Rea
     if (storedCompany) setCompany(storedCompany);
 
     // Validate token by calling dashboard API
-    const apiUrl = process.env.NEXT_PUBLIC_VP_DOMAIN || 'https://veloci.online';
+    const apiUrl = process.env.NEXT_PUBLIC_VP_DOMAIN || 'https://www.veloci.online';
     fetch(`${apiUrl}/api/business-portal/dashboard`, { headers: { Authorization: `Bearer ${token}` } })
       .then(r => {
         if (!r.ok) {

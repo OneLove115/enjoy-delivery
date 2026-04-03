@@ -57,7 +57,7 @@ export default function RiderStatusPage() {
       return;
     }
 
-    const apiUrl = process.env.NEXT_PUBLIC_VP_DOMAIN || 'https://veloci.online';
+    const apiUrl = process.env.NEXT_PUBLIC_VP_DOMAIN || 'https://www.veloci.online';
     fetch(`${apiUrl}/api/riders/status`, {
       headers: { Authorization: `Bearer ${token}` },
     })

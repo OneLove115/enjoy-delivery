@@ -15,7 +15,7 @@ const sections: Record<string, { label: string; href: string }[]> = {
     { label: 'Add your restaurant', href: '/partners' },
     { label: 'Ride with us',        href: '/riders' },
     { label: 'Business orders',     href: '/business' },
-    { label: 'Referral Program',    href: 'https://veloci.online/referral' },
+    { label: 'Referral Program',    href: 'https://www.veloci.online/referral' },
   ],
   Company: [
     { label: 'About us', href: '/about' },

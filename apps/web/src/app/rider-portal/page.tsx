@@ -43,7 +43,7 @@ function RiderPortalForm() {
     setLoading(true);
     setError('');
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_VP_DOMAIN || 'https://veloci.online';
+      const apiUrl = process.env.NEXT_PUBLIC_VP_DOMAIN || 'https://www.veloci.online';
       const res = await fetch(`${apiUrl}/api/riders/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -54,7 +54,12 @@ function RiderPortalForm() {
       localStorage.setItem('enjoy-rider-token', data.token);
       router.push('/rider-portal/dashboard');
     } catch (err: any) {
-      setError(err.message || 'Er ging iets mis. Probeer opnieuw.');
+      const msg = err?.message || '';
+      if (msg.includes('fetch') || msg.includes('network') || msg.includes('CORS')) {
+        setError('Verbinding mislukt. Controleer je internetverbinding en probeer opnieuw.');
+      } else {
+        setError(msg || 'Er ging iets mis. Probeer opnieuw.');
+      }
     } finally {
       setLoading(false);
     }
