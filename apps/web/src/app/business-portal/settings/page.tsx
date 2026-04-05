@@ -152,6 +152,7 @@ export default function SettingsPage() {
     padding: '12px 16px', color: 'var(--text-primary)',
     fontSize: 15, fontFamily: 'Outfit, sans-serif', outline: 'none',
     boxSizing: 'border-box',
+    transition: 'border-color 0.2s, box-shadow 0.2s, background 0.2s',
   };
 
   const labelStyle: React.CSSProperties = {
@@ -159,16 +160,34 @@ export default function SettingsPage() {
     display: 'block', marginBottom: 6, textTransform: 'uppercase', letterSpacing: 0.5,
   };
 
-  const Section = ({ title, children }: { title: string; children: React.ReactNode }) => (
-    <div style={{
-      background: 'var(--bg-card)', border: '1px solid var(--border)',
-      borderRadius: 18, overflow: 'hidden', marginBottom: 20,
-    }}>
-      <div style={{ padding: '18px 24px', borderBottom: '1px solid var(--border)', background: 'rgba(255,255,255,0.02)' }}>
+  // inject focus ring styles
+  useEffect(() => {
+    if (document.getElementById('biz-settings-focus')) return;
+    const style = document.createElement('style');
+    style.id = 'biz-settings-focus';
+    style.textContent = `
+      .biz-input:focus { border-color: ${PURPLE} !important; box-shadow: 0 0 0 3px ${PURPLE}22 !important; background: rgba(90,49,244,0.04) !important; }
+    `;
+    document.head.appendChild(style);
+  }, []);
+
+  const Section = ({ title, icon, children }: { title: string; icon: string; children: React.ReactNode }) => (
+    <motion.div
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      whileHover={{ boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }}
+      style={{
+        background: 'var(--bg-card)', border: '1px solid var(--border)',
+        borderRadius: 18, overflow: 'hidden', marginBottom: 20,
+        transition: 'box-shadow 0.2s',
+      }}
+    >
+      <div style={{ padding: '18px 24px', borderBottom: '1px solid var(--border)', background: 'rgba(255,255,255,0.02)', display: 'flex', alignItems: 'center', gap: 10 }}>
+        <span style={{ fontSize: 18 }}>{icon}</span>
         <h2 style={{ fontSize: 15, fontWeight: 800, margin: 0 }}>{title}</h2>
       </div>
       <div style={{ padding: '24px' }}>{children}</div>
-    </div>
+    </motion.div>
   );
 
   if (loading) return <SettingsSkeleton />;
@@ -183,7 +202,9 @@ export default function SettingsPage() {
 
       <div style={{ marginBottom: 28 }}>
         <h1 style={{ fontSize: 'clamp(22px,4vw,30px)', fontWeight: 950, letterSpacing: -0.5, margin: '0 0 6px' }}>
-          Instellingen
+          <span style={{ background: `linear-gradient(135deg,${PURPLE},${PINK})`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+            Instellingen
+          </span>
         </h1>
         <p style={{ color: 'var(--text-muted)', fontSize: 14, margin: 0 }}>
           Beheer je bedrijfsinformatie en voorkeuren
@@ -196,41 +217,41 @@ export default function SettingsPage() {
         </div>
       )}
 
-      <Section title="Bedrijfsinformatie">
+      <Section title="Bedrijfsinformatie" icon="🏢">
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(220px,1fr))', gap: 16 }}>
           <div>
             <label style={labelStyle}>Bedrijfsnaam</label>
-            <input value={form.companyName} onChange={e => set('companyName', e.target.value)} style={inputStyle} />
+            <input value={form.companyName} onChange={e => set('companyName', e.target.value)} className="biz-input" style={inputStyle} />
           </div>
           <div style={{ gridColumn: '1 / -1' }}>
             <label style={labelStyle}>Adres</label>
-            <input value={form.address} onChange={e => set('address', e.target.value)} style={inputStyle} />
+            <input value={form.address} onChange={e => set('address', e.target.value)} className="biz-input" style={inputStyle} />
           </div>
           <div>
             <label style={labelStyle}>KVK-nummer</label>
-            <input value={form.kvk} onChange={e => set('kvk', e.target.value)} style={inputStyle} />
+            <input value={form.kvk} onChange={e => set('kvk', e.target.value)} className="biz-input" style={inputStyle} />
           </div>
           <div>
             <label style={labelStyle}>BTW-nummer</label>
-            <input value={form.btw} onChange={e => set('btw', e.target.value)} style={inputStyle} />
+            <input value={form.btw} onChange={e => set('btw', e.target.value)} className="biz-input" style={inputStyle} />
           </div>
         </div>
       </Section>
 
-      <Section title="Facturatie">
+      <Section title="Facturatie" icon="📄">
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(220px,1fr))', gap: 16 }}>
           <div>
             <label style={labelStyle}>Factuur e-mail</label>
-            <input type="email" value={form.billingEmail} onChange={e => set('billingEmail', e.target.value)} style={inputStyle} />
+            <input type="email" value={form.billingEmail} onChange={e => set('billingEmail', e.target.value)} className="biz-input" style={inputStyle} />
           </div>
           <div>
             <label style={labelStyle}>Standaard bezorgadres</label>
-            <input value={form.deliveryAddress} onChange={e => set('deliveryAddress', e.target.value)} style={inputStyle} />
+            <input value={form.deliveryAddress} onChange={e => set('deliveryAddress', e.target.value)} className="biz-input" style={inputStyle} />
           </div>
         </div>
       </Section>
 
-      <Section title="Meldingsinstellingen">
+      <Section title="Meldingsinstellingen" icon="🔔">
         <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
           {NOTIF_OPTIONS.map((opt, i) => (
             <div
