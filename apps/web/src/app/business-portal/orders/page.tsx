@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
+import { motion } from 'framer-motion';
 
 const PURPLE = '#5A31F4';
 const PINK = '#FF0080';
@@ -25,16 +26,23 @@ const STATUS_COLORS: Record<string, { bg: string; color: string }> = {
   In_behandeling:  { bg: `rgba(90,49,244,0.12)`,    color: PURPLE },
 };
 
-function Spinner() {
+function TableSkeleton() {
   return (
-    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '60px 0' }}>
-      <div style={{
-        width: 32, height: 32, borderRadius: '50%',
-        border: `3px solid rgba(90,49,244,0.15)`,
-        borderTopColor: PURPLE,
-        animation: 'spin 0.7s linear infinite',
-      }} />
-      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+    <div style={{ padding: 0 }}>
+      <style>{`@keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }`}</style>
+      {/* Header row skeleton */}
+      <div style={{ padding: '14px 16px', borderBottom: '1px solid var(--border)', display: 'flex', gap: 24 }}>
+        {[60, 80, 100, 70, 60, 80, 50].map((w, j) => (
+          <div key={j} style={{ height: 12, width: w, borderRadius: 6, animation: 'shimmer 1.8s infinite', backgroundImage: 'linear-gradient(90deg, var(--bg-elevated) 25%, var(--border) 50%, var(--bg-elevated) 75%)', backgroundSize: '200% 100%' }} />
+        ))}
+      </div>
+      {[0,1,2,3,4].map(i => (
+        <div key={i} style={{ padding: '16px 16px', borderBottom: '1px solid var(--border)', display: 'flex', gap: 24 }}>
+          {[50, 80, 100, 70, 55, 70, 60].map((w, j) => (
+            <div key={j} style={{ height: 14, width: w, borderRadius: 6, animation: 'shimmer 1.8s infinite', backgroundImage: 'linear-gradient(90deg, var(--bg-elevated) 25%, var(--border) 50%, var(--bg-elevated) 75%)', backgroundSize: '200% 100%' }} />
+          ))}
+        </div>
+      ))}
     </div>
   );
 }
@@ -105,7 +113,12 @@ export default function OrdersPage() {
   };
 
   return (
-    <div style={{ padding: 'clamp(20px,3vw,40px)' }}>
+    <motion.div
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}
+      style={{ padding: 'clamp(20px,3vw,40px)' }}
+    >
 
       {/* Header */}
       <div style={{ marginBottom: 28 }}>
@@ -133,7 +146,7 @@ export default function OrdersPage() {
         borderRadius: 18, overflow: 'hidden',
       }}>
         {loading ? (
-          <Spinner />
+          <TableSkeleton />
         ) : error ? (
           <div style={{ padding: '24px', color: '#ef4444', fontWeight: 600 }}>{error}</div>
         ) : filtered.length === 0 ? (
@@ -211,6 +224,6 @@ export default function OrdersPage() {
           </>
         )}
       </div>
-    </div>
+    </motion.div>
   );
 }

@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { motion } from 'framer-motion';
 
 const PURPLE = '#5A31F4';
 const PINK = '#FF0080';
@@ -17,16 +18,25 @@ interface Invoice {
   downloadUrl?: string;
 }
 
-function Spinner() {
+function InvoiceTableSkeleton() {
   return (
-    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '60px 0' }}>
-      <div style={{
-        width: 32, height: 32, borderRadius: '50%',
-        border: `3px solid rgba(90,49,244,0.15)`,
-        borderTopColor: PURPLE,
-        animation: 'spin 0.7s linear infinite',
-      }} />
-      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+    <div style={{ padding: 0 }}>
+      <style>{`@keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }`}</style>
+      {/* Header row */}
+      <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--border)', display: 'flex', gap: 24 }}>
+        {[60, 70, 80, 60, 50, 50, 70].map((w, j) => (
+          <div key={j} style={{ height: 12, width: w, borderRadius: 6, animation: 'shimmer 1.8s infinite', backgroundImage: 'linear-gradient(90deg, var(--bg-elevated) 25%, var(--border) 50%, var(--bg-elevated) 75%)', backgroundSize: '200% 100%' }} />
+        ))}
+      </div>
+      {[0,1,2,3].map(i => (
+        <div key={i} style={{ padding: '18px 16px', borderBottom: '1px solid var(--border)', display: 'flex', gap: 24, alignItems: 'center' }}>
+          {[60, 80, 80, 70, 60].map((w, j) => (
+            <div key={j} style={{ height: 14, width: w, borderRadius: 6, animation: 'shimmer 1.8s infinite', backgroundImage: 'linear-gradient(90deg, var(--bg-elevated) 25%, var(--border) 50%, var(--bg-elevated) 75%)', backgroundSize: '200% 100%' }} />
+          ))}
+          <div style={{ height: 28, width: 50, borderRadius: 8, animation: 'shimmer 1.8s infinite', backgroundImage: 'linear-gradient(90deg, var(--bg-elevated) 25%, var(--border) 50%, var(--bg-elevated) 75%)', backgroundSize: '200% 100%' }} />
+          <div style={{ height: 32, width: 80, borderRadius: 10, animation: 'shimmer 1.8s infinite', backgroundImage: 'linear-gradient(90deg, var(--bg-elevated) 25%, var(--border) 50%, var(--bg-elevated) 75%)', backgroundSize: '200% 100%' }} />
+        </div>
+      ))}
     </div>
   );
 }
@@ -81,7 +91,12 @@ export default function InvoicesPage() {
     .reduce((s, inv) => s + Number(inv.amount), 0);
 
   return (
-    <div style={{ padding: 'clamp(20px,3vw,40px)', maxWidth: 900, margin: '0 auto' }}>
+    <motion.div
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}
+      style={{ padding: 'clamp(20px,3vw,40px)', maxWidth: 900, margin: '0 auto' }}
+    >
 
       {/* Header */}
       <div style={{ marginBottom: 28 }}>
@@ -124,7 +139,7 @@ export default function InvoicesPage() {
         </div>
 
         {loading ? (
-          <Spinner />
+          <InvoiceTableSkeleton />
         ) : error ? (
           <div style={{ padding: '24px', color: '#ef4444', fontWeight: 600 }}>{error}</div>
         ) : invoices.length === 0 ? (
@@ -240,6 +255,6 @@ export default function InvoicesPage() {
           Bij vragen over je factuur, neem contact op via <strong>billing@enjoy.nl</strong>.
         </p>
       </div>
-    </div>
+    </motion.div>
   );
 }

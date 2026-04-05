@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { motion } from 'framer-motion';
 import { Nav } from '../../components/Nav';
 import { Footer } from '../../components/Footer';
 
@@ -87,10 +88,40 @@ export default function RiderStatusPage() {
 
           {/* Loading */}
           {loading && (
-            <div style={{ textAlign: 'center', padding: '80px 0' }}>
-              <div style={{ display: 'inline-block', width: 48, height: 48, border: `3px solid ${PURPLE}30`, borderTopColor: PURPLE, borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
-              <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
-              <p style={{ color: 'var(--text-secondary)', marginTop: 20, fontSize: 16 }}>Gegevens laden…</p>
+            <div>
+              <style>{`@keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }`}</style>
+              {/* Header skeleton */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 40 }}>
+                <div>
+                  <div style={{ height: 34, width: 200, borderRadius: 8, marginBottom: 8, animation: 'shimmer 1.8s infinite', backgroundImage: 'linear-gradient(90deg, var(--bg-elevated) 25%, var(--border) 50%, var(--bg-elevated) 75%)', backgroundSize: '200% 100%' }} />
+                  <div style={{ height: 16, width: 250, borderRadius: 6, animation: 'shimmer 1.8s infinite', backgroundImage: 'linear-gradient(90deg, var(--bg-elevated) 25%, var(--border) 50%, var(--bg-elevated) 75%)', backgroundSize: '200% 100%' }} />
+                </div>
+                <div style={{ height: 40, width: 100, borderRadius: 10, animation: 'shimmer 1.8s infinite', backgroundImage: 'linear-gradient(90deg, var(--bg-elevated) 25%, var(--border) 50%, var(--bg-elevated) 75%)', backgroundSize: '200% 100%' }} />
+              </div>
+              {/* Info card skeleton */}
+              <div style={{ background: 'var(--bg-elevated)', borderRadius: 20, border: '1px solid var(--border)', padding: 'clamp(20px,4vw,32px)', marginBottom: 28 }}>
+                <div style={{ height: 12, width: 100, borderRadius: 6, marginBottom: 20, animation: 'shimmer 1.8s infinite', backgroundImage: 'linear-gradient(90deg, var(--bg-elevated) 25%, var(--border) 50%, var(--bg-elevated) 75%)', backgroundSize: '200% 100%' }} />
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16 }}>
+                  {[0,1,2,3,4].map(i => (
+                    <div key={i}>
+                      <div style={{ height: 12, width: 60, borderRadius: 6, marginBottom: 6, animation: 'shimmer 1.8s infinite', backgroundImage: 'linear-gradient(90deg, var(--bg-elevated) 25%, var(--border) 50%, var(--bg-elevated) 75%)', backgroundSize: '200% 100%' }} />
+                      <div style={{ height: 15, width: 120, borderRadius: 6, animation: 'shimmer 1.8s infinite', backgroundImage: 'linear-gradient(90deg, var(--bg-elevated) 25%, var(--border) 50%, var(--bg-elevated) 75%)', backgroundSize: '200% 100%' }} />
+                    </div>
+                  ))}
+                </div>
+              </div>
+              {/* Stepper skeleton */}
+              <div style={{ background: 'var(--bg-elevated)', borderRadius: 20, border: '1px solid var(--border)', padding: 'clamp(20px,4vw,32px)' }}>
+                <div style={{ height: 12, width: 100, borderRadius: 6, marginBottom: 28, animation: 'shimmer 1.8s infinite', backgroundImage: 'linear-gradient(90deg, var(--bg-elevated) 25%, var(--border) 50%, var(--bg-elevated) 75%)', backgroundSize: '200% 100%' }} />
+                {[0,1,2].map(i => (
+                  <div key={i} style={{ display: 'flex', gap: 16, marginBottom: 24 }}>
+                    <div style={{ width: 40, height: 40, borderRadius: '50%', flexShrink: 0, animation: 'shimmer 1.8s infinite', backgroundImage: 'linear-gradient(90deg, var(--bg-elevated) 25%, var(--border) 50%, var(--bg-elevated) 75%)', backgroundSize: '200% 100%' }} />
+                    <div style={{ paddingTop: 8, flex: 1 }}>
+                      <div style={{ height: 15, width: 120, borderRadius: 6, animation: 'shimmer 1.8s infinite', backgroundImage: 'linear-gradient(90deg, var(--bg-elevated) 25%, var(--border) 50%, var(--bg-elevated) 75%)', backgroundSize: '200% 100%' }} />
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
 
@@ -108,7 +139,11 @@ export default function RiderStatusPage() {
 
           {/* Status dashboard */}
           {!loading && rider && (
-            <>
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4 }}
+            >
               {/* Header row */}
               <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16, marginBottom: 40 }}>
                 <div>
@@ -154,7 +189,13 @@ export default function RiderStatusPage() {
                     const isLast = i === arr.length - 1;
 
                     return (
-                      <div key={stage.key} style={{ display: 'flex', gap: 16, position: 'relative' }}>
+                      <motion.div
+                        key={stage.key}
+                        initial={{ opacity: 0, x: -16 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ duration: 0.35, delay: i * 0.12 }}
+                        style={{ display: 'flex', gap: 16, position: 'relative' }}
+                      >
                         {/* Connector line */}
                         {!isLast && (
                           <div style={{ position: 'absolute', left: 19, top: 40, width: 2, height: 'calc(100% - 12px)', background: isDone || isActive ? `linear-gradient(${PURPLE}, ${PINK})` : 'rgba(255,255,255,0.08)' }} />
@@ -174,7 +215,7 @@ export default function RiderStatusPage() {
                             <p style={{ fontSize: 13, color: 'var(--text-secondary)', margin: '4px 0 0' }}>{stage.description}</p>
                           )}
                         </div>
-                      </div>
+                      </motion.div>
                     );
                   })}
                 </div>
@@ -212,7 +253,7 @@ export default function RiderStatusPage() {
                   </Link>
                 </div>
               )}
-            </>
+            </motion.div>
           )}
         </div>
       </section>

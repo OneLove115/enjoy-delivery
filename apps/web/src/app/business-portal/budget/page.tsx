@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { motion } from 'framer-motion';
 
 const PURPLE = '#5A31F4';
 const PINK = '#FF0080';
@@ -25,16 +26,24 @@ interface BudgetData {
   members?: BudgetMember[];
 }
 
-function Spinner() {
+function BudgetSkeleton() {
   return (
-    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '60px 0' }}>
-      <div style={{
-        width: 32, height: 32, borderRadius: '50%',
-        border: `3px solid rgba(90,49,244,0.15)`,
-        borderTopColor: PURPLE,
-        animation: 'spin 0.7s linear infinite',
-      }} />
-      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+    <div>
+      <style>{`@keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }`}</style>
+      {/* Stat cards skeleton */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(180px,1fr))', gap: 16, marginBottom: 28 }}>
+        {[0,1,2,3].map(i => (
+          <div key={i} style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border)', borderRadius: 16, padding: '20px 22px' }}>
+            <div style={{ height: 13, width: '55%', borderRadius: 6, marginBottom: 12, animation: 'shimmer 1.8s infinite', backgroundImage: 'linear-gradient(90deg, var(--bg-elevated) 25%, var(--border) 50%, var(--bg-elevated) 75%)', backgroundSize: '200% 100%' }} />
+            <div style={{ height: 26, width: '45%', borderRadius: 8, animation: 'shimmer 1.8s infinite', backgroundImage: 'linear-gradient(90deg, var(--bg-elevated) 25%, var(--border) 50%, var(--bg-elevated) 75%)', backgroundSize: '200% 100%' }} />
+          </div>
+        ))}
+      </div>
+      {/* Progress bar skeleton */}
+      <div style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border)', borderRadius: 18, padding: '24px 28px', marginBottom: 28 }}>
+        <div style={{ height: 16, width: 200, borderRadius: 6, marginBottom: 16, animation: 'shimmer 1.8s infinite', backgroundImage: 'linear-gradient(90deg, var(--bg-elevated) 25%, var(--border) 50%, var(--bg-elevated) 75%)', backgroundSize: '200% 100%' }} />
+        <div style={{ height: 16, borderRadius: 10, animation: 'shimmer 1.8s infinite', backgroundImage: 'linear-gradient(90deg, var(--bg-elevated) 25%, var(--border) 50%, var(--bg-elevated) 75%)', backgroundSize: '200% 100%' }} />
+      </div>
     </div>
   );
 }
@@ -87,7 +96,12 @@ export default function BudgetPage() {
     typeof window !== 'undefined' ? localStorage.getItem('enjoy-business-company') ?? 'Jouw bedrijf' : 'Jouw bedrijf';
 
   return (
-    <div style={{ padding: 'clamp(20px,3vw,40px)', maxWidth: 1000, margin: '0 auto' }}>
+    <motion.div
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}
+      style={{ padding: 'clamp(20px,3vw,40px)', maxWidth: 1000, margin: '0 auto' }}
+    >
 
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 28, flexWrap: 'wrap', gap: 12 }}>
@@ -164,7 +178,7 @@ export default function BudgetPage() {
       )}
 
       {loading ? (
-        <Spinner />
+        <BudgetSkeleton />
       ) : error ? (
         <div style={{
           background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)',
@@ -282,6 +296,6 @@ export default function BudgetPage() {
           </div>
         </>
       )}
-    </div>
+    </motion.div>
   );
 }

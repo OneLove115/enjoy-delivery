@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import { motion } from 'framer-motion';
 
 const PURPLE = '#5A31F4';
 const PINK = '#FF0080';
@@ -24,16 +25,21 @@ interface Member {
 const EMPTY_FORM = { name: '', email: '', dept: '', budget: '' };
 const DEPTS = ['Engineering', 'Marketing', 'Design', 'Sales', 'HR', 'Finance', 'Operations', 'Legal'];
 
-function Spinner() {
+function MemberCardsSkeleton() {
   return (
-    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '60px 0' }}>
-      <div style={{
-        width: 32, height: 32, borderRadius: '50%',
-        border: `3px solid rgba(90,49,244,0.15)`,
-        borderTopColor: PURPLE,
-        animation: 'spin 0.7s linear infinite',
-      }} />
-      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+    <div style={{ padding: '24px' }}>
+      <style>{`@keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }`}</style>
+      {[0,1,2,3].map(i => (
+        <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '16px 0', borderBottom: '1px solid var(--border)' }}>
+          <div style={{ width: 36, height: 36, borderRadius: 10, flexShrink: 0, animation: 'shimmer 1.8s infinite', backgroundImage: 'linear-gradient(90deg, var(--bg-elevated) 25%, var(--border) 50%, var(--bg-elevated) 75%)', backgroundSize: '200% 100%' }} />
+          <div style={{ flex: 1, display: 'flex', gap: 24 }}>
+            {[100, 140, 70, 60, 80].map((w, j) => (
+              <div key={j} style={{ height: 14, width: w, borderRadius: 6, animation: 'shimmer 1.8s infinite', backgroundImage: 'linear-gradient(90deg, var(--bg-elevated) 25%, var(--border) 50%, var(--bg-elevated) 75%)', backgroundSize: '200% 100%' }} />
+            ))}
+          </div>
+          <div style={{ width: 40, height: 22, borderRadius: 11, animation: 'shimmer 1.8s infinite', backgroundImage: 'linear-gradient(90deg, var(--bg-elevated) 25%, var(--border) 50%, var(--bg-elevated) 75%)', backgroundSize: '200% 100%' }} />
+        </div>
+      ))}
     </div>
   );
 }
@@ -235,7 +241,12 @@ export default function TeamPage() {
   };
 
   return (
-    <div style={{ padding: 'clamp(20px,3vw,40px)', maxWidth: 1050, margin: '0 auto' }}>
+    <motion.div
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}
+      style={{ padding: 'clamp(20px,3vw,40px)', maxWidth: 1050, margin: '0 auto' }}
+    >
 
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 28, flexWrap: 'wrap', gap: 12 }}>
@@ -325,7 +336,7 @@ export default function TeamPage() {
       {/* Members table */}
       <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 18, overflow: 'hidden' }}>
         {loading ? (
-          <Spinner />
+          <MemberCardsSkeleton />
         ) : error ? (
           <div style={{ padding: '24px', color: '#ef4444', fontWeight: 600 }}>{error}</div>
         ) : members.length === 0 ? (
@@ -362,6 +373,6 @@ export default function TeamPage() {
           </div>
         )}
       </div>
-    </div>
+    </motion.div>
   );
 }

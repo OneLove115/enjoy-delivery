@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import { motion } from 'framer-motion';
 
 const PURPLE = '#5A31F4';
 const PINK = '#FF0080';
@@ -25,16 +26,28 @@ interface Event {
 
 const EMPTY_FORM = { name: '', date: '', persons: '', cuisine: '', budgetPP: '', notes: '' };
 
-function Spinner() {
+function EventCardsSkeleton() {
   return (
-    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '60px 0' }}>
-      <div style={{
-        width: 32, height: 32, borderRadius: '50%',
-        border: `3px solid rgba(90,49,244,0.15)`,
-        borderTopColor: PURPLE,
-        animation: 'spin 0.7s linear infinite',
-      }} />
-      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+    <div>
+      <style>{`@keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }`}</style>
+      {[0,1,2].map(i => (
+        <div key={i} style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border)', borderRadius: 18, padding: '22px 24px', marginBottom: 12, borderLeft: '4px solid var(--border)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+            <div style={{ flex: 1 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+                <div style={{ width: 20, height: 20, borderRadius: 6, animation: 'shimmer 1.8s infinite', backgroundImage: 'linear-gradient(90deg, var(--bg-elevated) 25%, var(--border) 50%, var(--bg-elevated) 75%)', backgroundSize: '200% 100%' }} />
+                <div style={{ height: 16, width: 160, borderRadius: 6, animation: 'shimmer 1.8s infinite', backgroundImage: 'linear-gradient(90deg, var(--bg-elevated) 25%, var(--border) 50%, var(--bg-elevated) 75%)', backgroundSize: '200% 100%' }} />
+              </div>
+              <div style={{ display: 'flex', gap: 20 }}>
+                {[100, 90, 80].map((w, j) => (
+                  <div key={j} style={{ height: 14, width: w, borderRadius: 6, animation: 'shimmer 1.8s infinite', backgroundImage: 'linear-gradient(90deg, var(--bg-elevated) 25%, var(--border) 50%, var(--bg-elevated) 75%)', backgroundSize: '200% 100%' }} />
+                ))}
+              </div>
+            </div>
+            <div style={{ height: 24, width: 80, borderRadius: 8, animation: 'shimmer 1.8s infinite', backgroundImage: 'linear-gradient(90deg, var(--bg-elevated) 25%, var(--border) 50%, var(--bg-elevated) 75%)', backgroundSize: '200% 100%' }} />
+          </div>
+        </div>
+      ))}
     </div>
   );
 }
@@ -208,7 +221,12 @@ export default function EventsPage() {
   };
 
   return (
-    <div style={{ padding: 'clamp(20px,3vw,40px)', maxWidth: 900, margin: '0 auto' }}>
+    <motion.div
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}
+      style={{ padding: 'clamp(20px,3vw,40px)', maxWidth: 900, margin: '0 auto' }}
+    >
 
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 28, flexWrap: 'wrap', gap: 12 }}>
@@ -318,7 +336,7 @@ export default function EventsPage() {
       )}
 
       {loading ? (
-        <Spinner />
+        <EventCardsSkeleton />
       ) : error ? (
         <div style={{
           background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)',
@@ -363,6 +381,6 @@ export default function EventsPage() {
           )}
         </>
       )}
-    </div>
+    </motion.div>
   );
 }

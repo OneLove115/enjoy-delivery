@@ -27,10 +27,49 @@ const statusColors: Record<string, string> = {
   confirmed: '#60A5FA',
 };
 
+function OrderSkeleton({ index }: { index: number }) {
+  const shimmerStyle: React.CSSProperties = {
+    background: 'linear-gradient(90deg, var(--bg-elevated) 25%, var(--border) 50%, var(--bg-elevated) 75%)',
+    backgroundSize: '200% 100%',
+    animation: 'shimmer 1.8s ease-in-out infinite',
+    borderRadius: 8,
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: index * 0.1 }}
+      style={{
+        padding: '24px 28px',
+        background: 'var(--bg-card)',
+        borderRadius: 20,
+        border: '1px solid var(--border)',
+      }}
+    >
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
+        <div>
+          <div style={{ ...shimmerStyle, width: 180, height: 20, marginBottom: 8 }} />
+          <div style={{ ...shimmerStyle, width: 130, height: 14 }} />
+        </div>
+        <div style={{ textAlign: 'right' }}>
+          <div style={{ ...shimmerStyle, width: 70, height: 20, marginBottom: 8, marginLeft: 'auto' }} />
+          <div style={{ ...shimmerStyle, width: 80, height: 22 }} />
+        </div>
+      </div>
+      <div style={{ ...shimmerStyle, width: '75%', height: 14, marginBottom: 16 }} />
+      <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+        <div style={{ ...shimmerStyle, width: 90, height: 38, borderRadius: 12 }} />
+      </div>
+    </motion.div>
+  );
+}
+
 export default function AccountOrdersPage() {
   const router = useRouter();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
+  const [hoveredId, setHoveredId] = useState<string | null>(null);
 
   useEffect(() => {
     fetch('/api/auth/me')
@@ -44,6 +83,12 @@ export default function AccountOrdersPage() {
 
   return (
     <div style={{ background: 'var(--bg-page)', minHeight: '100vh', color: 'var(--text-primary)', fontFamily: 'Outfit, sans-serif' }}>
+      <style>{`
+        @keyframes shimmer {
+          0% { background-position: 200% 0; }
+          100% { background-position: -200% 0; }
+        }
+      `}</style>
       <Nav />
       <section style={{ padding: '100px 60px 60px', maxWidth: 800, margin: '0 auto' }}>
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
@@ -52,18 +97,66 @@ export default function AccountOrdersPage() {
         </motion.div>
 
         {loading ? (
-          <div style={{ textAlign: 'center', padding: '80px 0', color: 'var(--text-muted)' }}>Loading orders...</div>
-        ) : orders.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '80px 0' }}>
-            <div style={{ fontSize: 56, marginBottom: 16 }}>🍽️</div>
-            <p style={{ color: 'var(--text-muted)', fontSize: 16, marginBottom: 24 }}>No orders yet. Time to eat royally.</p>
-            <Link href="/discover" style={{ background: `linear-gradient(135deg,${PURPLE},${PINK})`, color: 'var(--text-primary)', padding: '14px 32px', borderRadius: 12, fontSize: 15, fontWeight: 700, textDecoration: 'none' }}>Browse restaurants</Link>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            {[0, 1, 2, 3].map(i => (
+              <OrderSkeleton key={i} index={i} />
+            ))}
           </div>
+        ) : orders.length === 0 ? (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5 }}
+            style={{ textAlign: 'center', padding: '80px 0' }}
+          >
+            <div style={{ fontSize: 80, marginBottom: 20, lineHeight: 1 }}>🍽️</div>
+            <h2 style={{
+              fontSize: 28,
+              fontWeight: 900,
+              marginBottom: 12,
+              background: `linear-gradient(135deg, ${PURPLE}, ${PINK})`,
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+            }}>
+              No orders yet
+            </h2>
+            <p style={{ color: 'var(--text-muted)', fontSize: 16, marginBottom: 32, maxWidth: 340, marginLeft: 'auto', marginRight: 'auto' }}>
+              Your order history will appear here. Time to discover something delicious.
+            </p>
+            <Link href="/discover" style={{
+              display: 'inline-block',
+              background: `linear-gradient(135deg,${PURPLE},${PINK})`,
+              color: '#fff',
+              padding: '16px 40px',
+              borderRadius: 14,
+              fontSize: 16,
+              fontWeight: 800,
+              textDecoration: 'none',
+              boxShadow: `0 8px 30px ${PURPLE}40`,
+              transition: 'transform 0.2s, box-shadow 0.2s',
+            }}>
+              Discover restaurants
+            </Link>
+          </motion.div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             {orders.map((o, i) => (
               <motion.div key={o.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.06 }}>
-                <div style={{ padding: '24px 28px', background: 'var(--bg-card)', borderRadius: 20, border: '1px solid var(--border)', color: 'var(--text-primary)' }}>
+                <div
+                  onMouseEnter={() => setHoveredId(o.id)}
+                  onMouseLeave={() => setHoveredId(null)}
+                  style={{
+                    padding: '24px 28px',
+                    background: 'var(--bg-card)',
+                    borderRadius: 20,
+                    border: `1px solid ${hoveredId === o.id ? PURPLE + '60' : 'var(--border)'}`,
+                    color: 'var(--text-primary)',
+                    transform: hoveredId === o.id ? 'translateY(-2px)' : 'translateY(0)',
+                    boxShadow: hoveredId === o.id ? `0 8px 30px ${PURPLE}20` : 'none',
+                    transition: 'transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease',
+                  }}
+                >
                   <Link href={`/order/${o.id}`} style={{ display: 'block', textDecoration: 'none', color: 'inherit' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
                       <div>

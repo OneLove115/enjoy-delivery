@@ -43,7 +43,12 @@ export default function LoginPage() {
   return (
     <div style={{ background: 'var(--bg-page)', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Outfit, sans-serif', color: 'var(--text-primary)' }}>
       <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at 50% 30%, rgba(90,49,244,0.12) 0%, transparent 60%)' }} />
-      <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }}
+      <style>{`
+        .auth-login-card input:focus { box-shadow: 0 0 0 2px #5A31F4; border-color: #5A31F4 !important; outline: none; }
+        @keyframes auth-spin { to { transform: rotate(360deg); } }
+        .auth-spinner { display: inline-block; width: 18px; height: 18px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: auth-spin 0.6s linear infinite; vertical-align: middle; margin-right: 8px; }
+      `}</style>
+      <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} className="auth-login-card"
         style={{ width: '100%', maxWidth: 440, background: 'var(--bg-elevated)', border: '1px solid var(--border-strong)', borderRadius: 24, padding: '48px 40px', position: 'relative', zIndex: 1 }}>
         <Link href="/" style={{ textDecoration: 'none', display: 'block', textAlign: 'center', marginBottom: 32 }}>
           <img src="/logo-enjoy.png" alt="EnJoy" style={{ height: 64 }} />
@@ -75,7 +80,7 @@ export default function LoginPage() {
           {error && <p style={{ color: '#FF4444', fontSize: 13, textAlign: 'center', margin: 0 }}>{error}</p>}
           <button type="submit" disabled={loading}
             style={{ background: `linear-gradient(135deg,${PURPLE},${PINK})`, color: 'var(--text-primary)', border: 'none', borderRadius: 12, padding: '15px 0', fontSize: 16, fontWeight: 800, cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? 0.7 : 1, marginTop: 4 }}>
-            {loading ? 'Signing in...' : 'Sign in'}
+            {loading ? <><span className="auth-spinner" />Signing in...</> : 'Sign in'}
           </button>
         </form>
 

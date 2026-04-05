@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { motion } from 'framer-motion';
 
 const PURPLE = '#5A31F4';
 const PINK = '#FF0080';
@@ -20,16 +21,54 @@ const NOTIF_OPTIONS = [
   { key: 'weeklyReport', label: 'Wekelijks overzicht', desc: 'Elke maandag een overzicht van de afgelopen week' },
 ];
 
-function Spinner() {
+function SettingsSkeleton() {
+  const shimmerStyle: React.CSSProperties = {
+    animation: 'shimmer 1.8s infinite',
+    backgroundImage: 'linear-gradient(90deg, var(--bg-elevated) 25%, var(--border) 50%, var(--bg-elevated) 75%)',
+    backgroundSize: '200% 100%',
+    borderRadius: 6,
+  };
   return (
-    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '60px 0' }}>
-      <div style={{
-        width: 32, height: 32, borderRadius: '50%',
-        border: '3px solid rgba(90,49,244,0.15)',
-        borderTopColor: PURPLE,
-        animation: 'spin 0.7s linear infinite',
-      }} />
-      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+    <div style={{ padding: 'clamp(20px,3vw,40px)', maxWidth: 800, margin: '0 auto' }}>
+      <style>{`@keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }`}</style>
+      {/* Title skeleton */}
+      <div style={{ marginBottom: 28 }}>
+        <div style={{ ...shimmerStyle, height: 28, width: 160, marginBottom: 8 }} />
+        <div style={{ ...shimmerStyle, height: 14, width: 280 }} />
+      </div>
+      {/* Form section skeletons */}
+      {[0,1].map(s => (
+        <div key={s} style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border)', borderRadius: 18, overflow: 'hidden', marginBottom: 20 }}>
+          <div style={{ padding: '18px 24px', borderBottom: '1px solid var(--border)' }}>
+            <div style={{ ...shimmerStyle, height: 15, width: 140 }} />
+          </div>
+          <div style={{ padding: 24, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+            {[0,1,2,3].map(i => (
+              <div key={i}>
+                <div style={{ ...shimmerStyle, height: 12, width: 80, marginBottom: 8 }} />
+                <div style={{ ...shimmerStyle, height: 42, width: '100%', borderRadius: 10 }} />
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
+      {/* Notification toggles skeleton */}
+      <div style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border)', borderRadius: 18, overflow: 'hidden', marginBottom: 20 }}>
+        <div style={{ padding: '18px 24px', borderBottom: '1px solid var(--border)' }}>
+          <div style={{ ...shimmerStyle, height: 15, width: 160 }} />
+        </div>
+        <div style={{ padding: 24 }}>
+          {[0,1,2].map(i => (
+            <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 0', borderBottom: '1px solid var(--border)' }}>
+              <div>
+                <div style={{ ...shimmerStyle, height: 14, width: 140, marginBottom: 6 }} />
+                <div style={{ ...shimmerStyle, height: 12, width: 220 }} />
+              </div>
+              <div style={{ ...shimmerStyle, width: 44, height: 24, borderRadius: 12 }} />
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
@@ -132,10 +171,15 @@ export default function SettingsPage() {
     </div>
   );
 
-  if (loading) return <div style={{ padding: 40 }}><Spinner /></div>;
+  if (loading) return <SettingsSkeleton />;
 
   return (
-    <div style={{ padding: 'clamp(20px,3vw,40px)', maxWidth: 800, margin: '0 auto' }}>
+    <motion.div
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}
+      style={{ padding: 'clamp(20px,3vw,40px)', maxWidth: 800, margin: '0 auto' }}
+    >
 
       <div style={{ marginBottom: 28 }}>
         <h1 style={{ fontSize: 'clamp(22px,4vw,30px)', fontWeight: 950, letterSpacing: -0.5, margin: '0 0 6px' }}>
@@ -260,6 +304,6 @@ export default function SettingsPage() {
           </div>
         )}
       </div>
-    </div>
+    </motion.div>
   );
 }

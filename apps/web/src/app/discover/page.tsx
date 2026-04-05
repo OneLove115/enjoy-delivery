@@ -244,19 +244,63 @@ function CuisineChip({ c, active, onClick }: { c: Cuisine; active: boolean; onCl
   );
 }
 
+/* ─── Skeleton card ─── */
+function SkeletonCard() {
+  return (
+    <div style={{ borderRadius: 16, overflow: 'hidden', background: 'var(--discover-card)', marginBottom: 20 }}>
+      <div style={{ height: 190, background: 'var(--discover-input)' }}
+        className="animate-pulse" />
+      <div style={{ padding: '12px 14px 14px' }}>
+        <div className="animate-pulse" style={{ height: 15, borderRadius: 8, background: 'var(--b20)', marginBottom: 8, width: '65%' }} />
+        <div className="animate-pulse" style={{ height: 12, borderRadius: 8, background: 'var(--b15)', marginBottom: 10, width: '45%' }} />
+        <div className="animate-pulse" style={{ height: 11, borderRadius: 8, background: 'var(--b15)', width: '35%' }} />
+      </div>
+    </div>
+  );
+}
+
+/* ─── Skeleton card (grid variant for desktop) ─── */
+function SkeletonCardGrid() {
+  return (
+    <div style={{ background: 'var(--discover-card)', borderRadius: 14, overflow: 'hidden', border: '1px solid var(--b8)' }}>
+      <div className="animate-pulse" style={{ height: 160, background: 'var(--discover-input)' }} />
+      <div style={{ padding: '12px 14px 14px' }}>
+        <div className="animate-pulse" style={{ height: 14, borderRadius: 8, background: 'var(--b20)', marginBottom: 8, width: '60%' }} />
+        <div className="animate-pulse" style={{ height: 12, borderRadius: 8, background: 'var(--b15)', marginBottom: 10, width: '40%' }} />
+        <div className="animate-pulse" style={{ height: 11, borderRadius: 8, background: 'var(--b15)', width: '30%' }} />
+      </div>
+    </div>
+  );
+}
+
 /* ─── Restaurant card ─── */
 function RestaurantCard({ r, hasOrdered }: { r: RestaurantRow; hasOrdered?: boolean }) {
   const emo = RESTAURANT_EMOJIS[r.name] || '🍽️';
+  const [imgLoaded, setImgLoaded] = useState(false);
   return (
     <Link href={r.slug ? `/menu/${r.slug}` : '#'} data-track="order-cta" style={{ textDecoration: 'none', display: 'block', marginBottom: 20 }}>
-      <div style={{ borderRadius: 16, overflow: 'hidden', background: 'var(--discover-card)' }}>
+      <motion.div whileHover={{ y: -4, boxShadow: '0 12px 24px rgba(0,0,0,0.15)' }} style={{ borderRadius: 16, overflow: 'hidden', background: 'var(--discover-card)' }}>
         {!r.open && r.openTime && (
           <div style={{ background: 'var(--discover-input)', padding: '8px 16px', textAlign: 'center', fontSize: 13, color: 'var(--t58)', fontWeight: 600 }}>
             Opent om {r.openTime}
           </div>
         )}
         <div style={{ position: 'relative', height: 190, background: 'var(--discover-input)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <span style={{ fontSize: 80, filter: 'drop-shadow(0 4px 16px rgba(0,0,0,0.4))' }}>{emo}</span>
+          {r.img ? (
+            <img
+              src={r.img}
+              alt={r.name}
+              onLoad={() => setImgLoaded(true)}
+              style={{
+                position: 'absolute', inset: 0, width: '100%', height: '100%',
+                objectFit: 'cover',
+                opacity: imgLoaded ? 1 : 0,
+                transition: 'opacity 0.3s ease',
+              }}
+            />
+          ) : (
+            <span style={{ fontSize: 80, filter: 'drop-shadow(0 4px 16px rgba(0,0,0,0.4))' }}>{emo}</span>
+          )}
           {!r.open && <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.48)' }} />}
           <div style={{
             position: 'absolute', bottom: 12, left: 12,
@@ -295,7 +339,75 @@ function RestaurantCard({ r, hasOrdered }: { r: RestaurantRow; hasOrdered?: bool
             )}
           </div>
         </div>
-      </div>
+      </motion.div>
+    </Link>
+  );
+}
+
+/* ─── Desktop restaurant card ─── */
+function DesktopRestaurantCard({ r, emo, hasOrdered, index }: { r: RestaurantRow; emo: string; hasOrdered: boolean; index: number }) {
+  const [imgLoaded, setImgLoaded] = useState(false);
+  return (
+    <Link href={r.slug ? `/menu/${r.slug}` : '#'} style={{ textDecoration: 'none' }}>
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: index * 0.03 }}
+        whileHover={{ y: -4, boxShadow: '0 12px 24px rgba(0,0,0,0.15)' }}
+        style={{ background: 'var(--discover-card)', borderRadius: 14, overflow: 'hidden', border: '1px solid var(--b8)', cursor: 'pointer' }}
+      >
+        <div style={{ height: 160, position: 'relative', background: 'var(--discover-input)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          {r.img ? (
+            <img
+              src={r.img}
+              alt={r.name}
+              onLoad={() => setImgLoaded(true)}
+              style={{
+                position: 'absolute', inset: 0, width: '100%', height: '100%',
+                objectFit: 'cover',
+                opacity: imgLoaded ? 1 : 0,
+                transition: 'opacity 0.3s ease',
+              }}
+            />
+          ) : (
+            <span style={{ fontSize: 70, filter: 'drop-shadow(0 4px 14px rgba(0,0,0,0.4))' }}>{emo}</span>
+          )}
+          {!r.open && (
+            <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ background: 'var(--discover-input)', color: 'var(--t75)', padding: '7px 18px', borderRadius: 10, fontSize: 13, fontWeight: 700 }}>Gesloten</span>
+            </div>
+          )}
+          {r.rating > 0 && (
+            <div style={{ position: 'absolute', top: 10, right: 10, background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(8px)', borderRadius: 8, padding: '3px 9px', fontSize: 12, fontWeight: 800, color: '#FFD700' }}>⭐ {r.rating}</div>
+          )}
+          {r.delivery === 'Gratis' && r.open && (
+            <div style={{ position: 'absolute', top: 10, left: 10, background: '#27AE60', borderRadius: 8, padding: '3px 10px', fontSize: 11, fontWeight: 800, color: 'white' }}>Gratis</div>
+          )}
+        </div>
+        <div style={{ padding: '12px 14px 14px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 2 }}>
+            <h3 style={{ fontSize: 14, fontWeight: 800, color: 'var(--text-primary)' }}>{r.name}</h3>
+            {r.open ? (
+              <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 10, fontWeight: 700, color: '#4ade80', flexShrink: 0 }}>
+                <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#4ade80', display: 'inline-block', animation: 'pulse 2s cubic-bezier(0.4,0,0.6,1) infinite' }} />
+                Open
+              </span>
+            ) : (
+              <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--t40)', flexShrink: 0 }}>Closed</span>
+            )}
+          </div>
+          <p style={{ color: 'var(--t40)', fontSize: 12, marginBottom: 8 }}>{r.cuisine}</p>
+          <div style={{ display: 'flex', gap: 12, fontSize: 12, alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ display: 'flex', gap: 12 }}>
+              <span style={{ color: 'var(--t40)' }}>🕐 {r.time} min</span>
+              <span style={{ color: r.delivery === 'Gratis' ? '#2ECC71' : 'var(--t40)' }}>{r.delivery === 'Gratis' ? '✓ Gratis' : r.delivery}</span>
+            </div>
+            {hasOrdered && (
+              <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--t55)', whiteSpace: 'nowrap' }}>⟳ Quick reorder</span>
+            )}
+          </div>
+        </div>
+      </motion.div>
     </Link>
   );
 }
@@ -398,6 +510,7 @@ function AccountDrawer({ open, onClose }: { open: boolean; onClose: () => void }
 function DiscoverContent() {
   const router = useRouter();
   const [restaurants, setRestaurants]       = useState<RestaurantRow[]>(DEMO);
+  const [loadingRestaurants, setLoadingRestaurants] = useState(true);
   const [orderedRestaurantNames, setOrderedRestaurantNames] = useState<Set<string>>(new Set());
   const [address, setAddress]               = useState('');
   const [search, setSearch]                 = useState('');
@@ -442,8 +555,9 @@ function DiscoverContent() {
           cuisineCategories: t.cuisineCategories || [],
         }));
         if (real.length > 0) setRestaurants(real);
+        setLoadingRestaurants(false);
       })
-      .catch(() => {});
+      .catch(() => { setLoadingRestaurants(false); });
 
     // Fetch order history to enable "Quick reorder" indicators
     fetch('/api/account/orders')
@@ -784,30 +898,40 @@ function DiscoverContent() {
             </div>
           )}
 
-          <p style={{ fontSize: 16, fontWeight: 900, color: 'var(--text-primary)', marginBottom: 18 }}>
-            Bestel bij {filtered.length} locaties
-          </p>
-
-          {openRestaurants.map((r, i) => <RestaurantCard key={r.slug || r.name + i} r={r} hasOrdered={orderedRestaurantNames.has(r.name)} />)}
-
-          {closedRestaurants.length > 0 && (
+          {loadingRestaurants ? (
             <>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, margin: '8px 0 16px' }}>
-                <h3 style={{ fontSize: 16, fontWeight: 900 }}>Binnenkort geopend</h3>
-                <div style={{ width: 18, height: 18, borderRadius: '50%', border: '1.5px solid var(--b20)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, color: 'var(--t45)', cursor: 'pointer' }}>i</div>
-              </div>
-              {closedRestaurants.map((r, i) => <RestaurantCard key={r.slug || r.name + i} r={r} hasOrdered={orderedRestaurantNames.has(r.name)} />)}
+              <div style={{ height: 16, borderRadius: 8, background: 'var(--b15)', width: '55%', marginBottom: 18 }} className="animate-pulse" />
+              {Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)}
             </>
-          )}
-
-          {filtered.length === 0 && (
-            <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--t30)' }}>
-              <p style={{ fontSize: 40, marginBottom: 12 }}>🍽️</p>
-              <p style={{ fontSize: 18, fontWeight: 700, color: 'var(--t58)' }}>
-                {search ? `No results for "${search}"` : 'Geen restaurants gevonden'}
+          ) : (
+            <>
+              <p style={{ fontSize: 16, fontWeight: 900, color: 'var(--text-primary)', marginBottom: 18 }}>
+                Bestel bij {filtered.length} locaties
               </p>
-              <button onClick={resetAll} style={{ marginTop: 16, padding: '10px 24px', borderRadius: 12, background: `linear-gradient(135deg,${ORANGE},${PINK})`, border: 'none', color: 'white', fontWeight: 700, cursor: 'pointer', fontSize: 14 }}>Reset alles</button>
-            </div>
+
+              {filtered.length === 0 ? (
+                <div style={{ textAlign: 'center', padding: '60px 20px', color: 'var(--t30)' }}>
+                  <p style={{ fontSize: 52, marginBottom: 16 }}>🔍</p>
+                  <p style={{ fontSize: 20, fontWeight: 900, color: 'var(--text-primary)', marginBottom: 8 }}>Geen restaurants gevonden</p>
+                  <p style={{ fontSize: 14, color: 'var(--t45)', marginBottom: 24 }}>Probeer andere filters</p>
+                  <button onClick={resetAll} style={{ padding: '12px 28px', borderRadius: 14, background: `linear-gradient(135deg,${PURPLE},${PINK})`, border: 'none', color: 'white', fontWeight: 800, cursor: 'pointer', fontSize: 14 }}>Filters resetten</button>
+                </div>
+              ) : (
+                <>
+                  {openRestaurants.map((r, i) => <RestaurantCard key={r.slug || r.name + i} r={r} hasOrdered={orderedRestaurantNames.has(r.name)} />)}
+
+                  {closedRestaurants.length > 0 && (
+                    <>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, margin: '8px 0 16px' }}>
+                        <h3 style={{ fontSize: 16, fontWeight: 900 }}>Binnenkort geopend</h3>
+                        <div style={{ width: 18, height: 18, borderRadius: '50%', border: '1.5px solid var(--b20)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, color: 'var(--t45)', cursor: 'pointer' }}>i</div>
+                      </div>
+                      {closedRestaurants.map((r, i) => <RestaurantCard key={r.slug || r.name + i} r={r} hasOrdered={orderedRestaurantNames.has(r.name)} />)}
+                    </>
+                  )}
+                </>
+              )}
+            </>
           )}
         </div>
 
@@ -852,11 +976,17 @@ function DiscoverContent() {
 
                 {/* Cuisine chips with scroll arrows */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 28 }}>
-                  <button onClick={() => scrollCuisines('left')} disabled={!canScrollL} style={{ width: 36, height: 36, borderRadius: '50%', border: '1px solid var(--b15)', background: canScrollL ? 'var(--discover-input)' : 'transparent', cursor: canScrollL ? 'pointer' : 'default', color: canScrollL ? 'var(--text-primary)' : 'var(--t25)', fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, transition: 'all 0.2s' }}>◀</button>
+                  <button onClick={() => scrollCuisines('left')} disabled={!canScrollL} style={{ width: 36, height: 36, borderRadius: '50%', border: '1px solid var(--b15)', background: canScrollL ? 'rgba(255,255,255,0.12)' : 'transparent', cursor: canScrollL ? 'pointer' : 'default', color: canScrollL ? 'var(--text-primary)' : 'var(--t25)', fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, transition: 'all 0.2s' }}
+                    onMouseEnter={e => { if (canScrollL) (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,255,255,0.2)'; }}
+                    onMouseLeave={e => { if (canScrollL) (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,255,255,0.12)'; }}
+                  >◀</button>
                   <div ref={cuisineRef} onScroll={updateScroll} className="scroll-x" style={{ display: 'flex', gap: 10, flex: 1 }}>
                     {cuisines.map((c, i) => <CuisineChip key={i} c={c} active={activeCuisines.has(c.label)} onClick={() => toggleCuisine(c.label)} />)}
                   </div>
-                  <button onClick={() => scrollCuisines('right')} disabled={!canScrollR} style={{ width: 36, height: 36, borderRadius: '50%', border: '1px solid var(--b15)', background: canScrollR ? 'var(--discover-input)' : 'transparent', cursor: canScrollR ? 'pointer' : 'default', color: canScrollR ? 'var(--text-primary)' : 'var(--t25)', fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, transition: 'all 0.2s' }}>▶</button>
+                  <button onClick={() => scrollCuisines('right')} disabled={!canScrollR} style={{ width: 36, height: 36, borderRadius: '50%', border: '1px solid var(--b15)', background: canScrollR ? 'rgba(255,255,255,0.12)' : 'transparent', cursor: canScrollR ? 'pointer' : 'default', color: canScrollR ? 'var(--text-primary)' : 'var(--t25)', fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, transition: 'all 0.2s' }}
+                    onMouseEnter={e => { if (canScrollR) (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,255,255,0.2)'; }}
+                    onMouseLeave={e => { if (canScrollR) (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,255,255,0.12)'; }}
+                  >▶</button>
                   <button onClick={() => setAllCatsOpen(true)} style={{ padding: '10px 18px', borderRadius: 22, border: '1.5px solid var(--b20)', background: 'transparent', color: 'var(--t88)', fontWeight: 700, fontSize: 13, cursor: 'pointer', flexShrink: 0, whiteSpace: 'nowrap', transition: 'all 0.2s' }}>Toon alles</button>
                 </div>
 
@@ -879,65 +1009,26 @@ function DiscoverContent() {
             )}
 
             {/* Restaurant count */}
-            <h2 style={{ fontSize: 18, fontWeight: 900, marginBottom: 20 }}>{selectedCat.label} — {filtered.length} partners</h2>
+            {!loadingRestaurants && (
+              <h2 style={{ fontSize: 18, fontWeight: 900, marginBottom: 20 }}>{selectedCat.label} — {filtered.length} partners</h2>
+            )}
 
             {/* Restaurant grid */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(280px,1fr))', gap: 16, paddingBottom: 60 }}>
-              {filtered.length === 0 ? (
-                <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '60px 0', color: 'var(--t25)' }}>
-                  <p style={{ fontSize: 40, marginBottom: 12 }}>🍽️</p>
-                  <p style={{ fontSize: 18, fontWeight: 700, color: 'var(--t58)' }}>
-                    {search ? `No results for "${search}"` : 'Geen restaurants gevonden'}
-                  </p>
-                  <button onClick={resetAll} style={{ marginTop: 16, padding: '10px 24px', borderRadius: 12, background: `linear-gradient(135deg,${PURPLE},${PINK})`, border: 'none', color: 'white', fontWeight: 700, cursor: 'pointer', fontSize: 14 }}>Reset alles</button>
+              {loadingRestaurants ? (
+                Array.from({ length: 6 }).map((_, i) => <SkeletonCardGrid key={i} />)
+              ) : filtered.length === 0 ? (
+                <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '80px 20px', color: 'var(--t25)' }}>
+                  <p style={{ fontSize: 52, marginBottom: 16 }}>🔍</p>
+                  <p style={{ fontSize: 22, fontWeight: 900, color: 'var(--text-primary)', marginBottom: 10 }}>Geen restaurants gevonden</p>
+                  <p style={{ fontSize: 15, color: 'var(--t45)', marginBottom: 28 }}>Probeer andere filters</p>
+                  <button onClick={resetAll} style={{ padding: '12px 32px', borderRadius: 14, background: `linear-gradient(135deg,${PURPLE},${PINK})`, border: 'none', color: 'white', fontWeight: 800, cursor: 'pointer', fontSize: 15 }}>Filters resetten</button>
                 </div>
               ) : filtered.map((r, i) => {
                 const emo = RESTAURANT_EMOJIS[r.name] || '🍽️';
                 const hasOrdered = orderedRestaurantNames.has(r.name);
                 return (
-                  <Link key={r.slug || r.name + i} href={r.slug ? `/menu/${r.slug}` : '#'} style={{ textDecoration: 'none' }}>
-                    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.03 }}
-                      whileHover={{ y: -3 }}
-                      style={{ background: 'var(--discover-card)', borderRadius: 14, overflow: 'hidden', border: '1px solid var(--b8)', cursor: 'pointer' }}>
-                      <div style={{ height: 160, position: 'relative', background: 'var(--discover-input)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <span style={{ fontSize: 70, filter: 'drop-shadow(0 4px 14px rgba(0,0,0,0.4))' }}>{emo}</span>
-                        {!r.open && (
-                          <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            <span style={{ background: 'var(--discover-input)', color: 'var(--t75)', padding: '7px 18px', borderRadius: 10, fontSize: 13, fontWeight: 700 }}>Gesloten</span>
-                          </div>
-                        )}
-                        {r.rating > 0 && (
-                          <div style={{ position: 'absolute', top: 10, right: 10, background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(8px)', borderRadius: 8, padding: '3px 9px', fontSize: 12, fontWeight: 800, color: '#FFD700' }}>⭐ {r.rating}</div>
-                        )}
-                        {r.delivery === 'Gratis' && r.open && (
-                          <div style={{ position: 'absolute', top: 10, left: 10, background: '#27AE60', borderRadius: 8, padding: '3px 10px', fontSize: 11, fontWeight: 800, color: 'white' }}>Gratis</div>
-                        )}
-                      </div>
-                      <div style={{ padding: '12px 14px 14px' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 2 }}>
-                          <h3 style={{ fontSize: 14, fontWeight: 800, color: 'var(--text-primary)' }}>{r.name}</h3>
-                          {r.open ? (
-                            <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 10, fontWeight: 700, color: '#4ade80', flexShrink: 0 }}>
-                              <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#4ade80', display: 'inline-block', animation: 'pulse 2s cubic-bezier(0.4,0,0.6,1) infinite' }} />
-                              Open
-                            </span>
-                          ) : (
-                            <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--t40)', flexShrink: 0 }}>Closed</span>
-                          )}
-                        </div>
-                        <p style={{ color: 'var(--t40)', fontSize: 12, marginBottom: 8 }}>{r.cuisine}</p>
-                        <div style={{ display: 'flex', gap: 12, fontSize: 12, alignItems: 'center', justifyContent: 'space-between' }}>
-                          <div style={{ display: 'flex', gap: 12 }}>
-                            <span style={{ color: 'var(--t40)' }}>🕐 {r.time} min</span>
-                            <span style={{ color: r.delivery === 'Gratis' ? '#2ECC71' : 'var(--t40)' }}>{r.delivery === 'Gratis' ? '✓ Gratis' : r.delivery}</span>
-                          </div>
-                          {hasOrdered && (
-                            <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--t55)', whiteSpace: 'nowrap' }}>⟳ Quick reorder</span>
-                          )}
-                        </div>
-                      </div>
-                    </motion.div>
-                  </Link>
+                  <DesktopRestaurantCard key={r.slug || r.name + i} r={r} emo={emo} hasOrdered={hasOrdered} index={i} />
                 );
               })}
             </div>

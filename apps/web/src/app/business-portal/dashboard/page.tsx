@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { motion } from 'framer-motion';
 
 const PURPLE = '#5A31F4';
 const PINK = '#FF0080';
@@ -46,16 +47,35 @@ const statusColor = (s: string) => {
   }
 };
 
-function Spinner() {
+function DashboardSkeleton() {
   return (
-    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 200 }}>
-      <div style={{
-        width: 36, height: 36, borderRadius: '50%',
-        border: `3px solid rgba(90,49,244,0.15)`,
-        borderTopColor: PURPLE,
-        animation: 'spin 0.7s linear infinite',
-      }} />
-      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+    <div>
+      <style>{`@keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }`}</style>
+      {/* Welcome banner skeleton */}
+      <div style={{ background: 'var(--bg-elevated)', borderRadius: 20, height: 120, marginBottom: 28, animation: 'shimmer 1.8s infinite', backgroundImage: 'linear-gradient(90deg, var(--bg-elevated) 25%, var(--border) 50%, var(--bg-elevated) 75%)', backgroundSize: '200% 100%' }} />
+      {/* Stat cards skeleton */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(200px,1fr))', gap: 16, marginBottom: 28 }}>
+        {[0,1,2,3].map(i => (
+          <div key={i} style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border)', borderRadius: 18, padding: '22px 24px' }}>
+            <div style={{ height: 14, width: '60%', borderRadius: 6, marginBottom: 16, animation: 'shimmer 1.8s infinite', backgroundImage: 'linear-gradient(90deg, var(--bg-elevated) 25%, var(--border) 50%, var(--bg-elevated) 75%)', backgroundSize: '200% 100%' }} />
+            <div style={{ height: 28, width: '50%', borderRadius: 8, animation: 'shimmer 1.8s infinite', backgroundImage: 'linear-gradient(90deg, var(--bg-elevated) 25%, var(--border) 50%, var(--bg-elevated) 75%)', backgroundSize: '200% 100%' }} />
+          </div>
+        ))}
+      </div>
+      {/* Table skeleton */}
+      <div style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border)', borderRadius: 18, overflow: 'hidden' }}>
+        <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between' }}>
+          <div style={{ height: 16, width: 160, borderRadius: 6, animation: 'shimmer 1.8s infinite', backgroundImage: 'linear-gradient(90deg, var(--bg-elevated) 25%, var(--border) 50%, var(--bg-elevated) 75%)', backgroundSize: '200% 100%' }} />
+          <div style={{ height: 14, width: 90, borderRadius: 6, animation: 'shimmer 1.8s infinite', backgroundImage: 'linear-gradient(90deg, var(--bg-elevated) 25%, var(--border) 50%, var(--bg-elevated) 75%)', backgroundSize: '200% 100%' }} />
+        </div>
+        {[0,1,2,3].map(i => (
+          <div key={i} style={{ padding: '16px 24px', borderBottom: '1px solid var(--border)', display: 'flex', gap: 24 }}>
+            {[40,80,100,60,50,60].map((w,j) => (
+              <div key={j} style={{ height: 14, width: w, borderRadius: 6, animation: 'shimmer 1.8s infinite', backgroundImage: 'linear-gradient(90deg, var(--bg-elevated) 25%, var(--border) 50%, var(--bg-elevated) 75%)', backgroundSize: '200% 100%' }} />
+            ))}
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
@@ -118,7 +138,7 @@ export default function BusinessDashboardPage() {
   if (loading) {
     return (
       <div style={{ padding: 'clamp(20px,3vw,40px)', maxWidth: 1100, margin: '0 auto' }}>
-        <Spinner />
+        <DashboardSkeleton />
       </div>
     );
   }
@@ -137,7 +157,12 @@ export default function BusinessDashboardPage() {
   }
 
   return (
-    <div style={{ padding: 'clamp(20px,3vw,40px)', maxWidth: 1100, margin: '0 auto' }}>
+    <motion.div
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}
+      style={{ padding: 'clamp(20px,3vw,40px)', maxWidth: 1100, margin: '0 auto' }}
+    >
 
       {/* Welcome banner */}
       <div style={{
@@ -317,6 +342,6 @@ export default function BusinessDashboardPage() {
           .bp-dash-bottom { grid-template-columns: 1fr !important; }
         }
       `}</style>
-    </div>
+    </motion.div>
   );
 }

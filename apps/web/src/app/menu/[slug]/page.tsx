@@ -70,13 +70,23 @@ function MenuItemCard({ item, qty, onAdd, onInc, onDec, onItemClick, currency, l
   const hasModifiers = item.modifierGroups && item.modifierGroups.length > 0;
   const handleItemClick = () => { if (onItemClick) onItemClick(); };
   const handleQuickAdd = (e: React.MouseEvent) => { e.stopPropagation(); if (hasModifiers && onItemClick) onItemClick(); else onAdd(); };
+  const [imgLoaded, setImgLoaded] = useState(false);
 
   return (
-    <div
+    <motion.div
       role="button"
       tabIndex={0}
       onClick={handleItemClick}
-      style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', padding: '18px 0', borderBottom: '1px solid var(--border)', gap: 16, cursor: 'pointer', minHeight: 48 }}
+      whileHover={{ scale: 1.02, y: -2 }}
+      transition={{ type: 'spring', stiffness: 340, damping: 28 }}
+      style={{
+        display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start',
+        padding: '18px 0', borderBottom: '1px solid var(--border)', gap: 16,
+        cursor: 'pointer', minHeight: 48,
+        borderRadius: 8,
+      }}
+      onHoverStart={(e) => { (e.currentTarget as HTMLElement).style.boxShadow = '0 4px 16px rgba(90,49,244,0.10)'; }}
+      onHoverEnd={(e) => { (e.currentTarget as HTMLElement).style.boxShadow = 'none'; }}
     >
       {/* Text */}
       <div style={{ flex: 1, minWidth: 0 }}>
@@ -113,16 +123,37 @@ function MenuItemCard({ item, qty, onAdd, onInc, onDec, onItemClick, currency, l
       {/* Image + desktop qty */}
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 10, flexShrink: 0 }}>
         <div style={{ position: 'relative', width: 88, height: 88, borderRadius: 12, overflow: 'hidden', background: 'var(--bg-elevated)', flexShrink: 0 }}>
-          {item.imageUrl
-            ? <img src={item.imageUrl} alt={item.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-            : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 32 }}>🍽️</div>
-          }
+          {item.imageUrl ? (
+            <>
+              {/* Skeleton shown until image loads */}
+              {!imgLoaded && (
+                <div style={{
+                  position: 'absolute', inset: 0, borderRadius: 12,
+                  background: 'linear-gradient(90deg, var(--bg-elevated) 25%, var(--border) 50%, var(--bg-elevated) 75%)',
+                  backgroundSize: '200% 100%',
+                  animation: 'skeletonPulse 1.4s ease-in-out infinite',
+                }} />
+              )}
+              <img
+                src={item.imageUrl}
+                alt={item.name}
+                onLoad={() => setImgLoaded(true)}
+                style={{
+                  width: '100%', height: '100%', objectFit: 'cover',
+                  opacity: imgLoaded ? 1 : 0,
+                  transition: 'opacity 0.3s ease',
+                }}
+              />
+            </>
+          ) : (
+            <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 32 }}>🍽️</div>
+          )}
         </div>
         <span className="hide-mobile" onClick={e => e.stopPropagation()}>
           <QtyControl qty={qty} onAdd={() => handleQuickAdd({ stopPropagation: () => {} } as any)} onInc={onInc} onDec={onDec} />
         </span>
       </div>
-    </div>
+    </motion.div>
   );
 }
 
@@ -341,7 +372,7 @@ export default function MenuPage() {
   if (loading) {
     return (
       <div style={{ background: 'var(--bg-page)', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 16 }}>
-        <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
+        <style>{`@keyframes spin{to{transform:rotate(360deg)}} @keyframes skeletonPulse{0%{background-position:200% 0}100%{background-position:-200% 0}}`}</style>
         <div style={{ width: 44, height: 44, borderRadius: '50%', border: `3px solid ${PURPLE}`, borderTopColor: 'transparent', animation: 'spin 0.8s linear infinite' }} />
       </div>
     );
@@ -363,6 +394,7 @@ export default function MenuPage() {
 
   return (
     <div style={{ background: 'var(--bg-page)', minHeight: '100vh', color: 'var(--text-primary)', fontFamily: 'Outfit, sans-serif' }}>
+      <style>{`@keyframes skeletonPulse{0%{background-position:200% 0}100%{background-position:-200% 0}}`}</style>
 
       {/* ─── Non-sticky Nav (scrolls with page) ─── */}
       <nav style={{
@@ -585,21 +617,49 @@ export default function MenuPage() {
                     <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{filteredItems.length} gerecht{filteredItems.length !== 1 ? 'en' : ''}</span>
                   </div>
                   <div style={{ height: 1, background: 'var(--border)', marginBottom: 4 }} />
-                  {filteredItems.map(item => (
-                    <MenuItemCard
-                      key={item.id} item={item}
-                      qty={getQty(item.id)}
-                      onAdd={() => handleAdd(item)}
-                      onInc={() => handleAdd(item)}
-                      onDec={() => handleDec(item.id)}
-                      onItemClick={() => setSelectedItem({
-                        id: item.id, name: item.name, description: item.description,
-                        basePrice: item.basePrice, imageUrl: item.imageUrl,
-                        modifierGroups: item.modifierGroups || [],
-                      })}
-                      currency={currency} locale={locale}
-                    />
-                  ))}
+                  {filteredItems.length === 0 && !q ? (
+                    /* Better empty state for category with no items */
+                    <div style={{
+                      padding: '36px 20px',
+                      display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12,
+                      background: 'linear-gradient(135deg, rgba(90,49,244,0.04) 0%, rgba(255,0,128,0.04) 100%)',
+                      borderRadius: 16, margin: '8px 0',
+                    }}>
+                      <div style={{ fontSize: 48, lineHeight: 1 }}>🍳</div>
+                      <div style={{
+                        fontSize: 16, fontWeight: 800,
+                        background: `linear-gradient(135deg,${PURPLE},${PINK})`,
+                        WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+                        backgroundClip: 'text',
+                      }}>Komt binnenkort</div>
+                      <div style={{ fontSize: 13, color: 'var(--text-muted)', textAlign: 'center', maxWidth: 200 }}>
+                        We werken aan nieuwe gerechten voor deze categorie.
+                      </div>
+                    </div>
+                  ) : (
+                    filteredItems.map((item, idx) => (
+                      <motion.div
+                        key={item.id}
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.22, delay: idx * 0.03, ease: 'easeOut' }}
+                      >
+                        <MenuItemCard
+                          item={item}
+                          qty={getQty(item.id)}
+                          onAdd={() => handleAdd(item)}
+                          onInc={() => handleAdd(item)}
+                          onDec={() => handleDec(item.id)}
+                          onItemClick={() => setSelectedItem({
+                            id: item.id, name: item.name, description: item.description,
+                            basePrice: item.basePrice, imageUrl: item.imageUrl,
+                            modifierGroups: item.modifierGroups || [],
+                          })}
+                          currency={currency} locale={locale}
+                        />
+                      </motion.div>
+                    ))
+                  )}
                 </div>
               );})
             )}
@@ -745,26 +805,36 @@ export default function MenuPage() {
       </AnimatePresence>
 
       {/* ─── Mobile Floating Cart Bar ─── */}
-      {itemCount() > 0 && (
-        <div className="show-mobile" style={{ display: 'none', position: 'fixed', bottom: 'max(20px, env(safe-area-inset-bottom, 20px))', left: 16, right: 16, zIndex: 300 }}>
-          <motion.button
-            initial={{ y: 80, opacity: 0 }} animate={{ y: 0, opacity: 1 }}
-            onClick={() => setCartOpen(true)}
-            style={{
-              width: '100%', background: `linear-gradient(135deg,${PURPLE},${PINK})`,
-              border: 'none', borderRadius: 16, padding: '16px 22px',
-              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-              color: 'white', fontSize: 15, fontWeight: 900, cursor: 'pointer',
-              boxShadow: '0 12px 36px rgba(90,49,244,0.4)',
-              minHeight: 56,
-            }}
-          >
-            <span style={{ background: 'rgba(255,255,255,0.2)', borderRadius: 8, padding: '4px 10px', fontSize: 13, fontWeight: 900 }}>{itemCount()}</span>
-            <span>Bekijk bestelling</span>
-            <span>{fmt(totalCart, currency, locale)}</span>
-          </motion.button>
-        </div>
-      )}
+      <AnimatePresence>
+        {itemCount() > 0 && (
+          <div className="show-mobile" style={{ display: 'none', position: 'fixed', bottom: 'max(20px, env(safe-area-inset-bottom, 20px))', left: 16, right: 16, zIndex: 300 }}>
+            <motion.button
+              key="floating-cart"
+              initial={{ y: 80, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: 80, opacity: 0 }}
+              transition={{ type: 'spring', stiffness: 340, damping: 30 }}
+              whileTap={{ scale: 0.97 }}
+              onClick={() => setCartOpen(true)}
+              style={{
+                width: '100%', background: `linear-gradient(135deg,${PURPLE},${PINK})`,
+                border: 'none', borderRadius: 16, padding: '14px 20px',
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                color: 'white', fontSize: 15, fontWeight: 900, cursor: 'pointer',
+                boxShadow: '0 12px 36px rgba(90,49,244,0.45)',
+                minHeight: 56,
+              }}
+            >
+              <span style={{
+                background: 'rgba(255,255,255,0.22)', borderRadius: 8,
+                padding: '4px 10px', fontSize: 13, fontWeight: 900, minWidth: 28, textAlign: 'center',
+              }}>{itemCount()}</span>
+              <span>Bestellen</span>
+              <span style={{ fontWeight: 800 }}>{fmt(totalCart, currency, locale)}</span>
+            </motion.button>
+          </div>
+        )}
+      </AnimatePresence>
 
       {/* ─── Menu Item Options Modal ─── */}
       <MenuItemModal
