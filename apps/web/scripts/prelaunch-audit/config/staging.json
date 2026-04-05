@@ -1,0 +1,46 @@
+{
+  "project": "enjoy-web",
+  "baseUrl": "https://enjoy.veloci.online",
+  "environment": "staging",
+  "mode": "full",
+  "srcDir": "src",
+  "publicPages": [
+    "/",
+    "/about",
+    "/discover",
+    "/how-it-works",
+    "/partners",
+    "/business",
+    "/login",
+    "/signup",
+    "/privacy",
+    "/terms",
+    "/cookies",
+    "/faq",
+    "/help",
+    "/contact"
+  ],
+  "cors": {
+    "allowedOrigins": [
+      "https://enjoy.veloci.online"
+    ],
+    "disallowedOrigins": [
+      "https://evil.com",
+      "https://attacker.example.com"
+    ]
+  },
+  "legal": {
+    "requiredPages": [
+      "/privacy",
+      "/terms",
+      "/cookies"
+    ]
+  },
+  "seo": {
+    "sitemapPath": "/sitemap.xml",
+    "robotsPath": "/robots.txt"
+  },
+  "failFast": false,
+  "timeout": 10000,
+  "concurrency": 3
+}

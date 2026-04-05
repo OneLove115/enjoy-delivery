@@ -1,45 +1,110 @@
 'use client';
-import { useState } from 'react';
-
-// TODO: wire to /api/business-portal/settings when available
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
 const PURPLE = '#5A31F4';
 const PINK = '#FF0080';
-const ORANGE = '#FF6B00';
 
-const INITIAL = {
-  companyName: 'TechCorp BV',
-  address: 'Herengracht 420, 1017 BZ Amsterdam',
-  kvk: '12345678',
-  btw: 'NL001234567B01',
-  billingEmail: 'finance@techcorp.nl',
-  deliveryAddress: 'Herengracht 420, 1017 BZ Amsterdam',
+const API_URL = process.env.NEXT_PUBLIC_VP_DOMAIN || 'https://www.veloci.online';
+
+const EMPTY_FORM = {
+  companyName: '', address: '', kvk: '', btw: '',
+  billingEmail: '', deliveryAddress: '',
 };
 
 const NOTIF_OPTIONS = [
-  { key: 'orderConfirm',   label: 'Orderbevestiging',           desc: 'Ontvang een e-mail bij elke nieuwe bestelling' },
-  { key: 'orderDelivered', label: 'Bezorging bevestiging',      desc: 'Melding wanneer een bestelling is bezorgd' },
-  { key: 'invoiceNew',     label: 'Nieuwe factuur',             desc: 'E-mail wanneer een nieuwe factuur klaar staat' },
-  { key: 'budgetAlert',    label: 'Budget waarschuwing (80%)',   desc: 'Waarschuwing wanneer 80% van je budget op is' },
-  { key: 'weeklyReport',   label: 'Wekelijks overzicht',        desc: 'Elke maandag een overzicht van de afgelopen week' },
+  { key: 'orderConfirm', label: 'Orderbevestiging', desc: 'Ontvang een e-mail bij elke nieuwe bestelling' },
+  { key: 'orderDelivered', label: 'Bezorging bevestiging', desc: 'Melding wanneer een bestelling is bezorgd' },
+  { key: 'invoiceNew', label: 'Nieuwe factuur', desc: 'E-mail wanneer een nieuwe factuur klaar staat' },
+  { key: 'budgetAlert', label: 'Budget waarschuwing (80%)', desc: 'Waarschuwing wanneer 80% van je budget op is' },
+  { key: 'weeklyReport', label: 'Wekelijks overzicht', desc: 'Elke maandag een overzicht van de afgelopen week' },
 ];
 
+function Spinner() {
+  return (
+    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '60px 0' }}>
+      <div style={{
+        width: 32, height: 32, borderRadius: '50%',
+        border: '3px solid rgba(90,49,244,0.15)',
+        borderTopColor: PURPLE,
+        animation: 'spin 0.7s linear infinite',
+      }} />
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+    </div>
+  );
+}
+
 export default function SettingsPage() {
-  const [form, setForm] = useState(INITIAL);
+  const router = useRouter();
+  const [form, setForm] = useState(EMPTY_FORM);
   const [notifs, setNotifs] = useState<Record<string, boolean>>({
     orderConfirm: true, orderDelivered: true, invoiceNew: true, budgetAlert: true, weeklyReport: false,
   });
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [error, setError] = useState('');
   const [showDanger, setShowDanger] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState('');
 
   const set = (key: string, val: string) => setForm(prev => ({ ...prev, [key]: val }));
   const toggleNotif = (key: string) => setNotifs(prev => ({ ...prev, [key]: !prev[key] }));
 
+  useEffect(() => {
+    const token = localStorage.getItem('enjoy-business-token');
+    if (!token) { router.replace('/business-portal'); return; }
+
+    fetch(`${API_URL}/api/business-portal/dashboard`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then(async res => {
+        if (res.status === 401) {
+          localStorage.removeItem('enjoy-business-token');
+          router.replace('/business-portal');
+          return;
+        }
+        if (!res.ok) return;
+        return res.json();
+      })
+      .then(json => {
+        if (json) {
+          setForm(prev => ({
+            ...prev,
+            companyName: json.companyName ?? json.name ?? '',
+            address: json.address ?? '',
+            billingEmail: json.email ?? json.billingEmail ?? '',
+          }));
+        }
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, [router]);
+
   const handleSave = async () => {
-    await new Promise(r => setTimeout(r, 500));
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2500);
+    setSaving(true);
+    setError('');
+    const token = localStorage.getItem('enjoy-business-token');
+    try {
+      const res = await fetch(`${API_URL}/api/business-portal/team`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ settings: { ...form, notifications: notifs } }),
+      });
+      if (res.status === 401) {
+        localStorage.removeItem('enjoy-business-token');
+        router.replace('/business-portal');
+        return;
+      }
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2500);
+    } catch {
+      setError('Opslaan mislukt. Probeer het opnieuw.');
+    } finally {
+      setSaving(false);
+    }
   };
 
   const inputStyle: React.CSSProperties = {
@@ -63,16 +128,15 @@ export default function SettingsPage() {
       <div style={{ padding: '18px 24px', borderBottom: '1px solid var(--border)', background: 'rgba(255,255,255,0.02)' }}>
         <h2 style={{ fontSize: 15, fontWeight: 800, margin: 0 }}>{title}</h2>
       </div>
-      <div style={{ padding: '24px' }}>
-        {children}
-      </div>
+      <div style={{ padding: '24px' }}>{children}</div>
     </div>
   );
+
+  if (loading) return <div style={{ padding: 40 }}><Spinner /></div>;
 
   return (
     <div style={{ padding: 'clamp(20px,3vw,40px)', maxWidth: 800, margin: '0 auto' }}>
 
-      {/* Header */}
       <div style={{ marginBottom: 28 }}>
         <h1 style={{ fontSize: 'clamp(22px,4vw,30px)', fontWeight: 950, letterSpacing: -0.5, margin: '0 0 6px' }}>
           Instellingen
@@ -82,7 +146,12 @@ export default function SettingsPage() {
         </p>
       </div>
 
-      {/* Company info */}
+      {error && (
+        <div style={{ padding: '14px 20px', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: 12, color: '#ef4444', fontWeight: 600, marginBottom: 20, fontSize: 14 }}>
+          {error}
+        </div>
+      )}
+
       <Section title="Bedrijfsinformatie">
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(220px,1fr))', gap: 16 }}>
           <div>
@@ -104,7 +173,6 @@ export default function SettingsPage() {
         </div>
       </Section>
 
-      {/* Billing */}
       <Section title="Facturatie">
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(220px,1fr))', gap: 16 }}>
           <div>
@@ -118,16 +186,14 @@ export default function SettingsPage() {
         </div>
       </Section>
 
-      {/* Notifications */}
       <Section title="Meldingsinstellingen">
         <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
           {NOTIF_OPTIONS.map((opt, i) => (
-            <label
+            <div
               key={opt.key}
               style={{
                 display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                padding: '14px 0', cursor: 'pointer',
-                borderBottom: i < NOTIF_OPTIONS.length - 1 ? '1px solid var(--border)' : 'none',
+                padding: '14px 0', borderBottom: i < NOTIF_OPTIONS.length - 1 ? '1px solid var(--border)' : 'none',
                 gap: 16,
               }}
             >
@@ -149,27 +215,28 @@ export default function SettingsPage() {
                   left: notifs[opt.key] ? 24 : 4,
                 }} />
               </div>
-            </label>
+            </div>
           ))}
         </div>
       </Section>
 
-      {/* Save button */}
       <div style={{ display: 'flex', gap: 12, marginBottom: 32 }}>
         <button
           onClick={handleSave}
+          disabled={saving}
           style={{
             background: saved ? 'rgba(34,197,94,0.15)' : `linear-gradient(135deg,${PURPLE},${PINK})`,
             color: saved ? '#22c55e' : 'white',
             border: saved ? '1px solid rgba(34,197,94,0.3)' : 'none',
             borderRadius: 12, padding: '14px 28px',
-            cursor: 'pointer', fontSize: 15, fontWeight: 700,
+            cursor: saving ? 'not-allowed' : 'pointer', fontSize: 15, fontWeight: 700,
             fontFamily: 'Outfit, sans-serif',
             boxShadow: saved ? 'none' : `0 4px 14px ${PURPLE}35`,
             transition: 'all 0.3s',
+            opacity: saving ? 0.7 : 1,
           }}
         >
-          {saved ? '✓ Opgeslagen!' : 'Wijzigingen opslaan'}
+          {saving ? 'Opslaan...' : saved ? '✓ Opgeslagen!' : 'Wijzigingen opslaan'}
         </button>
       </div>
 
@@ -179,7 +246,7 @@ export default function SettingsPage() {
         borderRadius: 18, overflow: 'hidden',
       }}>
         <div
-          style={{ padding: '18px 24px', borderBottom: showDanger ? '1px solid rgba(239,68,68,0.15)' : 'none', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+          style={{ padding: '18px 24px', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: showDanger ? '1px solid rgba(239,68,68,0.15)' : 'none' }}
           onClick={() => setShowDanger(!showDanger)}
         >
           <h2 style={{ fontSize: 15, fontWeight: 800, margin: 0, color: '#ef4444' }}>Gevarenzone</h2>
@@ -188,36 +255,8 @@ export default function SettingsPage() {
         {showDanger && (
           <div style={{ padding: '24px' }}>
             <p style={{ color: 'var(--text-secondary)', fontSize: 14, lineHeight: 1.6, marginBottom: 16 }}>
-              Het verwijderen van je account is permanent en kan niet ongedaan worden gemaakt.
-              Alle data, bestellingen en facturen worden gewist.
+              Het verwijderen van je account is permanent. Neem contact op met <strong>support@enjoy.nl</strong> om je account te verwijderen.
             </p>
-            <div style={{ marginBottom: 16 }}>
-              <label style={{ ...labelStyle, color: '#ef4444' }}>
-                Typ "VERWIJDEREN" om te bevestigen
-              </label>
-              <input
-                value={deleteConfirm}
-                onChange={e => setDeleteConfirm(e.target.value)}
-                placeholder="VERWIJDEREN"
-                style={{
-                  ...inputStyle,
-                  border: '1px solid rgba(239,68,68,0.3)',
-                  maxWidth: 280,
-                }}
-              />
-            </div>
-            <button
-              disabled={deleteConfirm !== 'VERWIJDEREN'}
-              style={{
-                background: deleteConfirm === 'VERWIJDEREN' ? 'rgba(239,68,68,0.9)' : 'rgba(239,68,68,0.2)',
-                color: 'white', border: 'none', borderRadius: 10,
-                padding: '12px 22px', cursor: deleteConfirm === 'VERWIJDEREN' ? 'pointer' : 'not-allowed',
-                fontSize: 14, fontWeight: 700, fontFamily: 'Outfit, sans-serif',
-                transition: 'background 0.2s',
-              }}
-            >
-              Account definitief verwijderen
-            </button>
           </div>
         )}
       </div>

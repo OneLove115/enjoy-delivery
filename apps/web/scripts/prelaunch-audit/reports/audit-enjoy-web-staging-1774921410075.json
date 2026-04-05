@@ -1,0 +1,179 @@
+{
+  "project": "enjoy-web",
+  "environment": "staging",
+  "mode": "static",
+  "timestamp": "2026-03-31T01:43:30.074Z",
+  "duration_ms": 69,
+  "results": [
+    {
+      "category": "CORS",
+      "test_name": "security_headers_configured",
+      "status": "warn",
+      "details": "No security headers in middleware or next.config",
+      "severity": "medium",
+      "fix_recommendation": "Add security headers in middleware.ts or next.config headers()",
+      "duration_ms": 0
+    },
+    {
+      "category": "CORS",
+      "test_name": "csp_configured",
+      "status": "warn",
+      "details": "No Content-Security-Policy found",
+      "severity": "high",
+      "fix_recommendation": "Add Content-Security-Policy header in middleware or next.config",
+      "duration_ms": 0
+    },
+    {
+      "category": "Error Handling",
+      "test_name": "global_error_boundary",
+      "status": "pass",
+      "details": "Global error.tsx boundary found",
+      "severity": "medium",
+      "fix_recommendation": "Create src/app/error.tsx as a client error boundary",
+      "duration_ms": 0
+    },
+    {
+      "category": "Error Handling",
+      "test_name": "custom_404_page",
+      "status": "pass",
+      "details": "Custom not-found.tsx page found",
+      "severity": "low",
+      "fix_recommendation": "Create src/app/not-found.tsx for better UX",
+      "duration_ms": 0
+    },
+    {
+      "category": "SEO & Analytics",
+      "test_name": "metadata_export",
+      "status": "pass",
+      "details": "Metadata export found in root layout",
+      "severity": "high",
+      "fix_recommendation": "Export metadata from src/app/layout.tsx",
+      "duration_ms": 0
+    },
+    {
+      "category": "SEO & Analytics",
+      "test_name": "opengraph_config",
+      "status": "pass",
+      "details": "OpenGraph metadata configured",
+      "severity": "medium",
+      "fix_recommendation": "Add openGraph to metadata export",
+      "duration_ms": 0
+    },
+    {
+      "category": "SEO & Analytics",
+      "test_name": "json_ld_structured_data",
+      "status": "pass",
+      "details": "JSON-LD structured data found",
+      "severity": "medium",
+      "fix_recommendation": "Add JSON-LD schema.org structured data",
+      "duration_ms": 0
+    },
+    {
+      "category": "Legal",
+      "test_name": "page_file:/privacy",
+      "status": "pass",
+      "details": "/privacy page file found",
+      "severity": "high",
+      "fix_recommendation": "Create src/app/privacy/page.tsx",
+      "duration_ms": 0
+    },
+    {
+      "category": "Legal",
+      "test_name": "page_file:/terms",
+      "status": "pass",
+      "details": "/terms page file found",
+      "severity": "high",
+      "fix_recommendation": "Create src/app/terms/page.tsx",
+      "duration_ms": 0
+    },
+    {
+      "category": "Legal",
+      "test_name": "page_file:/cookies",
+      "status": "pass",
+      "details": "/cookies page file found",
+      "severity": "high",
+      "fix_recommendation": "Create src/app/cookies/page.tsx",
+      "duration_ms": 0
+    },
+    {
+      "category": "Deployment",
+      "test_name": "vercel_config_valid",
+      "status": "pass",
+      "details": "vercel.json is valid JSON",
+      "severity": "high",
+      "fix_recommendation": "",
+      "duration_ms": 0
+    },
+    {
+      "category": "Deployment",
+      "test_name": "vercel_security_headers",
+      "status": "warn",
+      "details": "No custom headers in vercel.json (may be set in next.config)",
+      "severity": "medium",
+      "fix_recommendation": "Configure security headers in vercel.json or next.config",
+      "duration_ms": 0
+    },
+    {
+      "category": "Deployment",
+      "test_name": "env_example_exists",
+      "status": "warn",
+      "details": "No .env.example file found",
+      "severity": "medium",
+      "fix_recommendation": "Create .env.example with all required environment variables",
+      "duration_ms": 0
+    },
+    {
+      "category": "Deployment",
+      "test_name": "gitignore_env_files",
+      "status": "pass",
+      "details": ".env files are in .gitignore",
+      "severity": "critical",
+      "fix_recommendation": "Add .env* to .gitignore immediately",
+      "duration_ms": 0
+    },
+    {
+      "category": "Deployment",
+      "test_name": "next_config_exists",
+      "status": "pass",
+      "details": "Next.js config file found",
+      "severity": "low",
+      "fix_recommendation": "Create next.config.mjs for production optimizations",
+      "duration_ms": 0
+    },
+    {
+      "category": "Deployment",
+      "test_name": "build_script_exists",
+      "status": "pass",
+      "details": "Build script: next build",
+      "severity": "critical",
+      "fix_recommendation": "Add build script to package.json",
+      "duration_ms": 0
+    },
+    {
+      "category": "Deployment",
+      "test_name": "start_script_exists",
+      "status": "pass",
+      "details": "Start script: next start",
+      "severity": "high",
+      "fix_recommendation": "Add start script to package.json",
+      "duration_ms": 0
+    },
+    {
+      "category": "Deployment",
+      "test_name": "typescript_strict_mode",
+      "status": "warn",
+      "details": "TypeScript strict mode not enabled",
+      "severity": "medium",
+      "fix_recommendation": "Enable strict mode in tsconfig.json for better type safety",
+      "duration_ms": 0
+    }
+  ],
+  "summary": {
+    "total": 18,
+    "passed": 13,
+    "failed": 0,
+    "warnings": 5,
+    "skipped": 0,
+    "critical_failures": 0
+  }
+}

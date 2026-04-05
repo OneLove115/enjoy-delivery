@@ -1,0 +1,953 @@
+{
+  "project": "enjoy-web",
+  "environment": "staging",
+  "mode": "live",
+  "timestamp": "2026-03-31T01:44:10.694Z",
+  "duration_ms": 18913,
+  "results": [
+    {
+      "category": "CORS",
+      "test_name": "cors_allowed:https://enjoy.veloci.online",
+      "status": "pass",
+      "details": "Origin https://enjoy.veloci.online allowed (ACAO: *)",
+      "severity": "medium",
+      "fix_recommendation": "Ensure https://enjoy.veloci.online is in CORS allowed origins",
+      "duration_ms": 1017
+    },
+    {
+      "category": "CORS",
+      "test_name": "cors_blocked:https://evil.com",
+      "status": "fail",
+      "details": "Disallowed origin https://evil.com was allowed (ACAO: *)",
+      "severity": "high",
+      "fix_recommendation": "Restrict CORS to only allowed origins",
+      "duration_ms": 420
+    },
+    {
+      "category": "CORS",
+      "test_name": "cors_blocked:https://attacker.example.com",
+      "status": "fail",
+      "details": "Disallowed origin https://attacker.example.com was allowed (ACAO: *)",
+      "severity": "high",
+      "fix_recommendation": "Restrict CORS to only allowed origins",
+      "duration_ms": 58
+    },
+    {
+      "category": "CORS",
+      "test_name": "header:x-frame-options",
+      "status": "warn",
+      "details": "Missing x-frame-options header",
+      "severity": "medium",
+      "fix_recommendation": "Add x-frame-options to security headers configuration",
+      "duration_ms": 0
+    },
+    {
+      "category": "CORS",
+      "test_name": "header:x-content-type-options",
+      "status": "warn",
+      "details": "Missing x-content-type-options header",
+      "severity": "medium",
+      "fix_recommendation": "Add x-content-type-options to security headers configuration",
+      "duration_ms": 0
+    },
+    {
+      "category": "CORS",
+      "test_name": "header:strict-transport-security",
+      "status": "pass",
+      "details": "strict-transport-security: max-age=63072000",
+      "severity": "high",
+      "fix_recommendation": "Add strict-transport-security to security headers configuration",
+      "duration_ms": 0
+    },
+    {
+      "category": "CORS",
+      "test_name": "header:referrer-policy",
+      "status": "warn",
+      "details": "Missing referrer-policy header",
+      "severity": "medium",
+      "fix_recommendation": "Add referrer-policy to security headers configuration",
+      "duration_ms": 0
+    },
+    {
+      "category": "Frontend",
+      "test_name": "page_loads:/",
+      "status": "pass",
+      "details": "/ loaded in 71ms",
+      "severity": "critical",
+      "fix_recommendation": "Fix / to return 200",
+      "duration_ms": 71
+    },
+    {
+      "category": "Frontend",
+      "test_name": "page_loads:/about",
+      "status": "pass",
+      "details": "/about loaded in 450ms",
+      "severity": "high",
+      "fix_recommendation": "Fix /about to return 200",
+      "duration_ms": 450
+    },
+    {
+      "category": "Frontend",
+      "test_name": "broken_link:/about->/icons/icon-192.png",
+      "status": "fail",
+      "details": "Broken link on /about: /icons/icon-192.png returned 404",
+      "severity": "medium",
+      "fix_recommendation": "Fix or remove broken link to /icons/icon-192.png",
+      "duration_ms": 216
+    },
+    {
+      "category": "Frontend",
+      "test_name": "page_loads:/discover",
+      "status": "pass",
+      "details": "/discover loaded in 69ms",
+      "severity": "high",
+      "fix_recommendation": "Fix /discover to return 200",
+      "duration_ms": 69
+    },
+    {
+      "category": "Frontend",
+      "test_name": "page_loads:/how-it-works",
+      "status": "pass",
+      "details": "/how-it-works loaded in 427ms",
+      "severity": "high",
+      "fix_recommendation": "Fix /how-it-works to return 200",
+      "duration_ms": 427
+    },
+    {
+      "category": "Frontend",
+      "test_name": "broken_link:/how-it-works->/icons/icon-192.png",
+      "status": "fail",
+      "details": "Broken link on /how-it-works: /icons/icon-192.png returned 404",
+      "severity": "medium",
+      "fix_recommendation": "Fix or remove broken link to /icons/icon-192.png",
+      "duration_ms": 110
+    },
+    {
+      "category": "Frontend",
+      "test_name": "page_loads:/partners",
+      "status": "pass",
+      "details": "/partners loaded in 184ms",
+      "severity": "high",
+      "fix_recommendation": "Fix /partners to return 200",
+      "duration_ms": 184
+    },
+    {
+      "category": "Frontend",
+      "test_name": "broken_link:/partners->/icons/icon-192.png",
+      "status": "fail",
+      "details": "Broken link on /partners: /icons/icon-192.png returned 404",
+      "severity": "medium",
+      "fix_recommendation": "Fix or remove broken link to /icons/icon-192.png",
+      "duration_ms": 54
+    },
+    {
+      "category": "Frontend",
+      "test_name": "page_loads:/business",
+      "status": "pass",
+      "details": "/business loaded in 375ms",
+      "severity": "high",
+      "fix_recommendation": "Fix /business to return 200",
+      "duration_ms": 375
+    },
+    {
+      "category": "Frontend",
+      "test_name": "broken_link:/business->/icons/icon-192.png",
+      "status": "fail",
+      "details": "Broken link on /business: /icons/icon-192.png returned 404",
+      "severity": "medium",
+      "fix_recommendation": "Fix or remove broken link to /icons/icon-192.png",
+      "duration_ms": 61
+    },
+    {
+      "category": "Frontend",
+      "test_name": "page_loads:/login",
+      "status": "pass",
+      "details": "/login loaded in 355ms",
+      "severity": "high",
+      "fix_recommendation": "Fix /login to return 200",
+      "duration_ms": 355
+    },
+    {
+      "category": "Frontend",
+      "test_name": "broken_link:/login->/icons/icon-192.png",
+      "status": "fail",
+      "details": "Broken link on /login: /icons/icon-192.png returned 404",
+      "severity": "medium",
+      "fix_recommendation": "Fix or remove broken link to /icons/icon-192.png",
+      "duration_ms": 62
+    },
+    {
+      "category": "Frontend",
+      "test_name": "page_loads:/signup",
+      "status": "pass",
+      "details": "/signup loaded in 344ms",
+      "severity": "high",
+      "fix_recommendation": "Fix /signup to return 200",
+      "duration_ms": 344
+    },
+    {
+      "category": "Frontend",
+      "test_name": "broken_link:/signup->/icons/icon-192.png",
+      "status": "fail",
+      "details": "Broken link on /signup: /icons/icon-192.png returned 404",
+      "severity": "medium",
+      "fix_recommendation": "Fix or remove broken link to /icons/icon-192.png",
+      "duration_ms": 66
+    },
+    {
+      "category": "Frontend",
+      "test_name": "page_loads:/privacy",
+      "status": "pass",
+      "details": "/privacy loaded in 342ms",
+      "severity": "high",
+      "fix_recommendation": "Fix /privacy to return 200",
+      "duration_ms": 342
+    },
+    {
+      "category": "Frontend",
+      "test_name": "broken_link:/privacy->/icons/icon-192.png",
+      "status": "fail",
+      "details": "Broken link on /privacy: /icons/icon-192.png returned 404",
+      "severity": "medium",
+      "fix_recommendation": "Fix or remove broken link to /icons/icon-192.png",
+      "duration_ms": 53
+    },
+    {
+      "category": "Frontend",
+      "test_name": "page_loads:/terms",
+      "status": "pass",
+      "details": "/terms loaded in 94ms",
+      "severity": "high",
+      "fix_recommendation": "Fix /terms to return 200",
+      "duration_ms": 94
+    },
+    {
+      "category": "Frontend",
+      "test_name": "broken_link:/terms->/icons/icon-192.png",
+      "status": "fail",
+      "details": "Broken link on /terms: /icons/icon-192.png returned 404",
+      "severity": "medium",
+      "fix_recommendation": "Fix or remove broken link to /icons/icon-192.png",
+      "duration_ms": 63
+    },
+    {
+      "category": "Frontend",
+      "test_name": "page_loads:/cookies",
+      "status": "pass",
+      "details": "/cookies loaded in 359ms",
+      "severity": "high",
+      "fix_recommendation": "Fix /cookies to return 200",
+      "duration_ms": 359
+    },
+    {
+      "category": "Frontend",
+      "test_name": "broken_link:/cookies->/icons/icon-192.png",
+      "status": "fail",
+      "details": "Broken link on /cookies: /icons/icon-192.png returned 404",
+      "severity": "medium",
+      "fix_recommendation": "Fix or remove broken link to /icons/icon-192.png",
+      "duration_ms": 53
+    },
+    {
+      "category": "Frontend",
+      "test_name": "page_loads:/faq",
+      "status": "pass",
+      "details": "/faq loaded in 410ms",
+      "severity": "high",
+      "fix_recommendation": "Fix /faq to return 200",
+      "duration_ms": 410
+    },
+    {
+      "category": "Frontend",
+      "test_name": "broken_link:/faq->/icons/icon-192.png",
+      "status": "fail",
+      "details": "Broken link on /faq: /icons/icon-192.png returned 404",
+      "severity": "medium",
+      "fix_recommendation": "Fix or remove broken link to /icons/icon-192.png",
+      "duration_ms": 54
+    },
+    {
+      "category": "Frontend",
+      "test_name": "page_loads:/help",
+      "status": "pass",
+      "details": "/help loaded in 416ms",
+      "severity": "high",
+      "fix_recommendation": "Fix /help to return 200",
+      "duration_ms": 416
+    },
+    {
+      "category": "Frontend",
+      "test_name": "broken_link:/help->/icons/icon-192.png",
+      "status": "fail",
+      "details": "Broken link on /help: /icons/icon-192.png returned 404",
+      "severity": "medium",
+      "fix_recommendation": "Fix or remove broken link to /icons/icon-192.png",
+      "duration_ms": 50
+    },
+    {
+      "category": "Frontend",
+      "test_name": "page_loads:/contact",
+      "status": "pass",
+      "details": "/contact loaded in 481ms",
+      "severity": "high",
+      "fix_recommendation": "Fix /contact to return 200",
+      "duration_ms": 481
+    },
+    {
+      "category": "Frontend",
+      "test_name": "broken_link:/contact->/icons/icon-192.png",
+      "status": "fail",
+      "details": "Broken link on /contact: /icons/icon-192.png returned 404",
+      "severity": "medium",
+      "fix_recommendation": "Fix or remove broken link to /icons/icon-192.png",
+      "duration_ms": 50
+    },
+    {
+      "category": "Frontend",
+      "test_name": "asset:/favicon.ico",
+      "status": "warn",
+      "details": "/favicon.ico returned 404",
+      "severity": "low",
+      "fix_recommendation": "Add /favicon.ico to public directory",
+      "duration_ms": 82
+    },
+    {
+      "category": "Frontend",
+      "test_name": "homepage_load_time",
+      "status": "pass",
+      "details": "Homepage loaded in 68ms",
+      "severity": "medium",
+      "fix_recommendation": "Optimize homepage loading speed (target <3s)",
+      "duration_ms": 68
+    },
+    {
+      "category": "Frontend",
+      "test_name": "homepage_html_size",
+      "status": "pass",
+      "details": "Homepage HTML is 38KB",
+      "severity": "medium",
+      "fix_recommendation": "Reduce HTML size for better initial load performance",
+      "duration_ms": 0
+    },
+    {
+      "category": "SEO & Analytics",
+      "test_name": "robots_txt",
+      "status": "pass",
+      "details": "robots.txt found and accessible",
+      "severity": "medium",
+      "fix_recommendation": "Create public/robots.txt with crawl directives",
+      "duration_ms": 192
+    },
+    {
+      "category": "SEO & Analytics",
+      "test_name": "robots_sitemap_ref",
+      "status": "pass",
+      "details": "robots.txt references sitemap",
+      "severity": "low",
+      "fix_recommendation": "Add Sitemap: URL to robots.txt",
+      "duration_ms": 0
+    },
+    {
+      "category": "SEO & Analytics",
+      "test_name": "sitemap_xml",
+      "status": "pass",
+      "details": "sitemap.xml found and accessible",
+      "severity": "medium",
+      "fix_recommendation": "Generate sitemap.xml (use next-sitemap or manual)",
+      "duration_ms": 208
+    },
+    {
+      "category": "SEO & Analytics",
+      "test_name": "meta_title:/",
+      "status": "pass",
+      "details": "Title: \"EnJoy — Elite Gourmet Delivery | Order Signature Local Favor\"",
+      "severity": "high",
+      "fix_recommendation": "Add unique, descriptive title to every page",
+      "duration_ms": 0
+    },
+    {
+      "category": "SEO & Analytics",
+      "test_name": "meta_description:/",
+      "status": "pass",
+      "details": "Meta description found",
+      "severity": "medium",
+      "fix_recommendation": "Add meta description to every page",
+      "duration_ms": 0
+    },
+    {
+      "category": "SEO & Analytics",
+      "test_name": "og_tags:/",
+      "status": "pass",
+      "details": "OpenGraph tags found",
+      "severity": "low",
+      "fix_recommendation": "Add OpenGraph meta tags for social sharing",
+      "duration_ms": 0
+    },
+    {
+      "category": "SEO & Analytics",
+      "test_name": "canonical:/",
+      "status": "pass",
+      "details": "Canonical URL set",
+      "severity": "low",
+      "fix_recommendation": "Add canonical URL to prevent duplicate content",
+      "duration_ms": 0
+    },
+    {
+      "category": "SEO & Analytics",
+      "test_name": "meta_title:/about",
+      "status": "pass",
+      "details": "Title: \"EnJoy — Elite Gourmet Delivery | Order Signature Local Favor\"",
+      "severity": "high",
+      "fix_recommendation": "Add unique, descriptive title to every page",
+      "duration_ms": 0
+    },
+    {
+      "category": "SEO & Analytics",
+      "test_name": "meta_description:/about",
+      "status": "pass",
+      "details": "Meta description found",
+      "severity": "medium",
+      "fix_recommendation": "Add meta description to every page",
+      "duration_ms": 0
+    },
+    {
+      "category": "SEO & Analytics",
+      "test_name": "og_tags:/about",
+      "status": "pass",
+      "details": "OpenGraph tags found",
+      "severity": "low",
+      "fix_recommendation": "Add OpenGraph meta tags for social sharing",
+      "duration_ms": 0
+    },
+    {
+      "category": "SEO & Analytics",
+      "test_name": "canonical:/about",
+      "status": "pass",
+      "details": "Canonical URL set",
+      "severity": "low",
+      "fix_recommendation": "Add canonical URL to prevent duplicate content",
+      "duration_ms": 0
+    },
+    {
+      "category": "SEO & Analytics",
+      "test_name": "meta_title:/discover",
+      "status": "pass",
+      "details": "Title: \"EnJoy — Elite Gourmet Delivery | Order Signature Local Favor\"",
+      "severity": "high",
+      "fix_recommendation": "Add unique, descriptive title to every page",
+      "duration_ms": 0
+    },
+    {
+      "category": "SEO & Analytics",
+      "test_name": "meta_description:/discover",
+      "status": "pass",
+      "details": "Meta description found",
+      "severity": "medium",
+      "fix_recommendation": "Add meta description to every page",
+      "duration_ms": 0
+    },
+    {
+      "category": "SEO & Analytics",
+      "test_name": "og_tags:/discover",
+      "status": "pass",
+      "details": "OpenGraph tags found",
+      "severity": "low",
+      "fix_recommendation": "Add OpenGraph meta tags for social sharing",
+      "duration_ms": 0
+    },
+    {
+      "category": "SEO & Analytics",
+      "test_name": "canonical:/discover",
+      "status": "pass",
+      "details": "Canonical URL set",
+      "severity": "low",
+      "fix_recommendation": "Add canonical URL to prevent duplicate content",
+      "duration_ms": 0
+    },
+    {
+      "category": "SEO & Analytics",
+      "test_name": "meta_title:/how-it-works",
+      "status": "pass",
+      "details": "Title: \"EnJoy — Elite Gourmet Delivery | Order Signature Local Favor\"",
+      "severity": "high",
+      "fix_recommendation": "Add unique, descriptive title to every page",
+      "duration_ms": 0
+    },
+    {
+      "category": "SEO & Analytics",
+      "test_name": "meta_description:/how-it-works",
+      "status": "pass",
+      "details": "Meta description found",
+      "severity": "medium",
+      "fix_recommendation": "Add meta description to every page",
+      "duration_ms": 0
+    },
+    {
+      "category": "SEO & Analytics",
+      "test_name": "og_tags:/how-it-works",
+      "status": "pass",
+      "details": "OpenGraph tags found",
+      "severity": "low",
+      "fix_recommendation": "Add OpenGraph meta tags for social sharing",
+      "duration_ms": 0
+    },
+    {
+      "category": "SEO & Analytics",
+      "test_name": "canonical:/how-it-works",
+      "status": "pass",
+      "details": "Canonical URL set",
+      "severity": "low",
+      "fix_recommendation": "Add canonical URL to prevent duplicate content",
+      "duration_ms": 0
+    },
+    {
+      "category": "SEO & Analytics",
+      "test_name": "meta_title:/partners",
+      "status": "pass",
+      "details": "Title: \"EnJoy — Elite Gourmet Delivery | Order Signature Local Favor\"",
+      "severity": "high",
+      "fix_recommendation": "Add unique, descriptive title to every page",
+      "duration_ms": 0
+    },
+    {
+      "category": "SEO & Analytics",
+      "test_name": "meta_description:/partners",
+      "status": "pass",
+      "details": "Meta description found",
+      "severity": "medium",
+      "fix_recommendation": "Add meta description to every page",
+      "duration_ms": 0
+    },
+    {
+      "category": "SEO & Analytics",
+      "test_name": "og_tags:/partners",
+      "status": "pass",
+      "details": "OpenGraph tags found",
+      "severity": "low",
+      "fix_recommendation": "Add OpenGraph meta tags for social sharing",
+      "duration_ms": 0
+    },
+    {
+      "category": "SEO & Analytics",
+      "test_name": "canonical:/partners",
+      "status": "pass",
+      "details": "Canonical URL set",
+      "severity": "low",
+      "fix_recommendation": "Add canonical URL to prevent duplicate content",
+      "duration_ms": 0
+    },
+    {
+      "category": "SEO & Analytics",
+      "test_name": "meta_title:/business",
+      "status": "pass",
+      "details": "Title: \"EnJoy — Elite Gourmet Delivery | Order Signature Local Favor\"",
+      "severity": "high",
+      "fix_recommendation": "Add unique, descriptive title to every page",
+      "duration_ms": 0
+    },
+    {
+      "category": "SEO & Analytics",
+      "test_name": "meta_description:/business",
+      "status": "pass",
+      "details": "Meta description found",
+      "severity": "medium",
+      "fix_recommendation": "Add meta description to every page",
+      "duration_ms": 0
+    },
+    {
+      "category": "SEO & Analytics",
+      "test_name": "og_tags:/business",
+      "status": "pass",
+      "details": "OpenGraph tags found",
+      "severity": "low",
+      "fix_recommendation": "Add OpenGraph meta tags for social sharing",
+      "duration_ms": 0
+    },
+    {
+      "category": "SEO & Analytics",
+      "test_name": "canonical:/business",
+      "status": "pass",
+      "details": "Canonical URL set",
+      "severity": "low",
+      "fix_recommendation": "Add canonical URL to prevent duplicate content",
+      "duration_ms": 0
+    },
+    {
+      "category": "SEO & Analytics",
+      "test_name": "meta_title:/login",
+      "status": "pass",
+      "details": "Title: \"EnJoy — Elite Gourmet Delivery | Order Signature Local Favor\"",
+      "severity": "high",
+      "fix_recommendation": "Add unique, descriptive title to every page",
+      "duration_ms": 0
+    },
+    {
+      "category": "SEO & Analytics",
+      "test_name": "meta_description:/login",
+      "status": "pass",
+      "details": "Meta description found",
+      "severity": "medium",
+      "fix_recommendation": "Add meta description to every page",
+      "duration_ms": 0
+    },
+    {
+      "category": "SEO & Analytics",
+      "test_name": "og_tags:/login",
+      "status": "pass",
+      "details": "OpenGraph tags found",
+      "severity": "low",
+      "fix_recommendation": "Add OpenGraph meta tags for social sharing",
+      "duration_ms": 0
+    },
+    {
+      "category": "SEO & Analytics",
+      "test_name": "canonical:/login",
+      "status": "pass",
+      "details": "Canonical URL set",
+      "severity": "low",
+      "fix_recommendation": "Add canonical URL to prevent duplicate content",
+      "duration_ms": 0
+    },
+    {
+      "category": "SEO & Analytics",
+      "test_name": "meta_title:/signup",
+      "status": "pass",
+      "details": "Title: \"EnJoy — Elite Gourmet Delivery | Order Signature Local Favor\"",
+      "severity": "high",
+      "fix_recommendation": "Add unique, descriptive title to every page",
+      "duration_ms": 0
+    },
+    {
+      "category": "SEO & Analytics",
+      "test_name": "meta_description:/signup",
+      "status": "pass",
+      "details": "Meta description found",
+      "severity": "medium",
+      "fix_recommendation": "Add meta description to every page",
+      "duration_ms": 0
+    },
+    {
+      "category": "SEO & Analytics",
+      "test_name": "og_tags:/signup",
+      "status": "pass",
+      "details": "OpenGraph tags found",
+      "severity": "low",
+      "fix_recommendation": "Add OpenGraph meta tags for social sharing",
+      "duration_ms": 0
+    },
+    {
+      "category": "SEO & Analytics",
+      "test_name": "canonical:/signup",
+      "status": "pass",
+      "details": "Canonical URL set",
+      "severity": "low",
+      "fix_recommendation": "Add canonical URL to prevent duplicate content",
+      "duration_ms": 0
+    },
+    {
+      "category": "SEO & Analytics",
+      "test_name": "meta_title:/privacy",
+      "status": "pass",
+      "details": "Title: \"EnJoy — Elite Gourmet Delivery | Order Signature Local Favor\"",
+      "severity": "high",
+      "fix_recommendation": "Add unique, descriptive title to every page",
+      "duration_ms": 0
+    },
+    {
+      "category": "SEO & Analytics",
+      "test_name": "meta_description:/privacy",
+      "status": "pass",
+      "details": "Meta description found",
+      "severity": "medium",
+      "fix_recommendation": "Add meta description to every page",
+      "duration_ms": 0
+    },
+    {
+      "category": "SEO & Analytics",
+      "test_name": "og_tags:/privacy",
+      "status": "pass",
+      "details": "OpenGraph tags found",
+      "severity": "low",
+      "fix_recommendation": "Add OpenGraph meta tags for social sharing",
+      "duration_ms": 0
+    },
+    {
+      "category": "SEO & Analytics",
+      "test_name": "canonical:/privacy",
+      "status": "pass",
+      "details": "Canonical URL set",
+      "severity": "low",
+      "fix_recommendation": "Add canonical URL to prevent duplicate content",
+      "duration_ms": 0
+    },
+    {
+      "category": "SEO & Analytics",
+      "test_name": "meta_title:/terms",
+      "status": "pass",
+      "details": "Title: \"EnJoy — Elite Gourmet Delivery | Order Signature Local Favor\"",
+      "severity": "high",
+      "fix_recommendation": "Add unique, descriptive title to every page",
+      "duration_ms": 0
+    },
+    {
+      "category": "SEO & Analytics",
+      "test_name": "meta_description:/terms",
+      "status": "pass",
+      "details": "Meta description found",
+      "severity": "medium",
+      "fix_recommendation": "Add meta description to every page",
+      "duration_ms": 0
+    },
+    {
+      "category": "SEO & Analytics",
+      "test_name": "og_tags:/terms",
+      "status": "pass",
+      "details": "OpenGraph tags found",
+      "severity": "low",
+      "fix_recommendation": "Add OpenGraph meta tags for social sharing",
+      "duration_ms": 0
+    },
+    {
+      "category": "SEO & Analytics",
+      "test_name": "canonical:/terms",
+      "status": "pass",
+      "details": "Canonical URL set",
+      "severity": "low",
+      "fix_recommendation": "Add canonical URL to prevent duplicate content",
+      "duration_ms": 0
+    },
+    {
+      "category": "SEO & Analytics",
+      "test_name": "meta_title:/cookies",
+      "status": "pass",
+      "details": "Title: \"EnJoy — Elite Gourmet Delivery | Order Signature Local Favor\"",
+      "severity": "high",
+      "fix_recommendation": "Add unique, descriptive title to every page",
+      "duration_ms": 0
+    },
+    {
+      "category": "SEO & Analytics",
+      "test_name": "meta_description:/cookies",
+      "status": "pass",
+      "details": "Meta description found",
+      "severity": "medium",
+      "fix_recommendation": "Add meta description to every page",
+      "duration_ms": 0
+    },
+    {
+      "category": "SEO & Analytics",
+      "test_name": "og_tags:/cookies",
+      "status": "pass",
+      "details": "OpenGraph tags found",
+      "severity": "low",
+      "fix_recommendation": "Add OpenGraph meta tags for social sharing",
+      "duration_ms": 0
+    },
+    {
+      "category": "SEO & Analytics",
+      "test_name": "canonical:/cookies",
+      "status": "pass",
+      "details": "Canonical URL set",
+      "severity": "low",
+      "fix_recommendation": "Add canonical URL to prevent duplicate content",
+      "duration_ms": 0
+    },
+    {
+      "category": "SEO & Analytics",
+      "test_name": "meta_title:/faq",
+      "status": "pass",
+      "details": "Title: \"EnJoy — Elite Gourmet Delivery | Order Signature Local Favor\"",
+      "severity": "high",
+      "fix_recommendation": "Add unique, descriptive title to every page",
+      "duration_ms": 0
+    },
+    {
+      "category": "SEO & Analytics",
+      "test_name": "meta_description:/faq",
+      "status": "pass",
+      "details": "Meta description found",
+      "severity": "medium",
+      "fix_recommendation": "Add meta description to every page",
+      "duration_ms": 0
+    },
+    {
+      "category": "SEO & Analytics",
+      "test_name": "og_tags:/faq",
+      "status": "pass",
+      "details": "OpenGraph tags found",
+      "severity": "low",
+      "fix_recommendation": "Add OpenGraph meta tags for social sharing",
+      "duration_ms": 0
+    },
+    {
+      "category": "SEO & Analytics",
+      "test_name": "canonical:/faq",
+      "status": "pass",
+      "details": "Canonical URL set",
+      "severity": "low",
+      "fix_recommendation": "Add canonical URL to prevent duplicate content",
+      "duration_ms": 0
+    },
+    {
+      "category": "SEO & Analytics",
+      "test_name": "meta_title:/help",
+      "status": "pass",
+      "details": "Title: \"EnJoy — Elite Gourmet Delivery | Order Signature Local Favor\"",
+      "severity": "high",
+      "fix_recommendation": "Add unique, descriptive title to every page",
+      "duration_ms": 0
+    },
+    {
+      "category": "SEO & Analytics",
+      "test_name": "meta_description:/help",
+      "status": "pass",
+      "details": "Meta description found",
+      "severity": "medium",
+      "fix_recommendation": "Add meta description to every page",
+      "duration_ms": 0
+    },
+    {
+      "category": "SEO & Analytics",
+      "test_name": "og_tags:/help",
+      "status": "pass",
+      "details": "OpenGraph tags found",
+      "severity": "low",
+      "fix_recommendation": "Add OpenGraph meta tags for social sharing",
+      "duration_ms": 0
+    },
+    {
+      "category": "SEO & Analytics",
+      "test_name": "canonical:/help",
+      "status": "pass",
+      "details": "Canonical URL set",
+      "severity": "low",
+      "fix_recommendation": "Add canonical URL to prevent duplicate content",
+      "duration_ms": 0
+    },
+    {
+      "category": "SEO & Analytics",
+      "test_name": "meta_title:/contact",
+      "status": "pass",
+      "details": "Title: \"EnJoy — Elite Gourmet Delivery | Order Signature Local Favor\"",
+      "severity": "high",
+      "fix_recommendation": "Add unique, descriptive title to every page",
+      "duration_ms": 0
+    },
+    {
+      "category": "SEO & Analytics",
+      "test_name": "meta_description:/contact",
+      "status": "pass",
+      "details": "Meta description found",
+      "severity": "medium",
+      "fix_recommendation": "Add meta description to every page",
+      "duration_ms": 0
+    },
+    {
+      "category": "SEO & Analytics",
+      "test_name": "og_tags:/contact",
+      "status": "pass",
+      "details": "OpenGraph tags found",
+      "severity": "low",
+      "fix_recommendation": "Add OpenGraph meta tags for social sharing",
+      "duration_ms": 0
+    },
+    {
+      "category": "SEO & Analytics",
+      "test_name": "canonical:/contact",
+      "status": "pass",
+      "details": "Canonical URL set",
+      "severity": "low",
+      "fix_recommendation": "Add canonical URL to prevent duplicate content",
+      "duration_ms": 0
+    },
+    {
+      "category": "Legal",
+      "test_name": "accessible:/privacy",
+      "status": "pass",
+      "details": "/privacy is accessible (200)",
+      "severity": "high",
+      "fix_recommendation": "Ensure /privacy is publicly accessible",
+      "duration_ms": 94
+    },
+    {
+      "category": "Legal",
+      "test_name": "content:/privacy",
+      "status": "pass",
+      "details": "/privacy has ~13301 characters of text content",
+      "severity": "high",
+      "fix_recommendation": "/privacy needs substantive legal content (recommended > 500 chars)",
+      "duration_ms": 0
+    },
+    {
+      "category": "Legal",
+      "test_name": "privacy_data_terms",
+      "status": "pass",
+      "details": "Privacy page mentions data/personal information",
+      "severity": "medium",
+      "fix_recommendation": "Ensure privacy policy covers data collection and processing",
+      "duration_ms": 0
+    },
+    {
+      "category": "Legal",
+      "test_name": "accessible:/terms",
+      "status": "pass",
+      "details": "/terms is accessible (200)",
+      "severity": "high",
+      "fix_recommendation": "Ensure /terms is publicly accessible",
+      "duration_ms": 85
+    },
+    {
+      "category": "Legal",
+      "test_name": "content:/terms",
+      "status": "pass",
+      "details": "/terms has ~13183 characters of text content",
+      "severity": "high",
+      "fix_recommendation": "/terms needs substantive legal content (recommended > 500 chars)",
+      "duration_ms": 0
+    },
+    {
+      "category": "Legal",
+      "test_name": "terms_service_terms",
+      "status": "pass",
+      "details": "Terms page mentions service/agreement",
+      "severity": "medium",
+      "fix_recommendation": "Ensure terms page covers service agreement",
+      "duration_ms": 0
+    },
+    {
+      "category": "Legal",
+      "test_name": "accessible:/cookies",
+      "status": "pass",
+      "details": "/cookies is accessible (200)",
+      "severity": "high",
+      "fix_recommendation": "Ensure /cookies is publicly accessible",
+      "duration_ms": 58
+    },
+    {
+      "category": "Legal",
+      "test_name": "content:/cookies",
+      "status": "pass",
+      "details": "/cookies has ~12619 characters of text content",
+      "severity": "high",
+      "fix_recommendation": "/cookies needs substantive legal content (recommended > 500 chars)",
+      "duration_ms": 0
+    },
+    {
+      "category": "Legal",
+      "test_name": "cookie_page_accessible",
+      "status": "pass",
+      "details": "Cookie policy page accessible",
+      "severity": "medium",
+      "fix_recommendation": "Ensure cookie policy page is accessible",
+      "duration_ms": 58
+    }
+  ],
+  "summary": {
+    "total": 104,
+    "passed": 86,
+    "failed": 14,
+    "warnings": 4,
+    "skipped": 0,
+    "critical_failures": 0
+  }
+}

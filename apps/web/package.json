@@ -5,11 +5,13 @@
   "scripts": {
     "dev": "next dev --port 3100",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "audit:prelaunch": "npx tsx scripts/prelaunch-audit/run.ts",
+    "audit:prelaunch:static": "npx tsx scripts/prelaunch-audit/run.ts --mode static",
+    "audit:prelaunch:live": "npx tsx scripts/prelaunch-audit/run.ts --mode live",
+    "audit:playwright": "npx playwright test --config tests/prelaunch/playwright.config.ts"
   },
   "dependencies": {
-    "@enjoy/database": "*",
-    "@enjoy/ui": "*",
     "framer-motion": "^11.0.0",
     "lucide-react": "^0.475.0",
     "next": "^15.2.0",
@@ -18,8 +20,10 @@
     "zustand": "5.0.4"
   },
   "devDependencies": {
+    "@playwright/test": "^1.58.2",
     "@types/node": "^22.0.0",
     "@types/react": "^19.0.0",
+    "tsx": "^4.7.0",
     "typescript": "^5.7.0"
   }
 }

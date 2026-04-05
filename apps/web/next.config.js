@@ -4,7 +4,9 @@ const nextConfig = {
   eslint: { ignoreDuringBuilds: true },
   images: {
     remotePatterns: [
-      { protocol: 'https', hostname: '**' },
+      { protocol: 'https', hostname: '*.supabase.co' },
+      { protocol: 'https', hostname: '*.veloci.online' },
+      { protocol: 'https', hostname: '*.vercel-storage.com' },
     ],
   },
 };

@@ -4,6 +4,9 @@ import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCartStore } from '../../../store/cart';
+import { MenuItemModal } from '../../../components/menu/MenuItemModal';
+import type { MenuItemForModal, MenuModifierGroup } from '../../../components/menu/MenuItemModal';
+import { GroupOrderModal } from '../../../components/menu/GroupOrderModal';
 
 const PURPLE = '#5A31F4';
 const PINK   = '#FF0080';
@@ -13,6 +16,7 @@ const NAV_H  = 60;
 type MenuItem = {
   id: string; name: string; description: string;
   basePrice: string; imageUrl: string | null; category: string;
+  modifierGroups?: MenuModifierGroup[];
 };
 type MenuCategory = { id: string; name: string; items: MenuItem[] };
 type BusinessHours = {
@@ -46,7 +50,7 @@ function QtyControl({ qty, onAdd, onInc, onDec, small }: {
         border: 'none', borderRadius: 20, padding: small ? '5px 14px' : '7px 18px',
         color: 'white', fontSize: 13, fontWeight: 800, cursor: 'pointer',
         boxShadow: '0 4px 12px rgba(90,49,244,0.25)',
-      }}>+ Toevoegen</button>
+      }}>+</button>
     );
   }
   return (
@@ -59,15 +63,39 @@ function QtyControl({ qty, onAdd, onInc, onDec, small }: {
 }
 
 /* ─── Menu Item Card ─── */
-function MenuItemCard({ item, qty, onAdd, onInc, onDec, currency, locale }: {
+function MenuItemCard({ item, qty, onAdd, onInc, onDec, onItemClick, currency, locale }: {
   item: MenuItem; qty: number; onAdd: () => void; onInc: () => void; onDec: () => void;
-  currency: string; locale: string;
+  onItemClick?: () => void; currency: string; locale: string;
 }) {
+  const hasModifiers = item.modifierGroups && item.modifierGroups.length > 0;
+  const handleItemClick = () => { if (onItemClick) onItemClick(); };
+  const handleQuickAdd = (e: React.MouseEvent) => { e.stopPropagation(); if (hasModifiers && onItemClick) onItemClick(); else onAdd(); };
+
   return (
-    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', padding: '18px 0', borderBottom: '1px solid var(--border)', gap: 16 }}>
+    <div
+      role="button"
+      tabIndex={0}
+      onClick={handleItemClick}
+      style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', padding: '18px 0', borderBottom: '1px solid var(--border)', gap: 16, cursor: 'pointer', minHeight: 48 }}
+    >
       {/* Text */}
       <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 4 }}>{item.name}</div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+          <span style={{ fontSize: 15, fontWeight: 700 }}>{item.name}</span>
+          {/* Info eye icon — always visible */}
+          <button
+            onClick={(e) => { e.stopPropagation(); if (onItemClick) onItemClick(); }}
+            title="Productinfo bekijken"
+            style={{
+              width: 22, height: 22, borderRadius: '50%', border: '1px solid var(--border)',
+              background: 'var(--bg-elevated)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+              cursor: 'pointer', fontSize: 12, color: 'var(--text-muted)', flexShrink: 0,
+            }}
+          >👁</button>
+          {hasModifiers && (
+            <span style={{ fontSize: 10, padding: '2px 6px', borderRadius: 8, background: `${PURPLE}18`, color: PURPLE, fontWeight: 700 }}>opties</span>
+          )}
+        </div>
         {item.description && (
           <div style={{
             fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.5, marginBottom: 10,
@@ -77,32 +105,72 @@ function MenuItemCard({ item, qty, onAdd, onInc, onDec, currency, locale }: {
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <span style={{ fontSize: 14, fontWeight: 800 }}>{fmt(parseFloat(item.basePrice), currency, locale)}</span>
           {/* Mobile: qty inline with price */}
-          <span className="show-mobile" style={{ display: 'none' }}>
-            <QtyControl qty={qty} onAdd={onAdd} onInc={onInc} onDec={onDec} small />
+          <span className="show-mobile" style={{ display: 'none' }} onClick={e => e.stopPropagation()}>
+            <QtyControl qty={qty} onAdd={() => handleQuickAdd({ stopPropagation: () => {} } as any)} onInc={onInc} onDec={onDec} small />
           </span>
         </div>
       </div>
       {/* Image + desktop qty */}
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 10, flexShrink: 0 }}>
-        <div style={{ width: 88, height: 88, borderRadius: 12, overflow: 'hidden', background: 'var(--bg-elevated)', flexShrink: 0 }}>
+        <div style={{ position: 'relative', width: 88, height: 88, borderRadius: 12, overflow: 'hidden', background: 'var(--bg-elevated)', flexShrink: 0 }}>
           {item.imageUrl
             ? <img src={item.imageUrl} alt={item.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 32 }}>🍽️</div>
           }
         </div>
-        <span className="hide-mobile">
-          <QtyControl qty={qty} onAdd={onAdd} onInc={onInc} onDec={onDec} />
+        <span className="hide-mobile" onClick={e => e.stopPropagation()}>
+          <QtyControl qty={qty} onAdd={() => handleQuickAdd({ stopPropagation: () => {} } as any)} onInc={onInc} onDec={onDec} />
         </span>
       </div>
     </div>
   );
 }
 
+/* ─── Upsell Logic ─── */
+function getUpsellItems(cart: any[], menu: MenuCategory[]): MenuItem[] {
+  if (cart.length === 0 || menu.length === 0) return [];
+  const cartIds = new Set(cart.map(c => c.id));
+  const cartCategories = new Set<string>();
+  // Find which categories the cart items belong to
+  for (const cat of menu) {
+    for (const item of cat.items) {
+      if (cartIds.has(item.id)) cartCategories.add(cat.id);
+    }
+  }
+  // Suggest items from OTHER categories (drinks with pizza, desserts with mains)
+  const suggestions: MenuItem[] = [];
+  const preferredCats = ['DRINKS', 'DESSERTS', 'SIDES', 'SALADS'];
+  for (const catName of preferredCats) {
+    const cat = menu.find(c => c.name.toUpperCase().includes(catName));
+    if (cat && !cartCategories.has(cat.id)) {
+      for (const item of cat.items.slice(0, 2)) {
+        if (!cartIds.has(item.id) && suggestions.length < 3) {
+          suggestions.push(item);
+        }
+      }
+    }
+  }
+  // If not enough, pick random items from non-cart categories
+  if (suggestions.length < 2) {
+    for (const cat of menu) {
+      if (cartCategories.has(cat.id)) continue;
+      for (const item of cat.items) {
+        if (!cartIds.has(item.id) && suggestions.length < 3) {
+          suggestions.push(item);
+        }
+      }
+    }
+  }
+  return suggestions;
+}
+
 /* ─── Cart Panel (shared content, used by sidebar + drawer) ─── */
-function CartContent({ cart, currency, locale, totalCart, onCheckout }: {
+function CartContent({ cart, currency, locale, totalCart, onCheckout, menu, onAddUpsell }: {
   cart: ReturnType<typeof useCartStore.getState>['items'];
   currency: string; locale: string; totalCart: number;
   onCheckout?: () => void;
+  menu?: MenuCategory[];
+  onAddUpsell?: (item: MenuItem) => void;
 }) {
   const { updateQty, removeItem } = useCartStore();
   if (cart.length === 0) {
@@ -117,11 +185,19 @@ function CartContent({ cart, currency, locale, totalCart, onCheckout }: {
   return (
     <>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 14, maxHeight: 360, overflowY: 'auto', padding: '16px 20px' }}>
-        {cart.map(c => (
+        {cart.map(c => {
+          const modExtra = (c.modifiers || []).reduce((s, m) => s + m.priceAdjustment, 0);
+          const unitPrice = parseFloat(c.basePrice) + modExtra;
+          return (
           <div key={c.id} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ fontSize: 13, fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.name}</div>
-              <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{fmt(parseFloat(c.basePrice), currency, locale)} / stuk</div>
+              {c.modifiers && c.modifiers.length > 0 && (
+                <div style={{ fontSize: 11, color: PURPLE, marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {c.modifiers.map(m => m.name).join(', ')}
+                </div>
+              )}
+              <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{fmt(unitPrice, currency, locale)} / stuk</div>
             </div>
             <QtyControl
               qty={c.qty} small onAdd={() => {}}
@@ -129,11 +205,44 @@ function CartContent({ cart, currency, locale, totalCart, onCheckout }: {
               onDec={() => { if (c.qty <= 1) removeItem(c.id); else updateQty(c.id, c.qty - 1); }}
             />
             <span style={{ fontSize: 13, fontWeight: 800, minWidth: 52, textAlign: 'right' }}>
-              {fmt(parseFloat(c.basePrice) * c.qty, currency, locale)}
+              {fmt(unitPrice * c.qty, currency, locale)}
             </span>
           </div>
-        ))}
+          );
+        })}
       </div>
+      {/* Upsell suggestions */}
+      {menu && menu.length > 0 && (() => {
+        const upsells = getUpsellItems(cart, menu);
+        if (upsells.length === 0) return null;
+        return (
+          <div style={{ padding: '12px 20px', borderTop: '1px solid var(--border)', background: 'var(--bg-card)' }}>
+            <div style={{ fontSize: 11, fontWeight: 800, color: PURPLE, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 10 }}>
+              Misschien ook lekker?
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {upsells.map(item => (
+                <div key={item.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 10px', borderRadius: 10, border: '1px solid var(--border)', background: 'var(--bg-page)' }}>
+                  {item.imageUrl && (
+                    <img src={item.imageUrl} alt={item.name} style={{ width: 36, height: 36, borderRadius: 8, objectFit: 'cover', flexShrink: 0 }} />
+                  )}
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: 12, fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.name}</div>
+                    <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{fmt(parseFloat(item.basePrice), currency, locale)}</div>
+                  </div>
+                  <button onClick={() => onAddUpsell?.(item)} style={{
+                    width: 28, height: 28, borderRadius: '50%', border: 'none', cursor: 'pointer',
+                    background: `linear-gradient(135deg,${PURPLE},${PINK})`, color: 'white',
+                    fontSize: 16, fontWeight: 900, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    boxShadow: '0 2px 8px rgba(90,49,244,0.25)', flexShrink: 0,
+                  }}>+</button>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      })()}
+
       <div style={{ padding: '14px 20px', borderTop: '1px solid var(--border)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, color: 'var(--text-secondary)', marginBottom: 8 }}>
           <span>Bezorgkosten</span>
@@ -162,9 +271,12 @@ export default function MenuPage() {
   const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
   const [menu, setMenu] = useState<MenuCategory[]>([]);
   const [activeCategory, setActiveCategory] = useState<string>('');
+  const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const [cartOpen, setCartOpen] = useState(false);
   const [infoOpen, setInfoOpen] = useState(false);
+  const [selectedItem, setSelectedItem] = useState<MenuItemForModal | null>(null);
+  const [groupOrderOpen, setGroupOrderOpen] = useState(false);
 
   const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
@@ -175,7 +287,7 @@ export default function MenuPage() {
 
   const handleAdd = useCallback((item: MenuItem) => {
     if (!restaurant) return;
-    addItem(slug, restaurant.name, { id: item.id, name: item.name, basePrice: item.basePrice, imageUrl: item.imageUrl });
+    addItem(slug, restaurant.name, { id: item.id, name: item.name, basePrice: item.basePrice, imageUrl: item.imageUrl }, currency, locale);
   }, [restaurant, slug, addItem]);
 
   const handleDec = useCallback((id: string) => {
@@ -218,7 +330,7 @@ export default function MenuPage() {
   const scrollTo = (catId: string) => {
     const el = sectionRefs.current[catId];
     if (!el) return;
-    const top = el.getBoundingClientRect().top + window.scrollY - (NAV_H + 56);
+    const top = el.getBoundingClientRect().top + window.scrollY - 60; // 60px for sticky category tabs
     window.scrollTo({ top, behavior: 'smooth' });
   };
 
@@ -252,11 +364,11 @@ export default function MenuPage() {
   return (
     <div style={{ background: 'var(--bg-page)', minHeight: '100vh', color: 'var(--text-primary)', fontFamily: 'Outfit, sans-serif' }}>
 
-      {/* ─── Sticky Nav ─── */}
+      {/* ─── Non-sticky Nav (scrolls with page) ─── */}
       <nav style={{
-        position: 'fixed', top: 0, left: 0, right: 0, zIndex: 200,
+        position: 'relative', top: 0, left: 0, right: 0, zIndex: 200,
         height: NAV_H, display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        padding: '0 20px', background: 'var(--bg-nav)', backdropFilter: 'blur(20px)',
+        padding: '0 20px', background: 'var(--bg-nav)',
         borderBottom: '1px solid var(--border)',
       }}>
         <Link href="/discover" style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'var(--text-secondary)', fontWeight: 700, fontSize: 14, textDecoration: 'none' }}>
@@ -283,7 +395,7 @@ export default function MenuPage() {
       </nav>
 
       {/* ─── Hero ─── */}
-      <div style={{ marginTop: NAV_H }}>
+      <div>
         <div style={{
           position: 'relative',
           background: restaurant.heroImage
@@ -338,6 +450,16 @@ export default function MenuPage() {
                       padding: '3px 10px', borderRadius: 20, fontSize: 12, fontWeight: 600,
                     }}>{cat}</span>
                   ))}
+                  {/* Group order button */}
+                  <button onClick={() => setGroupOrderOpen(true)} style={{
+                    display: 'flex', alignItems: 'center', gap: 5, padding: '4px 12px', borderRadius: 20,
+                    border: `1px solid ${PURPLE}60`,
+                    background: `${PURPLE}18`,
+                    color: PURPLE,
+                    fontSize: 12, fontWeight: 700, cursor: 'pointer',
+                  }}>
+                    <span>👥</span><span>Groepsbestelling</span>
+                  </button>
                   {/* Info button */}
                   <button onClick={() => setInfoOpen(true)} style={{
                     display: 'flex', alignItems: 'center', gap: 5, padding: '4px 12px', borderRadius: 20,
@@ -374,27 +496,48 @@ export default function MenuPage() {
           </div>
         </div>
 
-        {/* ─── Mobile Category Strip ─── */}
-        <div className="show-mobile" style={{ display: 'none', position: 'sticky', top: NAV_H, zIndex: 100, background: 'var(--catstrip-bg)', borderBottom: '1px solid var(--border)' }}>
-          <div className="scroll-x" style={{ display: 'flex', gap: 0, padding: '0 12px' }}>
-            {menu.map(cat => (
-              <button key={cat.id} onClick={() => scrollTo(cat.id)} style={{
-                padding: '13px 14px', border: 'none', background: 'transparent',
-                color: activeCategory === cat.id ? 'var(--text-primary)' : 'var(--text-muted)',
-                fontWeight: activeCategory === cat.id ? 800 : 500, fontSize: 14,
-                cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap',
-                borderBottom: activeCategory === cat.id ? `2px solid ${PURPLE}` : '2px solid transparent',
-                transition: 'all 0.15s',
-              }}>{cat.name}</button>
-            ))}
+        {/* ─── Sticky Search + Category Tabs ─── */}
+        <div style={{ position: 'sticky', top: 0, zIndex: 100, background: 'var(--bg-page)' }}>
+          {/* Search bar */}
+          <div style={{ maxWidth: 1200, margin: '0 auto', padding: '12px 24px 0' }}>
+            <div style={{ position: 'relative' }}>
+              <span style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', fontSize: 18, color: PURPLE }}>🔍</span>
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                placeholder={`Zoeken ${restaurant.name}`}
+                style={{
+                  width: '100%', padding: '14px 16px 14px 48px',
+                  borderRadius: 14, border: '1px solid var(--border)',
+                  background: 'var(--bg-elevated)', color: 'var(--text-primary)',
+                  fontSize: 15, fontFamily: 'inherit', outline: 'none',
+                }}
+              />
+            </div>
+          </div>
+          {/* Category tabs */}
+          <div style={{ borderBottom: '1px solid var(--border)' }}>
+            <div className="scroll-x" style={{ maxWidth: 1200, margin: '0 auto', display: 'flex', gap: 0, padding: '0 24px', overflowX: 'auto' }}>
+              {menu.map(cat => (
+                <button key={cat.id} onClick={() => { setSearchQuery(''); scrollTo(cat.id); }} style={{
+                  padding: '12px 18px', border: 'none', background: 'transparent',
+                  color: activeCategory === cat.id ? 'var(--text-primary)' : 'var(--text-muted)',
+                  fontWeight: activeCategory === cat.id ? 800 : 500, fontSize: 14,
+                  cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap',
+                  borderBottom: activeCategory === cat.id ? `3px solid ${PURPLE}` : '3px solid transparent',
+                  transition: 'all 0.15s',
+                }}>{cat.name}</button>
+              ))}
+            </div>
           </div>
         </div>
 
         {/* ─── Body ─── */}
         <div style={{ display: 'flex', maxWidth: 1200, margin: '0 auto', padding: '28px 24px 100px', gap: 28, alignItems: 'flex-start' }}>
 
-          {/* ─── Category Sidebar (desktop) ─── */}
-          <div className="hide-mobile" style={{ width: 220, flexShrink: 0, position: 'sticky', top: NAV_H + 20 }}>
+          {/* Sidebar removed — horizontal tabs above handle navigation */}
+          {false && <div className="hide-mobile" style={{ width: 220, flexShrink: 0, position: 'sticky', top: 20 }}>
             <div style={{ background: 'var(--bg-elevated)', borderRadius: 16, border: '1px solid var(--border)', overflow: 'hidden' }}>
               <div style={{ padding: '14px 18px 10px', fontSize: 11, fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-muted)' }}>
                 Menu
@@ -415,7 +558,7 @@ export default function MenuPage() {
                 </button>
               ))}
             </div>
-          </div>
+          </div>}
 
           {/* ─── Menu Sections ─── */}
           <div style={{ flex: 1, minWidth: 0 }}>
@@ -426,25 +569,39 @@ export default function MenuPage() {
                 <div style={{ fontSize: 14, marginTop: 8 }}>Dit restaurant heeft nog geen menu opgezet.</div>
               </div>
             ) : (
-              menu.map(cat => (
+              menu.map(cat => {
+                const q = searchQuery.toLowerCase().trim();
+                const filteredItems = q
+                  ? cat.items.filter(item =>
+                      item.name.toLowerCase().includes(q) ||
+                      (item.description || '').toLowerCase().includes(q)
+                    )
+                  : cat.items;
+                if (q && filteredItems.length === 0) return null;
+                return (
                 <div key={cat.id} ref={el => { sectionRefs.current[cat.id] = el; }} style={{ marginBottom: 44 }}>
                   <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 4, paddingTop: 4 }}>
                     <h2 style={{ fontSize: 20, fontWeight: 900 }}>{cat.name}</h2>
-                    <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{cat.items.length} gerecht{cat.items.length !== 1 ? 'en' : ''}</span>
+                    <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{filteredItems.length} gerecht{filteredItems.length !== 1 ? 'en' : ''}</span>
                   </div>
                   <div style={{ height: 1, background: 'var(--border)', marginBottom: 4 }} />
-                  {cat.items.map(item => (
+                  {filteredItems.map(item => (
                     <MenuItemCard
                       key={item.id} item={item}
                       qty={getQty(item.id)}
                       onAdd={() => handleAdd(item)}
                       onInc={() => handleAdd(item)}
                       onDec={() => handleDec(item.id)}
+                      onItemClick={() => setSelectedItem({
+                        id: item.id, name: item.name, description: item.description,
+                        basePrice: item.basePrice, imageUrl: item.imageUrl,
+                        modifierGroups: item.modifierGroups || [],
+                      })}
                       currency={currency} locale={locale}
                     />
                   ))}
                 </div>
-              ))
+              );})
             )}
           </div>
 
@@ -455,7 +612,7 @@ export default function MenuPage() {
                 <h3 style={{ fontSize: 16, fontWeight: 900 }}>Jouw bestelling</h3>
                 <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{restaurant.name}</div>
               </div>
-              <CartContent cart={cart} currency={currency} locale={locale} totalCart={totalCart} />
+              <CartContent cart={cart} currency={currency} locale={locale} totalCart={totalCart} menu={menu} onAddUpsell={handleAdd} />
             </div>
           </div>
         </div>
@@ -488,7 +645,7 @@ export default function MenuPage() {
                 <button onClick={() => setCartOpen(false)} style={{ background: 'var(--b8)', border: 'none', borderRadius: 10, width: 34, height: 34, cursor: 'pointer', fontSize: 18, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>×</button>
               </div>
               <div style={{ overflowY: 'auto', flex: 1 }}>
-                <CartContent cart={cart} currency={currency} locale={locale} totalCart={totalCart} onCheckout={() => setCartOpen(false)} />
+                <CartContent cart={cart} currency={currency} locale={locale} totalCart={totalCart} menu={menu} onAddUpsell={handleAdd} onCheckout={() => setCartOpen(false)} />
               </div>
             </motion.div>
           </div>
@@ -589,7 +746,7 @@ export default function MenuPage() {
 
       {/* ─── Mobile Floating Cart Bar ─── */}
       {itemCount() > 0 && (
-        <div className="show-mobile" style={{ display: 'none', position: 'fixed', bottom: 20, left: 16, right: 16, zIndex: 300 }}>
+        <div className="show-mobile" style={{ display: 'none', position: 'fixed', bottom: 'max(20px, env(safe-area-inset-bottom, 20px))', left: 16, right: 16, zIndex: 300 }}>
           <motion.button
             initial={{ y: 80, opacity: 0 }} animate={{ y: 0, opacity: 1 }}
             onClick={() => setCartOpen(true)}
@@ -599,6 +756,7 @@ export default function MenuPage() {
               display: 'flex', alignItems: 'center', justifyContent: 'space-between',
               color: 'white', fontSize: 15, fontWeight: 900, cursor: 'pointer',
               boxShadow: '0 12px 36px rgba(90,49,244,0.4)',
+              minHeight: 56,
             }}
           >
             <span style={{ background: 'rgba(255,255,255,0.2)', borderRadius: 8, padding: '4px 10px', fontSize: 13, fontWeight: 900 }}>{itemCount()}</span>
@@ -607,6 +765,41 @@ export default function MenuPage() {
           </motion.button>
         </div>
       )}
+
+      {/* ─── Menu Item Options Modal ─── */}
+      <MenuItemModal
+        item={selectedItem}
+        onClose={() => setSelectedItem(null)}
+        restaurantSlug={slug}
+        restaurantName={restaurant.name}
+        currency={currency}
+        locale={locale}
+        upsellItems={(() => {
+          // Get drinks + desserts for upsell in item modal
+          const upsells: Array<{id: string; name: string; basePrice: string; imageUrl: string | null}> = [];
+          const drinkCats = ['DRINKS', 'DRANKEN', 'DRANKJES', 'DESSERTS', 'NAGERECHTEN'];
+          for (const cat of menu) {
+            if (drinkCats.some(d => cat.name.toUpperCase().includes(d))) {
+              for (const item of cat.items.slice(0, 4)) {
+                if (item.id !== selectedItem?.id && upsells.length < 5) {
+                  upsells.push({ id: item.id, name: item.name, basePrice: item.basePrice, imageUrl: item.imageUrl });
+                }
+              }
+            }
+          }
+          return upsells;
+        })()}
+      />
+
+      {/* ─── Group Order Modal ─── */}
+      <GroupOrderModal
+        isOpen={groupOrderOpen}
+        onClose={() => setGroupOrderOpen(false)}
+        restaurantName={restaurant.name}
+        restaurantSlug={slug}
+        cartItemCount={itemCount()}
+        cartTotal={cartTotal()}
+      />
     </div>
   );
 }

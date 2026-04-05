@@ -130,8 +130,21 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                     auto_switch: true,
                     host_language: 'en',
                     destination_languages: ['nl','fr','de','tr','ar','es'],
-                    hide_switcher: true
+                    hide_switcher: true,
+                    cache: true,
+                    dynamic: '.main-content',
+                    translate_search: true
                   });
+                  // Re-translate on Next.js client navigation
+                  var observer = new MutationObserver(function() {
+                    if (typeof Weglot !== 'undefined' && Weglot.getCurrentLang && Weglot.getCurrentLang() !== 'en') {
+                      clearTimeout(window._weglotTimer);
+                      window._weglotTimer = setTimeout(function() {
+                        try { Weglot.translate(); } catch(e) {}
+                      }, 300);
+                    }
+                  });
+                  observer.observe(document.body, { childList: true, subtree: true });
                 };
                 document.head.appendChild(s);
               })();
