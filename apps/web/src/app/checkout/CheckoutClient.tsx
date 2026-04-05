@@ -23,6 +23,13 @@ const EMPTY: CheckoutDetails = {
   name: '', phone: '', email: '', payment: 'ideal',
 };
 
+const PURPLE = '#5A31F4';
+const PINK   = '#FF0080';
+const ORANGE = '#FF6B35';
+
+const GRADIENT = `linear-gradient(135deg, ${PURPLE}, ${PINK})`;
+const GRADIENT_HOVER = `linear-gradient(135deg, #6B42FF, #FF1A8C)`;
+
 export default function CheckoutClient() {
   const { items, restaurantName, restaurantSlug, total, itemCount, clearCart, currency, locale } = useCartStore();
   const router = useRouter();
@@ -49,7 +56,6 @@ export default function CheckoutClient() {
     });
   };
 
-  // Load saved details on mount
   useEffect(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
@@ -109,7 +115,6 @@ export default function CheckoutClient() {
         clearCart();
         pendingRedirect.current = () => { router.push(`/order-success?order=${data.orderNumber || ''}`); };
       }
-      // Show success animation, then redirect after 1.5s
       setShowSuccess(true);
       setTimeout(() => {
         pendingRedirect.current();
@@ -124,7 +129,44 @@ export default function CheckoutClient() {
   const isDisabled = submitting || items.length === 0;
 
   return (
-    <div style={{ background: '#0A0A0F', minHeight: '100vh', color: 'white', fontFamily: 'Outfit, sans-serif' }}>
+    <div style={{
+      background: 'var(--bg-page, #0A0A0F)',
+      minHeight: '100vh',
+      color: 'var(--text-primary, #fff)',
+      fontFamily: "'Outfit', system-ui, sans-serif",
+    }}>
+      <style>{`
+        @keyframes enjoy-spin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+        @keyframes checkout-glow-pulse {
+          0%, 100% { opacity: 0.5; }
+          50% { opacity: 1; }
+        }
+        .checkout-input {
+          width: 100%;
+          background: var(--bg-card, rgba(255,255,255,0.03));
+          border: 1px solid var(--border, rgba(255,255,255,0.06));
+          border-radius: 10px;
+          padding: 12px 16px;
+          color: var(--text-primary, #fff);
+          font-size: 15px;
+          outline: none;
+          font-family: inherit;
+          box-sizing: border-box;
+          transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+        }
+        .checkout-input:focus {
+          border-color: ${PURPLE};
+          box-shadow: 0 0 0 3px rgba(90,49,244,0.18);
+          background: rgba(90,49,244,0.04);
+        }
+        .checkout-input::placeholder {
+          color: var(--text-muted, rgba(255,255,255,0.35));
+        }
+      `}</style>
+
       {/* Success overlay */}
       <AnimatePresence>
         {showSuccess && (
@@ -134,33 +176,46 @@ export default function CheckoutClient() {
             exit={{ opacity: 0 }}
             style={{
               position: 'fixed', inset: 0, zIndex: 9999,
-              background: 'rgba(10,10,15,0.92)',
+              background: 'rgba(10,10,15,0.95)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               flexDirection: 'column', gap: 20,
             }}
           >
+            {/* Glow behind checkmark */}
+            <div style={{
+              position: 'absolute',
+              width: 200, height: 200,
+              borderRadius: '50%',
+              background: `radial-gradient(circle, rgba(90,49,244,0.25) 0%, transparent 70%)`,
+              animation: 'checkout-glow-pulse 1.5s ease-in-out infinite',
+            }} />
             <motion.svg
               width={100} height={100} viewBox="0 0 100 100"
               initial={{ scale: 0.6, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ type: 'spring', stiffness: 260, damping: 20 }}
+              style={{ position: 'relative', zIndex: 1 }}
             >
-              {/* Circle */}
+              <defs>
+                <linearGradient id="success-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor={PURPLE} />
+                  <stop offset="100%" stopColor={PINK} />
+                </linearGradient>
+              </defs>
               <motion.circle
                 cx={50} cy={50} r={44}
                 fill="none"
-                stroke="#FF6B35"
-                strokeWidth={5}
+                stroke="url(#success-grad)"
+                strokeWidth={4}
                 strokeLinecap="round"
                 initial={{ pathLength: 0 }}
                 animate={{ pathLength: 1 }}
                 transition={{ duration: 0.5, ease: 'easeOut' }}
               />
-              {/* Checkmark */}
               <motion.path
                 d="M28 50 L44 66 L72 36"
                 fill="none"
-                stroke="#FF6B35"
+                stroke="url(#success-grad)"
                 strokeWidth={6}
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -173,7 +228,7 @@ export default function CheckoutClient() {
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.7 }}
-              style={{ fontSize: 20, fontWeight: 800, color: 'white' }}
+              style={{ fontSize: 20, fontWeight: 800, color: 'white', position: 'relative', zIndex: 1 }}
             >
               Bestelling geplaatst!
             </motion.p>
@@ -182,226 +237,490 @@ export default function CheckoutClient() {
       </AnimatePresence>
 
       {/* Navbar */}
-      <nav style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100, height: 70, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 32px', background: 'rgba(10,10,15,0.9)', backdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-        <Link href={restaurantSlug ? `/menu/${restaurantSlug}` : '/discover'} style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'rgba(255,255,255,0.6)', fontSize: 14, fontWeight: 600, textDecoration: 'none' }}>
-          <span style={{ fontSize: 18 }}>←</span><span>Terug naar menu</span>
+      <nav style={{
+        position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100,
+        height: 64,
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        padding: '0 24px',
+        background: 'var(--bg-nav, rgba(10,10,15,0.88))',
+        backdropFilter: 'blur(20px)',
+        borderBottom: '1px solid var(--border, rgba(255,255,255,0.06))',
+      }}>
+        <Link
+          href={restaurantSlug ? `/menu/${restaurantSlug}` : '/discover'}
+          style={{
+            display: 'flex', alignItems: 'center', gap: 8,
+            color: 'var(--text-secondary, rgba(255,255,255,0.55))',
+            fontSize: 14, fontWeight: 600, textDecoration: 'none',
+            transition: 'color 0.15s',
+          }}
+        >
+          <svg width={16} height={16} viewBox="0 0 16 16" fill="none" style={{ flexShrink: 0 }}>
+            <path d="M10 3L5 8L10 13" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+          <span>Terug naar menu</span>
         </Link>
-        <Link href="/" style={{ fontSize: 24, fontWeight: 900, textDecoration: 'none', color: 'white' }}>
-          <img src="/logo-enjoy.png" alt="EnJoy" style={{ height: 36, width: 'auto' }} />
+        <Link href="/" style={{ textDecoration: 'none' }}>
+          <img src="/logo-enjoy.png" alt="EnJoy" style={{ height: 34, width: 'auto' }} />
         </Link>
+        {/* Spacer to center logo */}
+        <div style={{ width: 120 }} />
       </nav>
 
-      <div style={{ maxWidth: 1100, margin: '0 auto', padding: '100px 24px 60px', display: 'flex', gap: 32, alignItems: 'flex-start', flexWrap: 'wrap' }}>
-        {/* Left: Details */}
-        <div style={{ flex: 1, minWidth: 300 }}>
-          <h1 style={{ fontSize: 28, fontWeight: 900, marginBottom: 32 }}>Afrekenen</h1>
+      {/* Page title */}
+      <motion.div
+        initial={{ opacity: 0, y: -12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, ease: 'easeOut' }}
+        style={{
+          maxWidth: 1100, margin: '0 auto',
+          padding: '92px 24px 0',
+          display: 'flex', alignItems: 'baseline', gap: 12,
+        }}
+      >
+        <h1 style={{ fontSize: 30, fontWeight: 900, letterSpacing: '-0.02em' }}>Afrekenen</h1>
+        {restaurantName && (
+          <span style={{ fontSize: 15, color: 'var(--text-muted, rgba(255,255,255,0.35))', fontWeight: 500 }}>
+            bij {restaurantName}
+          </span>
+        )}
+      </motion.div>
 
-          {error && (
-            <div style={{ padding: '14px 18px', borderRadius: 12, background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', color: '#ef4444', fontWeight: 600, fontSize: 14, marginBottom: 24 }}>
-              {error}
+      <div style={{
+        maxWidth: 1100,
+        margin: '0 auto',
+        padding: '24px 24px 60px',
+        display: 'flex',
+        gap: 28,
+        alignItems: 'flex-start',
+        flexWrap: 'wrap',
+      }}>
+
+        {/* Left column: form sections */}
+        <div style={{ flex: 1, minWidth: 300, display: 'flex', flexDirection: 'column', gap: 0 }}>
+
+          {/* Error banner */}
+          <AnimatePresence>
+            {error && (
+              <motion.div
+                initial={{ opacity: 0, y: -8, height: 0 }}
+                animate={{ opacity: 1, y: 0, height: 'auto' }}
+                exit={{ opacity: 0, y: -8, height: 0 }}
+                style={{
+                  padding: '13px 16px',
+                  borderRadius: 12,
+                  background: 'rgba(239,68,68,0.08)',
+                  border: '1px solid rgba(239,68,68,0.25)',
+                  color: '#fc8181',
+                  fontWeight: 600,
+                  fontSize: 14,
+                  marginBottom: 20,
+                  display: 'flex', alignItems: 'center', gap: 10,
+                }}
+              >
+                <svg width={16} height={16} viewBox="0 0 16 16" fill="none" style={{ flexShrink: 0 }}>
+                  <circle cx={8} cy={8} r={7} stroke="#fc8181" strokeWidth={1.5} />
+                  <path d="M8 5v3M8 10.5v.5" stroke="#fc8181" strokeWidth={1.5} strokeLinecap="round" />
+                </svg>
+                {error}
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Section: Bezorgadres */}
+          <FormSection title="Bezorgadres" icon="📍" index={0}>
+            <FormField label="Straat en huisnummer">
+              <input
+                className="checkout-input"
+                type="text"
+                value={form.street}
+                onChange={e => set('street', e.target.value)}
+                placeholder="Bijv. Hoofdstraat 42"
+              />
+            </FormField>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.5fr', gap: 12 }}>
+              <FormField label="Postcode">
+                <input
+                  className="checkout-input"
+                  type="text"
+                  value={form.postcode}
+                  onChange={e => set('postcode', e.target.value)}
+                  placeholder="1234 AB"
+                />
+              </FormField>
+              <FormField label="Stad">
+                <input
+                  className="checkout-input"
+                  type="text"
+                  value={form.city}
+                  onChange={e => set('city', e.target.value)}
+                  placeholder="Amsterdam"
+                />
+              </FormField>
             </div>
-          )}
+            <FormField label="Bijzonderheden (optioneel)">
+              <input
+                className="checkout-input"
+                type="text"
+                value={form.notes}
+                onChange={e => set('notes', e.target.value)}
+                placeholder="Bijv. bel twee keer"
+              />
+            </FormField>
+          </FormSection>
 
-          <Section title="Bezorgadres">
-            <InputRow label="Straat en huisnummer">
-              <FocusInput type="text" value={form.street} onChange={e => set('street', e.target.value)} placeholder="Bijv. Hoofdstraat 42" />
-            </InputRow>
-            <InputRow label="Postcode">
-              <FocusInput type="text" value={form.postcode} onChange={e => set('postcode', e.target.value)} placeholder="1234 AB" />
-            </InputRow>
-            <InputRow label="Stad">
-              <FocusInput type="text" value={form.city} onChange={e => set('city', e.target.value)} placeholder="Amsterdam" />
-            </InputRow>
-            <InputRow label="Bijzonderheden (optioneel)">
-              <FocusInput type="text" value={form.notes} onChange={e => set('notes', e.target.value)} placeholder="Bijv. bel twee keer" />
-            </InputRow>
-          </Section>
+          {/* Section: Contactgegevens */}
+          <FormSection title="Contactgegevens" icon="👤" index={1}>
+            <FormField label="Naam">
+              <input
+                className="checkout-input"
+                type="text"
+                value={form.name}
+                onChange={e => set('name', e.target.value)}
+                placeholder="Voornaam en achternaam"
+              />
+            </FormField>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+              <FormField label="Telefoonnummer">
+                <input
+                  className="checkout-input"
+                  type="tel"
+                  value={form.phone}
+                  onChange={e => set('phone', e.target.value)}
+                  placeholder="+31 6 12345678"
+                />
+              </FormField>
+              <FormField label="E-mailadres">
+                <input
+                  className="checkout-input"
+                  type="email"
+                  value={form.email}
+                  onChange={e => set('email', e.target.value)}
+                  placeholder="jouw@email.nl"
+                />
+              </FormField>
+            </div>
+          </FormSection>
 
-          <Section title="Contactgegevens">
-            <InputRow label="Naam">
-              <FocusInput type="text" value={form.name} onChange={e => set('name', e.target.value)} placeholder="Voornaam en achternaam" />
-            </InputRow>
-            <InputRow label="Telefoonnummer">
-              <FocusInput type="tel" value={form.phone} onChange={e => set('phone', e.target.value)} placeholder="+31 6 12345678" />
-            </InputRow>
-            <InputRow label="E-mailadres">
-              <FocusInput type="email" value={form.email} onChange={e => set('email', e.target.value)} placeholder="jouw@email.nl" />
-            </InputRow>
-          </Section>
+          {/* Section: Betaalmethode */}
+          <FormSection title="Betaalmethode" icon="💳" index={2}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {[
+                { id: 'ideal',  label: 'iDEAL',                desc: 'Betaal via je bank',       icon: '🏦' },
+                { id: 'card',   label: 'Creditcard / Debitcard', desc: 'Visa, Mastercard, Maestro', icon: '💳' },
+                { id: 'paypal', label: 'PayPal',               desc: 'Snel en veilig',            icon: '🅿️' },
+              ].map(m => (
+                <PaymentOption
+                  key={m.id}
+                  id={m.id}
+                  label={m.label}
+                  desc={m.desc}
+                  icon={m.icon}
+                  selected={form.payment === m.id}
+                  onSelect={() => set('payment', m.id)}
+                />
+              ))}
+            </div>
+          </FormSection>
 
-          <Section title="Betaalmethode">
-            {[
-              { id: 'ideal', label: 'iDEAL', icon: '🏦' },
-              { id: 'card', label: 'Creditcard / Debitcard', icon: '💳' },
-              { id: 'paypal', label: 'PayPal', icon: '🅿️' },
-            ].map(m => (
-              <label key={m.id} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '14px 18px', borderRadius: 12, border: form.payment === m.id ? '2px solid #FF6B35' : '1px solid rgba(255,255,255,0.08)', marginBottom: 10, cursor: 'pointer', background: form.payment === m.id ? 'rgba(255,107,53,0.06)' : 'rgba(255,255,255,0.03)' }}>
-                <input type="radio" name="payment" checked={form.payment === m.id} onChange={() => set('payment', m.id)} style={{ accentColor: '#FF6B35' }} />
-                <span style={{ fontSize: 20 }}>{m.icon}</span>
-                <span style={{ fontWeight: 700, fontSize: 15 }}>{m.label}</span>
-              </label>
-            ))}
-          </Section>
-
-          <Section title="Tip voor de bezorger">
+          {/* Section: Tip */}
+          <FormSection title="Tip voor de bezorger" icon="🎁" index={3}>
             <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
               {[0, 1, 2, 3].map(amt => (
                 <TipButton key={amt} selected={tip === amt} onClick={() => setTip(amt)}>
-                  {amt === 0 ? 'Geen' : `€ ${amt},00`}
+                  {amt === 0 ? 'Geen tip' : `€ ${amt},00`}
                 </TipButton>
               ))}
             </div>
-          </Section>
+          </FormSection>
         </div>
 
-        {/* Right: Order Summary */}
-        <div style={{ width: 340, flexShrink: 0, position: 'sticky', top: 90 }}>
-          <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 20, padding: 24 }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
-              <div>
-                <div style={{ fontSize: 17, fontWeight: 900 }}>{restaurantName || 'Winkelmandje'}</div>
-                <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', marginTop: 2 }}>{itemCount()} product{itemCount() !== 1 ? 'en' : ''}</div>
+        {/* Right column: Order summary */}
+        <motion.div
+          initial={{ opacity: 0, x: 16 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.4, ease: 'easeOut', delay: 0.15 }}
+          style={{ width: 340, flexShrink: 0, position: 'sticky', top: 84 }}
+        >
+          {/* Glassmorphism card */}
+          <div style={{
+            background: 'rgba(255,255,255,0.03)',
+            backdropFilter: 'blur(24px)',
+            WebkitBackdropFilter: 'blur(24px)',
+            border: '1px solid rgba(255,255,255,0.08)',
+            borderRadius: 20,
+            overflow: 'hidden',
+          }}>
+            {/* Card header with gradient accent */}
+            <div style={{
+              padding: '18px 20px',
+              borderBottom: '1px solid rgba(255,255,255,0.06)',
+              background: 'linear-gradient(135deg, rgba(90,49,244,0.08) 0%, rgba(255,0,128,0.04) 100%)',
+            }}>
+              <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+                <div>
+                  <div style={{ fontSize: 16, fontWeight: 800, letterSpacing: '-0.01em' }}>
+                    {restaurantName || 'Winkelmandje'}
+                  </div>
+                  <div style={{ fontSize: 12, color: 'var(--text-muted, rgba(255,255,255,0.35))', marginTop: 3 }}>
+                    {itemCount()} product{itemCount() !== 1 ? 'en' : ''}
+                  </div>
+                </div>
+                <Link
+                  href={restaurantSlug ? `/menu/${restaurantSlug}` : '/discover'}
+                  style={{
+                    fontSize: 12,
+                    fontWeight: 700,
+                    textDecoration: 'none',
+                    background: GRADIENT,
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    backgroundClip: 'text',
+                  }}
+                >
+                  Wijzigen
+                </Link>
               </div>
-              <Link href={restaurantSlug ? `/menu/${restaurantSlug}` : '/discover'} style={{ fontSize: 13, color: '#FF6B35', fontWeight: 700, textDecoration: 'none' }}>Wijzigen</Link>
             </div>
 
-            {items.length === 0 ? (
-              <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: 14, textAlign: 'center', padding: '24px 0' }}>Je winkelmandje is leeg</p>
-            ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 20, maxHeight: 240, overflowY: 'auto' }}>
-                {items.map(item => (
-                  <div key={item.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', fontSize: 14 }}>
-                    <div style={{ display: 'flex', gap: 10 }}>
-                      <span style={{ color: 'rgba(255,255,255,0.4)', fontWeight: 700, minWidth: 20 }}>{item.qty}×</span>
-                      <span style={{ fontWeight: 600, lineHeight: 1.35 }}>{item.name}</span>
+            {/* Cart items */}
+            <div style={{ padding: '16px 20px' }}>
+              {items.length === 0 ? (
+                <p style={{
+                  color: 'var(--text-muted, rgba(255,255,255,0.35))',
+                  fontSize: 14, textAlign: 'center',
+                  padding: '20px 0',
+                }}>
+                  Je winkelmandje is leeg
+                </p>
+              ) : (
+                <div style={{
+                  display: 'flex', flexDirection: 'column', gap: 10,
+                  marginBottom: 4,
+                  maxHeight: 210,
+                  overflowY: 'auto',
+                  paddingRight: 4,
+                }}>
+                  {items.map(item => (
+                    <div key={item.id} style={{
+                      display: 'flex', justifyContent: 'space-between',
+                      alignItems: 'flex-start', fontSize: 14,
+                    }}>
+                      <div style={{ display: 'flex', gap: 10, flex: 1, minWidth: 0 }}>
+                        <span style={{
+                          fontWeight: 800, fontSize: 12,
+                          minWidth: 22, height: 22,
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          borderRadius: 6,
+                          background: 'rgba(90,49,244,0.15)',
+                          color: '#a78bfa',
+                          flexShrink: 0,
+                        }}>
+                          {item.qty}
+                        </span>
+                        <span style={{
+                          fontWeight: 500, lineHeight: 1.4,
+                          color: 'var(--text-secondary, rgba(255,255,255,0.8))',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap',
+                        }}>
+                          {item.name}
+                        </span>
+                      </div>
+                      <span style={{ fontWeight: 700, flexShrink: 0, marginLeft: 10, fontSize: 14 }}>
+                        {formatPrice(parseFloat(item.basePrice) * item.qty)}
+                      </span>
                     </div>
-                    <span style={{ fontWeight: 800, flexShrink: 0, marginLeft: 8 }}>{formatPrice(parseFloat(item.basePrice) * item.qty)}</span>
-                  </div>
-                ))}
-              </div>
-            )}
+                  ))}
+                </div>
+              )}
+            </div>
 
-            <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: 16, display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 20 }}>
+            {/* Price breakdown */}
+            <div style={{
+              padding: '16px 20px',
+              borderTop: '1px solid rgba(255,255,255,0.06)',
+              display: 'flex', flexDirection: 'column', gap: 9,
+            }}>
               <PriceRow label="Subtotaal" value={formatPrice(subtotal)} />
               <PriceRow label="BTW (9%)" value={formatPrice(taxAmount)} />
-              <PriceRow label="Bezorgkosten" value="Gratis" valueStyle={{ color: '#4ade80' }} />
-              {tip > 0 && <PriceRow label="Tip" value={formatPrice(tip)} />}
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 900, fontSize: 17, paddingTop: 10, borderTop: '1px solid rgba(255,255,255,0.08)' }}>
-                <span>Totaal</span>
-                <span>{formatPrice(grandTotal)}</span>
-              </div>
+              <PriceRow
+                label="Bezorgkosten"
+                value="Gratis"
+                valueStyle={{ color: '#4ade80', fontWeight: 700 }}
+              />
+              {tip > 0 && <PriceRow label="Tip bezorger" value={formatPrice(tip)} />}
             </div>
 
-            {/* Submit button */}
-            <button
-              onClick={handleOrder}
-              disabled={isDisabled}
-              style={{
-                width: '100%',
-                padding: '16px',
-                background: isDisabled ? '#444' : '#FF6B35',
-                color: isDisabled ? 'rgba(255,255,255,0.65)' : '#fff',
-                border: 'none',
-                borderRadius: 8,
-                fontSize: 16,
-                fontWeight: 900,
-                cursor: isDisabled ? 'not-allowed' : 'pointer',
-                marginBottom: 16,
-                boxShadow: isDisabled ? 'none' : '0 4px 16px rgba(255,107,53,0.3)',
-                transition: 'background 0.2s',
-                opacity: submitting ? 0.8 : 1,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: 10,
-              }}
-            >
-              {submitting && (
-                <svg
-                  width={18} height={18} viewBox="0 0 18 18"
-                  style={{ animation: 'enjoy-spin 0.75s linear infinite', flexShrink: 0 }}
-                >
-                  <circle
-                    cx={9} cy={9} r={7}
-                    fill="none"
-                    stroke="rgba(255,255,255,0.35)"
-                    strokeWidth={2.5}
-                  />
-                  <path
-                    d="M9 2 A7 7 0 0 1 16 9"
-                    fill="none"
-                    stroke="white"
-                    strokeWidth={2.5}
-                    strokeLinecap="round"
-                  />
+            {/* Grand total */}
+            <div style={{
+              padding: '14px 20px 16px',
+              borderTop: '1px solid rgba(255,255,255,0.06)',
+              display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+            }}>
+              <span style={{ fontSize: 15, fontWeight: 700 }}>Totaal</span>
+              <span style={{
+                fontSize: 22, fontWeight: 900, letterSpacing: '-0.03em',
+                background: GRADIENT,
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text',
+              }}>
+                {formatPrice(grandTotal)}
+              </span>
+            </div>
+
+            {/* CTA button */}
+            <div style={{ padding: '0 20px 20px' }}>
+              <OrderButton
+                onClick={handleOrder}
+                disabled={isDisabled}
+                submitting={submitting}
+              />
+              <p style={{
+                textAlign: 'center', fontSize: 11,
+                color: 'var(--text-muted, rgba(255,255,255,0.3))',
+                lineHeight: 1.5, marginTop: 12,
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5,
+              }}>
+                <svg width={12} height={12} viewBox="0 0 12 12" fill="none" style={{ flexShrink: 0 }}>
+                  <rect x={1} y={5} width={10} height={7} rx={1.5} stroke="currentColor" strokeWidth={1.2} />
+                  <path d="M3.5 5V3.5a2.5 2.5 0 015 0V5" stroke="currentColor" strokeWidth={1.2} strokeLinecap="round" />
                 </svg>
-              )}
-              {submitting ? 'Bezig…' : 'Bestel en betaal'}
-            </button>
-
-            {/* Keyframe for spinner */}
-            <style>{`
-              @keyframes enjoy-spin {
-                from { transform: rotate(0deg); }
-                to { transform: rotate(360deg); }
-              }
-            `}</style>
-
-            <p style={{ textAlign: 'center', fontSize: 12, color: 'rgba(255,255,255,0.3)', lineHeight: 1.5 }}>🔒 Veilig betalen via SSL-encryptie</p>
+                Veilig betalen via SSL-encryptie
+              </p>
+            </div>
           </div>
-        </div>
+        </motion.div>
       </div>
     </div>
   );
 }
 
-// Input with focus ring
-function FocusInput({ type, value, onChange, placeholder }: {
-  type: string;
-  value: string;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  placeholder?: string;
+/* ─── Sub-components ─── */
+
+function FormSection({
+  title, icon, children, index,
+}: {
+  title: string; icon: string; children: React.ReactNode; index: number;
 }) {
-  const [focused, setFocused] = useState(false);
   return (
-    <input
-      type={type}
-      value={value}
-      onChange={onChange}
-      placeholder={placeholder}
-      onFocus={() => setFocused(true)}
-      onBlur={() => setFocused(false)}
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.35, ease: 'easeOut', delay: index * 0.07 }}
       style={{
-        ...inputStyle,
-        borderColor: focused ? '#FF6B35' : 'rgba(255,255,255,0.1)',
-        boxShadow: focused ? '0 0 0 2px #FF6B35' : 'none',
-        transition: 'border-color 0.15s, box-shadow 0.15s',
+        background: 'var(--bg-card, rgba(255,255,255,0.03))',
+        border: '1px solid var(--border, rgba(255,255,255,0.06))',
+        borderRadius: 16,
+        padding: '20px 20px 22px',
+        marginBottom: 16,
       }}
-    />
+    >
+      <div style={{
+        display: 'flex', alignItems: 'center', gap: 10, marginBottom: 18,
+      }}>
+        <span style={{ fontSize: 16 }}>{icon}</span>
+        <h2 style={{
+          fontSize: 14, fontWeight: 700,
+          color: 'var(--text-primary, #fff)',
+          letterSpacing: '0.01em',
+        }}>
+          {title}
+        </h2>
+      </div>
+      {children}
+    </motion.div>
   );
 }
 
-// Tip button with scale + shadow on selection
-function TipButton({ selected, onClick, children }: {
-  selected: boolean;
-  onClick: () => void;
-  children: React.ReactNode;
+function FormField({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div style={{ marginBottom: 14 }}>
+      <label style={{
+        display: 'block', fontSize: 12, fontWeight: 600,
+        marginBottom: 6,
+        color: 'var(--text-muted, rgba(255,255,255,0.4))',
+        letterSpacing: '0.02em',
+      }}>
+        {label}
+      </label>
+      {children}
+    </div>
+  );
+}
+
+function PaymentOption({
+  id, label, desc, icon, selected, onSelect,
+}: {
+  id: string; label: string; desc: string; icon: string; selected: boolean; onSelect: () => void;
+}) {
+  return (
+    <label
+      style={{
+        display: 'flex', alignItems: 'center', gap: 14,
+        padding: '13px 16px',
+        borderRadius: 12,
+        border: selected ? '1.5px solid rgba(90,49,244,0.5)' : '1px solid var(--border, rgba(255,255,255,0.06))',
+        cursor: 'pointer',
+        background: selected
+          ? 'linear-gradient(135deg, rgba(90,49,244,0.08), rgba(255,0,128,0.04))'
+          : 'transparent',
+        transition: 'border-color 0.15s, background 0.15s',
+      }}
+    >
+      <input
+        type="radio"
+        name="payment"
+        checked={selected}
+        onChange={onSelect}
+        style={{ accentColor: '#5A31F4', flexShrink: 0 }}
+      />
+      <span style={{ fontSize: 18, flexShrink: 0 }}>{icon}</span>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ fontWeight: 700, fontSize: 14 }}>{label}</div>
+        <div style={{ fontSize: 12, color: 'var(--text-muted, rgba(255,255,255,0.35))', marginTop: 1 }}>{desc}</div>
+      </div>
+      {selected && (
+        <div style={{
+          width: 18, height: 18, borderRadius: '50%',
+          background: 'linear-gradient(135deg, #5A31F4, #FF0080)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          flexShrink: 0,
+        }}>
+          <svg width={10} height={10} viewBox="0 0 10 10" fill="none">
+            <path d="M2 5L4 7L8 3" stroke="white" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </div>
+      )}
+    </label>
+  );
+}
+
+function TipButton({
+  selected, onClick, children,
+}: {
+  selected: boolean; onClick: () => void; children: React.ReactNode;
 }) {
   return (
     <button
       onClick={onClick}
       style={{
-        padding: '8px 16px',
-        borderRadius: 24,
-        border: selected ? '2px solid #FF6B35' : '1px solid rgba(255,255,255,0.12)',
-        background: selected ? 'rgba(255,107,53,0.18)' : 'rgba(255,255,255,0.04)',
+        padding: '9px 18px',
+        borderRadius: 50,
+        border: selected ? '1.5px solid transparent' : '1px solid var(--border-strong, rgba(255,255,255,0.12))',
+        background: selected
+          ? 'linear-gradient(135deg, #5A31F4, #FF0080)'
+          : 'var(--bg-card, rgba(255,255,255,0.04))',
         color: 'white',
-        fontWeight: 800,
+        fontWeight: 700,
         fontSize: 14,
         cursor: 'pointer',
-        transform: selected ? 'scale(1.05)' : 'scale(1)',
-        boxShadow: selected ? '0 2px 12px rgba(255,107,53,0.35)' : 'none',
-        transition: 'transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease, border-color 0.15s ease',
+        transform: selected ? 'scale(1.04)' : 'scale(1)',
+        boxShadow: selected ? '0 4px 16px rgba(90,49,244,0.35)' : 'none',
+        transition: 'transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease',
+        fontFamily: 'inherit',
       }}
     >
       {children}
@@ -409,35 +728,65 @@ function TipButton({ selected, onClick, children }: {
   );
 }
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
+function OrderButton({
+  onClick, disabled, submitting,
+}: {
+  onClick: () => void; disabled: boolean; submitting: boolean;
+}) {
   return (
-    <div style={{ marginBottom: 32 }}>
-      <h2 style={{ fontSize: 16, fontWeight: 800, marginBottom: 16, color: 'rgba(255,255,255,0.7)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{title}</h2>
-      {children}
-    </div>
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      style={{
+        width: '100%',
+        padding: '15px 20px',
+        background: disabled
+          ? 'rgba(255,255,255,0.07)'
+          : 'linear-gradient(135deg, #5A31F4, #FF0080)',
+        color: disabled ? 'rgba(255,255,255,0.3)' : '#fff',
+        border: 'none',
+        borderRadius: 12,
+        fontSize: 15,
+        fontWeight: 800,
+        cursor: disabled ? 'not-allowed' : 'pointer',
+        boxShadow: disabled ? 'none' : '0 6px 24px rgba(90,49,244,0.35)',
+        transition: 'opacity 0.2s, transform 0.15s, box-shadow 0.2s',
+        opacity: submitting ? 0.85 : 1,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 10,
+        fontFamily: 'inherit',
+        letterSpacing: '-0.01em',
+      }}
+    >
+      {submitting && (
+        <svg
+          width={18} height={18} viewBox="0 0 18 18"
+          style={{ animation: 'enjoy-spin 0.75s linear infinite', flexShrink: 0 }}
+        >
+          <circle cx={9} cy={9} r={7} fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth={2.5} />
+          <path d="M9 2 A7 7 0 0 1 16 9" fill="none" stroke="white" strokeWidth={2.5} strokeLinecap="round" />
+        </svg>
+      )}
+      {submitting ? 'Bestelling plaatsen…' : 'Bestel en betaal'}
+    </button>
   );
 }
 
-function InputRow({ label, children }: { label: string; children: React.ReactNode }) {
+function PriceRow({ label, value, valueStyle }: {
+  label: string; value: string; valueStyle?: React.CSSProperties;
+}) {
   return (
-    <div style={{ marginBottom: 14 }}>
-      <label style={{ display: 'block', fontSize: 13, fontWeight: 600, marginBottom: 6, color: 'rgba(255,255,255,0.55)' }}>{label}</label>
-      {children}
-    </div>
-  );
-}
-
-function PriceRow({ label, value, valueStyle }: { label: string; value: string; valueStyle?: React.CSSProperties }) {
-  return (
-    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14, color: 'rgba(255,255,255,0.6)' }}>
+    <div style={{
+      display: 'flex', justifyContent: 'space-between',
+      fontSize: 13,
+      color: 'var(--text-muted, rgba(255,255,255,0.4))',
+    }}>
       <span>{label}</span>
-      <span style={{ fontWeight: 700, ...valueStyle }}>{value}</span>
+      <span style={{ fontWeight: 600, color: 'var(--text-secondary, rgba(255,255,255,0.6))', ...valueStyle }}>
+        {value}
+      </span>
     </div>
   );
 }
-
-const inputStyle: React.CSSProperties = {
-  width: '100%', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)',
-  borderRadius: 10, padding: '12px 16px', color: 'white', fontSize: 15, outline: 'none', fontFamily: 'inherit',
-  boxSizing: 'border-box',
-};

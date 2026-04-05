@@ -29,10 +29,14 @@ export function Nav() {
   return (
     <>
       <nav style={{
-        position: 'relative', height: 70,
+        position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100,
+        height: 70,
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        padding: '0 32px', background: 'var(--bg-page)',
-        borderBottom: '1px solid var(--border)',
+        padding: '0 32px',
+        background: 'rgba(10,10,15,0.55)',
+        backdropFilter: 'blur(16px)',
+        WebkitBackdropFilter: 'blur(16px)',
+        borderBottom: '1px solid rgba(255,255,255,0.08)',
       }}>
         {/* Logo */}
         <Link href="/" style={{ textDecoration: 'none', flexShrink: 0 }}>
@@ -43,7 +47,7 @@ export function Nav() {
         <div className="nav-center-links" style={{ display: 'flex', gap: 24, alignItems: 'center' }}>
           {navLinks.map(l => (
             <Link key={l.href} href={l.href} style={{
-              color: pathname === l.href ? 'var(--text-primary)' : 'var(--text-secondary)',
+              color: pathname === l.href ? '#ffffff' : 'rgba(255,255,255,0.75)',
               fontSize: 14, fontWeight: 600, textDecoration: 'none',
               borderBottom: pathname === l.href ? `2px solid ${PINK}` : '2px solid transparent',
               paddingBottom: 2, transition: 'color 0.2s',
@@ -75,7 +79,7 @@ export function Nav() {
               </>
             ) : (
               <>
-                <Link href="/login" style={{ color: 'var(--text-secondary)', fontSize: 14, fontWeight: 600 }}>Sign in</Link>
+                <Link href="/login" style={{ color: 'rgba(255,255,255,0.8)', fontSize: 14, fontWeight: 600 }}>Sign in</Link>
                 <Link href="/signup" style={{
                   background: `linear-gradient(135deg,${PURPLE},${PINK})`, color: 'white',
                   padding: '9px 20px', borderRadius: 10, fontSize: 14, fontWeight: 700,

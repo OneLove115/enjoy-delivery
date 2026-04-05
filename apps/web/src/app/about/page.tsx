@@ -69,7 +69,7 @@ export default function AboutPage() {
       {/* ── Hero ──────────────────────────────────────────────────── */}
       <section style={{ position: 'relative', height: 'clamp(380px, 55vh, 600px)', overflow: 'hidden' }}>
         <img
-          src="/marketing/about-team.png"
+          src="/marketing/about-team-v2.png"
           alt="EnJoy team"
           style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center' }}
         />
