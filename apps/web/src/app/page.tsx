@@ -1,7 +1,6 @@
 'use client';
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { TranslationProvider, useTranslation } from './context/TranslationContext';
 import { Nav } from './components/Nav';
@@ -10,24 +9,49 @@ import { Footer } from './components/Footer';
 const PURPLE = '#5A31F4';
 const PINK   = '#FF0080';
 
-/* ─── Hero Image ─── */
+/* ─── Hero — rotating food photography backgrounds ─── */
+const heroSlides = [
+  { src: '/food/hero-feast.png', label: 'Feest' },
+  { src: '/food/cat-pizza.png', label: 'Pizza' },
+  { src: '/food/cat-sushi.png', label: 'Sushi' },
+  { src: '/food/cat-burger.png', label: 'Burgers' },
+  { src: '/food/cat-curry.png', label: 'Curry' },
+  { src: '/food/cat-dessert.png', label: 'Desserts' },
+];
+
 function HeroCoupleSection() {
   const { t } = useTranslation();
+  const [slideIdx, setSlideIdx] = useState(0);
+
+  useEffect(() => {
+    const iv = setInterval(() => setSlideIdx(i => (i + 1) % heroSlides.length), 4000);
+    return () => clearInterval(iv);
+  }, []);
+
   return (
-    <section className="hero-couple" style={{ position: 'relative', width: '100%', overflow: 'hidden' }}>
-      <img
-        src="/food/hero-feast.png"
-        alt="Couple enjoying a meal together"
-        style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 30%', display: 'block' }}
-      />
+    <section className="hero-couple" style={{ position: 'relative', width: '100%', overflow: 'hidden', minHeight: 'min(70vh, 520px)' }}>
+      {/* Rotating background images */}
+      <AnimatePresence mode="wait">
+        <motion.img
+          key={slideIdx}
+          src={heroSlides[slideIdx].src}
+          alt={heroSlides[slideIdx].label}
+          initial={{ opacity: 0, scale: 1.06 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.98 }}
+          transition={{ duration: 1.1, ease: 'easeInOut' }}
+          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 30%' }}
+        />
+      </AnimatePresence>
+
       {/* Gradient overlay */}
-      <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(10,10,15,0.25) 0%, rgba(10,10,15,0.6) 100%)' }} />
+      <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(10,10,15,0.3) 0%, rgba(10,10,15,0.65) 100%)' }} />
 
       {/* Headline over image */}
       <div style={{
-        position: 'absolute', inset: 0,
+        position: 'relative', zIndex: 1,
         display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-        textAlign: 'center', padding: '0 20px',
+        textAlign: 'center', padding: '80px 20px 60px', minHeight: 'min(70vh, 520px)',
       }}>
         <motion.h1
           initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }}
@@ -42,12 +66,51 @@ function HeroCoupleSection() {
             {t('hero_title').split(',')[1]}
           </span>
         </motion.h1>
+
+        {/* Rotating food label */}
+        <div style={{ height: 48, overflow: 'hidden', marginBottom: 10 }}>
+          <AnimatePresence mode="wait">
+            <motion.span
+              key={slideIdx}
+              initial={{ y: 36, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: -36, opacity: 0 }}
+              transition={{ duration: 0.35 }}
+              style={{
+                display: 'block', fontSize: 'clamp(28px, 6vw, 48px)', fontWeight: 900,
+                color: '#FF6B35', textShadow: '0 0 30px rgba(255,107,53,0.5), 0 2px 10px rgba(0,0,0,0.5)',
+              }}
+            >
+              {heroSlides[slideIdx].label}
+            </motion.span>
+          </AnimatePresence>
+        </div>
+
         <motion.p
           initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}
-          style={{ fontSize: 'clamp(14px, 3.5vw, 18px)', color: 'rgba(255,255,255,0.85)', maxWidth: 480, lineHeight: 1.65, textShadow: '0 1px 10px rgba(0,0,0,0.5)' }}
+          style={{ fontSize: 'clamp(14px, 3.5vw, 18px)', color: 'rgba(255,255,255,0.9)', maxWidth: 480, lineHeight: 1.65, textShadow: '0 1px 10px rgba(0,0,0,0.5)' }}
         >
           {t('hero_subtitle')}
         </motion.p>
+
+        {/* Thumbnail dots */}
+        <div style={{ display: 'flex', gap: 8, marginTop: 28 }}>
+          {heroSlides.map((slide, i) => (
+            <button
+              key={i}
+              onClick={() => setSlideIdx(i)}
+              style={{
+                width: 40, height: 40, borderRadius: '50%', overflow: 'hidden', padding: 0,
+                border: i === slideIdx ? '2px solid #FF6B35' : '2px solid rgba(255,255,255,0.3)',
+                cursor: 'pointer', background: 'none',
+                boxShadow: i === slideIdx ? '0 0 12px rgba(255,107,53,0.5)' : 'none',
+                transition: 'border-color 0.3s, box-shadow 0.3s', opacity: i === slideIdx ? 1 : 0.7,
+              }}
+            >
+              <img src={slide.src} alt={slide.label} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            </button>
+          ))}
+        </div>
       </div>
     </section>
   );
@@ -359,7 +422,7 @@ function useAddressGuard() {
   };
 }
 
-/* ─── Food Culture Gallery ─── */
+/* ─── Food Culture Gallery — real photography with hover zoom ─── */
 function FoodCultureSection() {
   const goDiscover = useAddressGuard();
   const cuisines = [
@@ -378,88 +441,386 @@ function FoodCultureSection() {
       <p style={{ textAlign: 'center', color: 'var(--text-secondary)', fontSize: 'clamp(14px, 3vw, 16px)', maxWidth: 560, margin: '0 auto 36px' }}>
         From street food to fine dining — every culture, every craving, royally delivered.
       </p>
-      <div className="grid-3" style={{ gap: 12, maxWidth: 900, margin: '0 auto' }}>
+      <div className="grid-3" style={{ gap: 14, maxWidth: 900, margin: '0 auto' }}>
         {cuisines.map((c, i) => (
-          <motion.div key={i} initial={{ opacity: 0, y: 15 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.08 }}
+          <motion.div
+            key={i}
+            initial={{ opacity: 0, y: 15 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            whileHover={{ y: -6, boxShadow: '0 14px 36px rgba(0,0,0,0.18)' }}
+            viewport={{ once: true }}
+            transition={{ delay: i * 0.08 }}
             onClick={() => goDiscover()}
-            style={{ position: 'relative', borderRadius: 16, overflow: 'hidden', aspectRatio: '4/3', cursor: 'pointer', border: '1px solid var(--border)' }}>
-            <img src={c.img} alt={c.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 60%)' }} />
-            <span style={{ position: 'absolute', bottom: 10, left: 14, fontSize: 'clamp(13px, 3vw, 18px)', fontWeight: 800, color: 'white' }}>{c.name}</span>
-          </motion.div>
-        ))}
-      </div>
-    </section>
-  );
-}
-
-/* ─── How It Works ─── */
-function HowItWorks() {
-  const steps = [
-    { icon: '📍', title: 'Vind of boek', text: 'Voer je adres in of laat ons je locatie detecteren om restaurants in de buurt te ontdekken.' },
-    { icon: '🍳', title: 'Blader en bestel', text: 'Blader door samengestelde menu\'s, voeg items toe aan je winkelmandje en plaats je bestelling.' },
-    { icon: '👑', title: 'Koninklijke bezorging', text: 'Onze bezorgers leveren heet en vers — doorgaans binnen 30 minuten.' },
-  ];
-  return (
-    <section className="section-pad">
-      <h2 style={{ textAlign: 'center', fontSize: 'clamp(22px, 5vw, 36px)', fontWeight: 900, marginBottom: 40 }}>Hoe EnJoy werkt</h2>
-      {/* grid-how: 3-col desktop, 1-col mobile */}
-      <div className="grid-3 grid-how" style={{ gap: 20, maxWidth: 960, margin: '0 auto' }}>
-        {steps.map((s, i) => (
-          <motion.div key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.12 }}
-            style={{ textAlign: 'center', padding: '32px 22px', borderRadius: 20, background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
-            <div style={{ fontSize: 40, marginBottom: 16 }}>{s.icon}</div>
-            <h3 style={{ fontSize: 18, fontWeight: 800, marginBottom: 10 }}>{s.title}</h3>
-            <p style={{ color: 'var(--text-secondary)', lineHeight: 1.6, fontSize: 14 }}>{s.text}</p>
-          </motion.div>
-        ))}
-      </div>
-    </section>
-  );
-}
-
-/* ─── Popular Restaurants Preview ─── */
-function PopularRestaurants() {
-  const { t } = useTranslation();
-  const goDiscover = useAddressGuard();
-  const restaurants = [
-    { name: 'Royal Kitchen', cuisine: 'Indian · Curry',     rating: 4.8, time: '25-35 min', img: '/food/royal-kitchen.png',  slug: '' },
-    { name: 'Burger Empire', cuisine: 'Burgers · American', rating: 4.6, time: '15-25 min', img: '/food/burger-empire.png', slug: '' },
-    { name: 'Sushi Palace',  cuisine: 'Japanese · Sushi',   rating: 4.9, time: '30-40 min', img: '/food/sushi-palace.png',  slug: '' },
-    { name: 'Pizza Throne',  cuisine: 'Italian · Pizza',    rating: 4.7, time: '20-30 min', img: '/food/pizza-throne.png',  slug: '' },
-  ];
-  return (
-    <section className="section-pad" style={{ background: 'rgba(90,49,244,0.02)' }}>
-      <h2 style={{ textAlign: 'center', fontSize: 'clamp(22px, 5vw, 36px)', fontWeight: 900, marginBottom: 32 }}>{t('popular_near')}</h2>
-      <div className="grid-2" style={{ gap: 16, maxWidth: 960, margin: '0 auto' }}>
-        {restaurants.map((r, i) => (
-          <motion.div key={i} initial={{ opacity: 0, y: 15 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.08 }}
-            onClick={() => goDiscover(r.slug ? `/menu/${r.slug}` : '/discover')}
-            style={{ display: 'flex', background: 'var(--bg-card)', borderRadius: 16, border: '1px solid var(--border)', overflow: 'hidden', cursor: 'pointer' }}>
-            <div style={{ width: 120, minHeight: 110, position: 'relative', overflow: 'hidden', flexShrink: 0 }}>
-              <img src={r.img} alt={r.name} style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', inset: 0 }} />
-            </div>
-            <div style={{ flex: 1, padding: '14px 16px', display: 'flex', flexDirection: 'column', justifyContent: 'center', minWidth: 0 }}>
-              <h3 style={{ fontSize: 15, fontWeight: 800, marginBottom: 3, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{r.name}</h3>
-              <p style={{ color: 'var(--text-muted)', fontSize: 12, marginBottom: 10, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{r.cuisine}</p>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-                <span style={{ background: 'rgba(255,215,0,0.12)', color: '#FFD700', padding: '2px 8px', borderRadius: 8, fontSize: 12, fontWeight: 700, whiteSpace: 'nowrap' }}>⭐ {r.rating}</span>
-                <span style={{ color: 'var(--text-muted)', fontSize: 12, whiteSpace: 'nowrap' }}>{r.time}</span>
+            style={{
+              position: 'relative', borderRadius: 18, overflow: 'hidden',
+              aspectRatio: '4/3', cursor: 'pointer',
+              border: '1px solid var(--border)',
+              boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
+            }}
+          >
+            <motion.img
+              src={c.img} alt={c.name}
+              whileHover={{ scale: 1.08 }}
+              transition={{ duration: 0.4 }}
+              style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+            />
+            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.05) 55%)' }} />
+            <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '12px 16px' }}>
+              <span style={{ fontSize: 'clamp(15px, 3.5vw, 20px)', fontWeight: 800, color: 'white', textShadow: '0 1px 6px rgba(0,0,0,0.4)' }}>
+                {c.name}
+              </span>
+              <div style={{
+                display: 'inline-block', marginLeft: 10,
+                padding: '2px 10px', borderRadius: 20,
+                background: 'rgba(255,255,255,0.18)', backdropFilter: 'blur(8px)',
+                fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.9)',
+              }}>
+                Ontdek →
               </div>
             </div>
           </motion.div>
         ))}
       </div>
-      <div style={{ textAlign: 'center', marginTop: 28 }}>
-        <button
+    </section>
+  );
+}
+
+/* ─── Animated Stats Section ─── */
+function AnimatedNumber({ value, suffix }: { value: number; suffix: string }) {
+  const ref = useRef<HTMLSpanElement>(null);
+  const [display, setDisplay] = useState(0);
+  const [hasAnimated, setHasAnimated] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting && !hasAnimated) {
+        setHasAnimated(true);
+        const start = Date.now();
+        const tick = () => {
+          const progress = Math.min((Date.now() - start) / 2000, 1);
+          const eased = 1 - Math.pow(1 - progress, 3);
+          setDisplay(Math.round(value * eased));
+          if (progress < 1) requestAnimationFrame(tick);
+        };
+        requestAnimationFrame(tick);
+      }
+    }, { threshold: 0.3 });
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [value, hasAnimated]);
+
+  return <span ref={ref}>{display.toLocaleString('nl-NL')}{suffix}</span>;
+}
+
+function StatsAndHowItWorks() {
+  const stats = [
+    { label: 'Restaurants', value: 1000, suffix: '+', img: '/food/cat-pizza.png' },
+    { label: 'Bestellingen', value: 50000, suffix: '+', img: '/food/hero-feast.png' },
+    { label: 'Steden', value: 12, suffix: '', img: '/food/cat-sushi.png' },
+    { label: 'Gem. bezorgtijd', value: 28, suffix: ' min', img: '/food/cat-burger.png' },
+  ];
+
+  const steps = [
+    { icon: '📍', title: 'Vind of boek', text: 'Voer je adres in of laat ons je locatie detecteren om restaurants in de buurt te ontdekken.' },
+    { icon: '🍳', title: 'Blader en bestel', text: 'Blader door samengestelde menu\'s, voeg items toe aan je winkelmandje en plaats je bestelling.' },
+    { icon: '👑', title: 'Koninklijke bezorging', text: 'Onze bezorgers leveren heet en vers — doorgaans binnen 30 minuten.' },
+  ];
+
+  return (
+    <section className="section-pad">
+      {/* Animated stats */}
+      <motion.div
+        initial={{ opacity: 0, y: 24 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: '-60px' }}
+        transition={{ duration: 0.6 }}
+        style={{
+          display: 'flex', justifyContent: 'center', gap: 'clamp(20px, 5vw, 48px)',
+          flexWrap: 'wrap', padding: '40px 20px',
+          borderRadius: 24, maxWidth: 960, margin: '0 auto 48px',
+          background: `linear-gradient(135deg, rgba(90,49,244,0.04), rgba(255,0,128,0.04))`,
+          border: '1px solid var(--border)',
+        }}
+      >
+        {stats.map((s, i) => (
+          <motion.div
+            key={i}
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: i * 0.12, duration: 0.5 }}
+            style={{ textAlign: 'center', minWidth: 110 }}
+          >
+            <div style={{
+              width: 52, height: 52, borderRadius: '50%', overflow: 'hidden',
+              margin: '0 auto 10px', boxShadow: '0 3px 10px rgba(0,0,0,0.1)',
+              border: '2px solid var(--border)',
+            }}>
+              <img src={s.img} alt={s.label} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            </div>
+            <div style={{
+              fontSize: 'clamp(24px, 5vw, 34px)', fontWeight: 800,
+              background: `linear-gradient(135deg,${PURPLE},${PINK})`,
+              WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+              lineHeight: 1.1,
+            }}>
+              <AnimatedNumber value={s.value} suffix={s.suffix} />
+            </div>
+            <div style={{ fontSize: 13, color: 'var(--text-secondary)', marginTop: 4, fontWeight: 600 }}>{s.label}</div>
+          </motion.div>
+        ))}
+      </motion.div>
+
+      {/* How it works */}
+      <h2 style={{ textAlign: 'center', fontSize: 'clamp(22px, 5vw, 36px)', fontWeight: 900, marginBottom: 40 }}>Hoe EnJoy werkt</h2>
+      <div className="grid-3 grid-how" style={{ gap: 20, maxWidth: 960, margin: '0 auto' }}>
+        {steps.map((s, i) => (
+          <motion.div
+            key={i}
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            whileHover={{ y: -4, boxShadow: '0 10px 28px rgba(0,0,0,0.1)' }}
+            viewport={{ once: true }}
+            transition={{ delay: i * 0.12 }}
+            style={{
+              textAlign: 'center', padding: '36px 24px', borderRadius: 22,
+              background: 'var(--bg-card)', border: '1px solid var(--border)',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.04)',
+            }}
+          >
+            <div style={{
+              width: 64, height: 64, borderRadius: '50%', margin: '0 auto 18px',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: 32,
+              background: `linear-gradient(135deg, rgba(90,49,244,0.08), rgba(255,0,128,0.08))`,
+            }}>{s.icon}</div>
+            <div style={{
+              fontSize: 12, fontWeight: 800, color: PURPLE,
+              textTransform: 'uppercase', letterSpacing: 1.5, marginBottom: 8,
+            }}>Stap {i + 1}</div>
+            <h3 style={{ fontSize: 18, fontWeight: 800, marginBottom: 10 }}>{s.title}</h3>
+            <p style={{ color: 'var(--text-secondary)', lineHeight: 1.65, fontSize: 14 }}>{s.text}</p>
+          </motion.div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+/* ─── Popular Restaurants — enhanced cards with hover effects ─── */
+function PopularRestaurants() {
+  const { t } = useTranslation();
+  const goDiscover = useAddressGuard();
+  const restaurants = [
+    { name: 'Royal Kitchen', cuisine: 'Indian · Curry',     rating: 4.8, time: '25-35 min', img: '/food/royal-kitchen.png',  slug: '', isNew: true },
+    { name: 'Burger Empire', cuisine: 'Burgers · American', rating: 4.6, time: '15-25 min', img: '/food/burger-empire.png', slug: '', discount: '-15%' },
+    { name: 'Sushi Palace',  cuisine: 'Japanese · Sushi',   rating: 4.9, time: '30-40 min', img: '/food/sushi-palace.png',  slug: '' },
+    { name: 'Pizza Throne',  cuisine: 'Italian · Pizza',    rating: 4.7, time: '20-30 min', img: '/food/pizza-throne.png',  slug: '', isNew: true },
+  ];
+  return (
+    <section className="section-pad" style={{ background: 'rgba(90,49,244,0.02)' }}>
+      <h2 style={{ textAlign: 'center', fontSize: 'clamp(22px, 5vw, 36px)', fontWeight: 900, marginBottom: 32 }}>{t('popular_near')}</h2>
+      <div className="grid-2" style={{ gap: 18, maxWidth: 960, margin: '0 auto' }}>
+        {restaurants.map((r, i) => (
+          <motion.div
+            key={i}
+            initial={{ opacity: 0, y: 15 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            whileHover={{ y: -5, boxShadow: '0 12px 32px rgba(0,0,0,0.14)' }}
+            viewport={{ once: true }}
+            transition={{ delay: i * 0.08 }}
+            onClick={() => goDiscover(r.slug ? `/menu/${r.slug}` : '/discover')}
+            style={{
+              display: 'flex', background: 'var(--bg-card)', borderRadius: 18,
+              border: '1px solid var(--border)', overflow: 'hidden', cursor: 'pointer',
+              boxShadow: '0 4px 14px rgba(0,0,0,0.06)',
+            }}
+          >
+            {/* Image with hover zoom */}
+            <div style={{ width: 130, minHeight: 120, position: 'relative', overflow: 'hidden', flexShrink: 0 }}>
+              <motion.img
+                src={r.img} alt={r.name}
+                whileHover={{ scale: 1.08 }}
+                transition={{ duration: 0.4 }}
+                style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', inset: 0 }}
+              />
+              {/* Badges */}
+              {r.isNew && (
+                <span style={{
+                  position: 'absolute', top: 8, left: 8,
+                  padding: '3px 8px', borderRadius: 12,
+                  background: `linear-gradient(135deg,${PURPLE},${PINK})`,
+                  color: '#fff', fontSize: 10, fontWeight: 800, letterSpacing: 0.5,
+                }}>NIEUW</span>
+              )}
+              {r.discount && (
+                <span style={{
+                  position: 'absolute', top: 8, left: 8,
+                  padding: '3px 8px', borderRadius: 12,
+                  background: '#e74c3c', color: '#fff', fontSize: 10, fontWeight: 800,
+                }}>{r.discount}</span>
+              )}
+            </div>
+            <div style={{ flex: 1, padding: '16px 18px', display: 'flex', flexDirection: 'column', justifyContent: 'center', minWidth: 0 }}>
+              <h3 style={{ fontSize: 16, fontWeight: 800, marginBottom: 4, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{r.name}</h3>
+              <p style={{ color: 'var(--text-muted)', fontSize: 13, marginBottom: 10, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{r.cuisine}</p>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+                <span style={{
+                  background: 'rgba(255,215,0,0.12)', color: '#FFD700',
+                  padding: '3px 10px', borderRadius: 10, fontSize: 12, fontWeight: 700, whiteSpace: 'nowrap',
+                }}>★ {r.rating}</span>
+                <span style={{
+                  background: 'rgba(90,49,244,0.06)', color: 'var(--text-secondary)',
+                  padding: '3px 10px', borderRadius: 10, fontSize: 12, fontWeight: 600, whiteSpace: 'nowrap',
+                }}>{r.time}</span>
+              </div>
+            </div>
+          </motion.div>
+        ))}
+      </div>
+      <div style={{ textAlign: 'center', marginTop: 32 }}>
+        <motion.button
           onClick={() => goDiscover()}
+          whileHover={{ scale: 1.04, boxShadow: '0 8px 24px rgba(90,49,244,0.35)' }}
+          whileTap={{ scale: 0.97 }}
           style={{
-            display: 'inline-block', padding: '14px 32px', borderRadius: 50,
+            display: 'inline-block', padding: '15px 36px', borderRadius: 50,
             background: `linear-gradient(135deg,${PURPLE},${PINK})`,
             color: 'white', fontWeight: 800, fontSize: 16,
             border: 'none', cursor: 'pointer',
           }}
-        >Bekijk alle restaurants →</button>
+        >Bekijk alle restaurants →</motion.button>
+      </div>
+    </section>
+  );
+}
+
+/* ─── Live Order Tracker — blends into page background ─── */
+function LiveOrderTracker() {
+  const [activeStep, setActiveStep] = useState(0);
+  const steps = [
+    { label: 'Bestelling geplaatst', icon: '📋' },
+    { label: 'Restaurant bereidt voor', icon: '👨‍🍳' },
+    { label: 'Koerier onderweg', icon: '🛵' },
+    { label: 'Bezorgd!', icon: '🎉' },
+  ];
+
+  useEffect(() => {
+    const iv = setInterval(() => setActiveStep(s => (s + 1) % steps.length), 3000);
+    return () => clearInterval(iv);
+  }, [steps.length]);
+
+  return (
+    <section style={{ padding: '56px 16px', background: 'var(--bg-page)' }}>
+      <div style={{ maxWidth: 520, margin: '0 auto' }}>
+        <motion.h2
+          initial={{ opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          style={{
+            textAlign: 'center', fontSize: 'clamp(20px, 5vw, 32px)', fontWeight: 900,
+            marginBottom: 8,
+          }}
+        >
+          Live bestelling{' '}
+          <span style={{ background: `linear-gradient(135deg,${PURPLE},${PINK})`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+            volgen
+          </span>
+        </motion.h2>
+        <p style={{ textAlign: 'center', color: 'var(--text-secondary)', fontSize: 14, marginBottom: 36 }}>
+          Volg je bestelling in real-time van keuken tot voordeur
+        </p>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          style={{
+            padding: '32px 28px',
+            borderRadius: 24,
+            background: 'var(--bg-card)',
+            border: '1px solid var(--border)',
+            boxShadow: '0 8px 32px rgba(0,0,0,0.06)',
+          }}
+        >
+          {steps.map((step, i) => {
+            const isActive = i === activeStep;
+            const isCompleted = i < activeStep;
+
+            return (
+              <div key={i} style={{ display: 'flex', gap: 16, alignItems: 'flex-start' }}>
+                {/* Timeline column */}
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: 44 }}>
+                  <motion.div
+                    animate={{
+                      scale: isActive ? [1, 1.15, 1] : 1,
+                      background: isCompleted || isActive
+                        ? `linear-gradient(135deg,${PURPLE},${PINK})`
+                        : 'var(--bg-page)',
+                    }}
+                    transition={{
+                      scale: { duration: 1.2, repeat: isActive ? Infinity : 0 },
+                      background: { duration: 0.3 },
+                    }}
+                    style={{
+                      width: 44, height: 44, borderRadius: '50%',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      fontSize: 20,
+                      border: isCompleted || isActive ? 'none' : '2px solid var(--border)',
+                      boxShadow: isActive ? `0 0 20px rgba(90,49,244,0.3)` : 'none',
+                      color: isCompleted || isActive ? 'white' : 'var(--text-muted)',
+                    }}
+                  >
+                    {isCompleted ? '✓' : step.icon}
+                  </motion.div>
+
+                  {/* Connector line */}
+                  {i < steps.length - 1 && (
+                    <motion.div
+                      animate={{
+                        background: isCompleted
+                          ? `linear-gradient(to bottom,${PURPLE},${PINK})`
+                          : 'var(--border)',
+                      }}
+                      style={{ width: 3, height: 28, borderRadius: 2 }}
+                    />
+                  )}
+                </div>
+
+                {/* Label */}
+                <div style={{ paddingTop: 10, paddingBottom: i < steps.length - 1 ? 16 : 0 }}>
+                  <motion.span
+                    animate={{
+                      color: isActive ? 'var(--text-primary)' : isCompleted ? 'var(--text-muted)' : 'var(--text-muted)',
+                    }}
+                    style={{
+                      fontSize: 15,
+                      fontWeight: isActive ? 700 : 400,
+                      transition: 'font-weight 0.2s',
+                    }}
+                  >
+                    {step.label}
+                  </motion.span>
+                  {isActive && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      style={{
+                        fontSize: 12, marginTop: 3, fontWeight: 600,
+                        background: `linear-gradient(135deg,${PURPLE},${PINK})`,
+                        WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+                      }}
+                    >
+                      Nu bezig...
+                    </motion.div>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </motion.div>
       </div>
     </section>
   );
@@ -483,7 +844,8 @@ export default function LandingPage() {
 
         <FoodCultureSection />
         <PopularRestaurants />
-        <HowItWorks />
+        <LiveOrderTracker />
+        <StatsAndHowItWorks />
         <Footer />
       </div>
     </TranslationProvider>
