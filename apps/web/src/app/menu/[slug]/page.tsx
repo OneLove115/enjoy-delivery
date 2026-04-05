@@ -77,7 +77,8 @@ function MenuItemCard({ item, qty, onAdd, onInc, onDec, onItemClick, currency, l
       role="button"
       tabIndex={0}
       onClick={handleItemClick}
-      whileHover={{ scale: 1.02, y: -2 }}
+      whileHover={{ scale: 1.01, y: -1, boxShadow: '0 4px 16px rgba(90,49,244,0.10)' }}
+      whileTap={{ scale: 0.99 }}
       transition={{ type: 'spring', stiffness: 340, damping: 28 }}
       style={{
         display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start',
@@ -85,8 +86,6 @@ function MenuItemCard({ item, qty, onAdd, onInc, onDec, onItemClick, currency, l
         cursor: 'pointer', minHeight: 48,
         borderRadius: 8,
       }}
-      onHoverStart={(e) => { (e.currentTarget as HTMLElement).style.boxShadow = '0 4px 16px rgba(90,49,244,0.10)'; }}
-      onHoverEnd={(e) => { (e.currentTarget as HTMLElement).style.boxShadow = 'none'; }}
     >
       {/* Text */}
       <div style={{ flex: 1, minWidth: 0 }}>
