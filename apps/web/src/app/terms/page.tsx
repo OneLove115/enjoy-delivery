@@ -1,44 +1,212 @@
 'use client';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { motion } from 'framer-motion';
 import { Nav } from '../components/Nav';
 import { Footer } from '../components/Footer';
 
-const S = { page: { background: 'var(--bg-page)', minHeight: '100vh', color: 'var(--text-primary)', fontFamily: 'Outfit, sans-serif' } as const, container: { maxWidth: 800, margin: '0 auto', padding: 'clamp(24px,5vw,60px) clamp(16px,4vw,40px)' } as const, h1: { fontSize: 42, fontWeight: 900, marginBottom: 32, background: 'linear-gradient(135deg,#5A31F4,#FF0080)', WebkitBackgroundClip: 'text' as const, WebkitTextFillColor: 'transparent' as const } as const, h2: { fontSize: 24, fontWeight: 800, marginTop: 40, marginBottom: 16, color: 'var(--text-primary)' } as const, p: { color: 'var(--text-secondary)', lineHeight: 1.8, fontSize: 16, marginBottom: 16 } as const, back: { display: 'inline-block', marginBottom: 32, color: '#5A31F4', fontWeight: 700, fontSize: 14 } as const };
+const PURPLE = '#5A31F4';
+const PINK   = '#FF0080';
+
+const sections = [
+  { id: 'platform',   title: '1. Platformomschrijving' },
+  { id: 'account',    title: '2. Accountregistratie' },
+  { id: 'orders',     title: '3. Bestellingen & Betalingen' },
+  { id: 'delivery',   title: '4. Bezorging' },
+  { id: 'conduct',    title: '5. Gebruikersgedrag' },
+  { id: 'ip',         title: '6. Intellectueel eigendom' },
+  { id: 'liability',  title: '7. Aansprakelijkheidsbeperking' },
+  { id: 'law',        title: '8. Toepasselijk recht' },
+];
 
 export default function TermsPage() {
+  const [active, setActive] = useState<string>('platform');
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      entries => {
+        const visible = entries.filter(e => e.isIntersecting);
+        if (visible.length > 0) setActive(visible[0].target.id);
+      },
+      { rootMargin: '-30% 0px -60% 0px' }
+    );
+    sections.forEach(s => {
+      const el = document.getElementById(s.id);
+      if (el) observer.observe(el);
+    });
+    return () => observer.disconnect();
+  }, []);
+
+  function scrollTo(id: string) {
+    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
   return (
-    <div style={S.page}>
+    <div style={{ background: 'var(--bg-page)', minHeight: '100vh', color: 'var(--text-primary)', fontFamily: 'Outfit, sans-serif' }}>
       <Nav />
-      <div style={S.container}>
-      <h1 style={S.h1}>Terms of Service</h1>
-      <p style={S.p}><strong>Effective Date:</strong> March 20, 2026</p>
-      <p style={S.p}>Welcome to EnJoy. By accessing or using our platform, you agree to these Terms of Service. Please read them carefully.</p>
+      <div style={{ maxWidth: 1060, margin: '0 auto', padding: 'clamp(24px,5vw,60px) clamp(16px,4vw,40px)', paddingTop: 'clamp(60px,8vw,100px)' }}>
+        <div style={{ display: 'flex', gap: 48, alignItems: 'flex-start' }}>
 
-      <h2 style={S.h2}>1. Platform Description</h2>
-      <p style={S.p}>EnJoy is a premium food delivery marketplace connecting users with restaurant partners. We facilitate ordering, payment processing, and delivery logistics. EnJoy does not prepare food; our restaurant partners are responsible for food quality and preparation.</p>
+          {/* Sticky sidebar nav */}
+          <motion.aside
+            initial={{ opacity: 0, x: -16 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.2 }}
+            style={{
+              flexShrink: 0, width: 200,
+              position: 'sticky', top: 96,
+              display: 'none',
+            }}
+            className="terms-sidebar"
+          >
+            <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 1.2, marginBottom: 16 }}>Inhoud</div>
+            {sections.map(s => (
+              <button
+                key={s.id}
+                onClick={() => scrollTo(s.id)}
+                style={{
+                  display: 'block', width: '100%', textAlign: 'left',
+                  padding: '8px 12px', borderRadius: 8, marginBottom: 2,
+                  background: active === s.id ? `rgba(90,49,244,0.12)` : 'transparent',
+                  border: 'none', cursor: 'pointer', fontFamily: 'inherit',
+                  fontSize: 13, fontWeight: active === s.id ? 700 : 500,
+                  color: active === s.id ? PURPLE : 'var(--text-muted)',
+                  transition: 'all 0.15s',
+                  borderLeft: `2px solid ${active === s.id ? PURPLE : 'transparent'}`,
+                }}
+              >
+                {s.title.replace(/^\d+\.\s/, '')}
+              </button>
+            ))}
+          </motion.aside>
 
-      <h2 style={S.h2}>2. Account Registration</h2>
-      <p style={S.p}>To use our services, you must create an account with accurate information. You are responsible for maintaining the confidentiality of your credentials and for all activities under your account. You must be at least 16 years old.</p>
+          {/* Main content */}
+          <div style={{ flex: 1, minWidth: 0 }}>
 
-      <h2 style={S.h2}>3. Orders & Payments</h2>
-      <p style={S.p}>All prices are displayed in EUR and include applicable VAT. Payment is processed at the time of order. We accept major credit/debit cards, iDEAL, and digital wallets. Refunds are handled per our refund policy and are subject to the nature of the complaint.</p>
+            {/* Header */}
+            <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 20 }}>
+                <div style={{
+                  width: 44, height: 44, borderRadius: 12, flexShrink: 0,
+                  background: `linear-gradient(135deg, ${PURPLE}22, ${PINK}18)`,
+                  border: `1px solid ${PURPLE}30`,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: 20,
+                }}>
+                  📋
+                </div>
+                <h1 style={{
+                  fontSize: 'clamp(28px, 5vw, 40px)', fontWeight: 900, margin: 0, letterSpacing: -1,
+                  background: `linear-gradient(135deg, ${PURPLE}, ${PINK})`,
+                  WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+                }}>
+                  Gebruiksvoorwaarden
+                </h1>
+              </div>
 
-      <h2 style={S.h2}>4. Delivery</h2>
-      <p style={S.p}>Delivery times are estimates and may vary. EnJoy partners with independent couriers. We are not liable for delays caused by traffic, weather, or restaurant preparation times. If your order does not arrive, contact our support team immediately.</p>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 32, flexWrap: 'wrap' }}>
+                <span style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 6,
+                  padding: '4px 12px', borderRadius: 20, fontSize: 12, fontWeight: 700,
+                  background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)',
+                  color: 'var(--text-muted)',
+                }}>
+                  📅 Ingangsdatum: 20 maart 2026
+                </span>
+                <span style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 6,
+                  padding: '4px 12px', borderRadius: 20, fontSize: 12, fontWeight: 700,
+                  background: `rgba(90,49,244,0.1)`, border: `1px solid ${PURPLE}30`,
+                  color: PURPLE,
+                }}>
+                  ✓ Van kracht bij gebruik
+                </span>
+              </div>
 
-      <h2 style={S.h2}>5. User Conduct</h2>
-      <p style={S.p}>You agree not to: use the platform for illegal purposes, harass delivery personnel or restaurant staff, create fake accounts or reviews, attempt to circumvent security measures, or reverse engineer any part of our platform.</p>
+              <p style={{ color: 'var(--text-secondary)', lineHeight: 1.8, fontSize: 16, marginBottom: 40 }}>
+                Welkom bij EnJoy. Door toegang te nemen tot of gebruik te maken van ons platform ga je akkoord met deze gebruiksvoorwaarden. Lees ze zorgvuldig door.
+              </p>
+            </motion.div>
 
-      <h2 style={S.h2}>6. Intellectual Property</h2>
-      <p style={S.p}>All content, branding, logos (including the EnJoy crown and purple branded bag), and AI features (Joya concierge) are the exclusive property of EnJoy B.V. Unauthorized use is prohibited.</p>
+            {/* Sections */}
+            {[
+              {
+                id: 'platform', title: '1. Platformomschrijving',
+                body: 'EnJoy is een premium bezorgmarktplaats die gebruikers verbindt met restaurantpartners. Wij faciliteren het bestelproces, de betalingsverwerking en de bezorglogistiek. EnJoy bereidt geen voedsel; onze restaurantpartners zijn verantwoordelijk voor de voedselkwaliteit en bereiding.',
+              },
+              {
+                id: 'account', title: '2. Accountregistratie',
+                body: 'Om gebruik te maken van onze diensten moet je een account aanmaken met accurate informatie. Je bent verantwoordelijk voor het vertrouwelijk houden van je inloggegevens en voor alle activiteiten onder jouw account. Je moet minimaal 16 jaar oud zijn.',
+              },
+              {
+                id: 'orders', title: '3. Bestellingen & Betalingen',
+                body: 'Alle prijzen zijn in EUR inclusief BTW. Betaling wordt verwerkt op het moment van bestelling. We accepteren creditcards, iDEAL en digitale portemonnees. Terugbetalingen worden verwerkt conform ons terugbetalingsbeleid en zijn afhankelijk van de aard van de klacht.',
+              },
+              {
+                id: 'delivery', title: '4. Bezorging',
+                body: 'Bezorgtijden zijn schattingen en kunnen variëren. EnJoy werkt samen met onafhankelijke koeriers. Wij zijn niet aansprakelijk voor vertragingen door verkeer, weersomstandigheden of bereidingstijden in restaurants. Neem bij niet-bezorging direct contact op met ons supportteam.',
+              },
+              {
+                id: 'conduct', title: '5. Gebruikersgedrag',
+                body: 'Je stemt ermee in het platform niet te gebruiken voor illegale doeleinden, bezorgpersoneel of restaurantmedewerkers te intimideren, nep-accounts of reviews aan te maken, beveiligingsmaatregelen te omzeilen of onderdelen van ons platform te reverse-engineeren.',
+              },
+              {
+                id: 'ip', title: '6. Intellectueel eigendom',
+                body: 'Alle inhoud, branding, logo\'s (inclusief de EnJoy-kroon en paarse branded bag) en AI-functies (Joya concierge) zijn het exclusieve eigendom van EnJoy B.V. Ongeautoriseerd gebruik is verboden.',
+              },
+              {
+                id: 'liability', title: '7. Aansprakelijkheidsbeperking',
+                body: 'De aansprakelijkheid van EnJoy is beperkt tot het betaalde bedrag voor de betreffende bestelling. Wij zijn niet aansprakelijk voor indirecte, incidentele of gevolgschade die voortvloeit uit het gebruik van ons platform.',
+              },
+              {
+                id: 'law', title: '8. Toepasselijk recht',
+                body: 'Deze voorwaarden worden beheerst door het recht van Nederland. Geschillen worden beslecht bij de rechtbank te Den Haag.',
+              },
+            ].map((section, i) => (
+              <motion.section
+                key={section.id}
+                id={section.id}
+                initial={{ opacity: 0, y: 16 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.05 }}
+                style={{
+                  padding: '28px 28px',
+                  background: 'var(--bg-card)',
+                  borderRadius: 18,
+                  border: '1px solid var(--border)',
+                  marginBottom: 16,
+                  scrollMarginTop: 110,
+                }}
+              >
+                <h2 style={{ fontSize: 19, fontWeight: 800, marginBottom: 16, color: 'var(--text-primary)' }}>
+                  {section.title}
+                </h2>
+                <p style={{ color: 'var(--text-secondary)', lineHeight: 1.8, fontSize: 16 }}>{section.body}</p>
+              </motion.section>
+            ))}
 
-      <h2 style={S.h2}>7. Limitation of Liability</h2>
-      <p style={S.p}>EnJoy&apos;s liability is limited to the amount paid for the relevant order. We are not liable for indirect, incidental, or consequential damages arising from the use of our platform.</p>
-
-      <h2 style={S.h2}>8. Governing Law</h2>
-      <p style={S.p}>These terms are governed by the laws of The Netherlands. Disputes will be settled in the courts of Den Haag.</p>
-    </div>
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              style={{ textAlign: 'center', padding: '28px', borderRadius: 16, background: `rgba(90,49,244,0.06)`, border: `1px solid ${PURPLE}20`, marginTop: 8 }}
+            >
+              <p style={{ color: 'var(--text-secondary)', fontSize: 14, marginBottom: 0 }}>
+                Vragen over onze voorwaarden?{' '}
+                <Link href="/contact" style={{ color: PURPLE, fontWeight: 700 }}>Neem contact op</Link>
+              </p>
+            </motion.div>
+          </div>
+        </div>
+      </div>
       <Footer />
+
+      <style>{`
+        @media (min-width: 860px) {
+          .terms-sidebar { display: block !important; }
+        }
+      `}</style>
     </div>
   );
 }
