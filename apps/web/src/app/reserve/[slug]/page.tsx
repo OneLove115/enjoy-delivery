@@ -7,7 +7,7 @@ import { motion } from 'framer-motion';
 const PURPLE = '#5A31F4';
 const PINK   = '#FF0080';
 const ORANGE = '#FF6B35';
-const VP_API = process.env.NEXT_PUBLIC_VP_DOMAIN || 'https://veloci.online';
+const VP_API = process.env.NEXT_PUBLIC_VP_DOMAIN || 'https://www.veloci.online';
 
 type BusinessHours = {
   [day: string]: { open: string; close: string; closed: boolean };
