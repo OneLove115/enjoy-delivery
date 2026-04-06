@@ -29,7 +29,7 @@ export function Nav() {
   return (
     <>
       <nav style={{
-        position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100,
+        position: 'absolute', top: 0, left: 0, right: 0, zIndex: 100,
         height: 70,
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         padding: '0 32px',
