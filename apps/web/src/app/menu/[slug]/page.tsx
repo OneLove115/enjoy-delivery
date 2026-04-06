@@ -491,6 +491,16 @@ export default function MenuPage() {
                   }}>
                     <span>👥</span><span>Groepsbestelling</span>
                   </button>
+                  {/* Reserve button */}
+                  <Link href={`/reserve/${slug}`} style={{
+                    display: 'flex', alignItems: 'center', gap: 5, padding: '4px 12px', borderRadius: 20,
+                    border: `1px solid ${PINK}60`,
+                    background: `${PINK}18`,
+                    color: restaurant.heroImage ? 'rgba(255,255,255,0.9)' : PINK,
+                    fontSize: 12, fontWeight: 700, textDecoration: 'none',
+                  }}>
+                    <span>🍽️</span><span>Reserveer een tafel</span>
+                  </Link>
                   {/* Info button */}
                   <button onClick={() => setInfoOpen(true)} style={{
                     display: 'flex', alignItems: 'center', gap: 5, padding: '4px 12px', borderRadius: 20,
