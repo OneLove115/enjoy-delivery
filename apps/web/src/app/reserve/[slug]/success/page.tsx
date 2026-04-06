@@ -258,7 +258,8 @@ function SuccessContent({ slug }: SlugParams) {
   );
 }
 
-export default function ReserveSuccessPage({ params }: { params: SlugParams }) {
+export default async function ReserveSuccessPage({ params }: { params: Promise<SlugParams> }) {
+  const { slug } = await params;
   return (
     <Suspense fallback={
       <div style={{ background: 'var(--bg-page)', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -266,7 +267,7 @@ export default function ReserveSuccessPage({ params }: { params: SlugParams }) {
         <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
       </div>
     }>
-      <SuccessContent slug={params.slug} />
+      <SuccessContent slug={slug} />
     </Suspense>
   );
 }
