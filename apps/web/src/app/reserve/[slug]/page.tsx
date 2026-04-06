@@ -7,7 +7,7 @@ import { motion } from 'framer-motion';
 const PURPLE = '#5A31F4';
 const PINK   = '#FF0080';
 const ORANGE = '#FF6B35';
-const VP_API = process.env.NEXT_PUBLIC_VP_DOMAIN || 'https://www.veloci.online';
+const VP_API = process.env.NEXT_PUBLIC_VP_DOMAIN || 'https://veloci.online';
 
 type BusinessHours = {
   [day: string]: { open: string; close: string; closed: boolean };
@@ -165,23 +165,24 @@ export default function ReservePage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           tenantId: restaurant.id,
-          date,
-          time,
+          reservationDate: `${date}T${time}:00`,
           partySize,
           customerName: name,
           customerEmail: email,
           customerPhone: phone,
           notes,
           occasion,
+          source: 'enjoy',
         }),
       });
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
-        throw new Error(body?.message || 'Er ging iets mis. Probeer opnieuw.');
+        throw new Error(body?.error || body?.message || 'Er ging iets mis. Probeer opnieuw.');
       }
       const data = await res.json();
       const reservationId = data?.reservation?.id || data?.id || '';
-      router.push(`/reserve/${slug}/success?id=${reservationId}&date=${encodeURIComponent(date)}&time=${encodeURIComponent(time)}&party=${partySize}`);
+      const depositPaid = data?.reservation?.deposit_amount || 0;
+      router.push(`/reserve/${slug}/success?id=${reservationId}&date=${encodeURIComponent(date)}&time=${encodeURIComponent(time)}&party=${partySize}&deposit=${depositPaid}`);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Er ging iets mis. Probeer opnieuw.');
     } finally {

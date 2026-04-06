@@ -14,7 +14,7 @@ function getCSP(): string {
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data: https: blob:",
     "font-src 'self' data:",
-    "connect-src 'self' https://www.veloci.online https://*.google-analytics.com https://www.googletagmanager.com https://connect.facebook.net",
+    "connect-src 'self' https://veloci.online https://www.veloci.online https://*.google-analytics.com https://www.googletagmanager.com https://connect.facebook.net",
     "frame-src 'none'",
     "object-src 'none'",
     "base-uri 'self'",
