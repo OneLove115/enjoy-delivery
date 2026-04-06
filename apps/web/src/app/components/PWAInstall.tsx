@@ -85,7 +85,10 @@ export function PWAInstall() {
       }}>
         🍽️
       </div>
-      <div style={{ flex: 1, minWidth: 0 }}>
+      <div
+        onClick={isIOS ? undefined : install}
+        style={{ flex: 1, minWidth: 0, cursor: isIOS ? 'default' : 'pointer' }}
+      >
         <div style={{ color: 'white', fontWeight: 800, fontSize: 14, marginBottom: 2 }}>
           Installeer EnJoy
         </div>
@@ -97,16 +100,18 @@ export function PWAInstall() {
         </div>
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 6, flexShrink: 0 }}>
-        {!isIOS && (
-          <button onClick={install} style={{
-            padding: '8px 16px', borderRadius: 10, border: 'none', cursor: 'pointer',
-            background: `linear-gradient(135deg, ${PURPLE}, ${PINK})`,
-            color: 'white', fontWeight: 800, fontSize: 13, fontFamily: 'inherit',
-            whiteSpace: 'nowrap',
-          }}>
-            Installeer
-          </button>
-        )}
+        <button onClick={isIOS ? () => {
+          // On iOS, show a more detailed instruction overlay
+          alert('Om EnJoy te installeren:\n\n1. Tik op het Deel-icoon (⎋) onderaan Safari\n2. Scroll naar beneden\n3. Tik op "Zet op beginscherm"\n4. Tik op "Voeg toe"\n\nEnJoy verschijnt als app op je beginscherm!');
+          dismiss();
+        } : install} style={{
+          padding: '8px 16px', borderRadius: 10, border: 'none', cursor: 'pointer',
+          background: `linear-gradient(135deg, ${PURPLE}, ${PINK})`,
+          color: 'white', fontWeight: 800, fontSize: 13, fontFamily: 'inherit',
+          whiteSpace: 'nowrap',
+        }}>
+          {isIOS ? 'Hoe installeren?' : 'Installeer'}
+        </button>
         <button onClick={dismiss} style={{
           padding: '6px 12px', borderRadius: 8, border: '1px solid rgba(255,255,255,0.12)',
           cursor: 'pointer', background: 'transparent',
