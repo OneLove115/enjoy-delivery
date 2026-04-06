@@ -153,6 +153,10 @@ html.light input::placeholder { color: var(--text-muted); }
 .scroll-x { overflow-x: auto; scrollbar-width: none; }
 .scroll-x::-webkit-scrollbar { display: none; }
 
+/* ─── Native select dark theme (prevents white dropdown on dark backgrounds) ─── */
+select { background-color: #1a1a2e; color: white; }
+select option { background-color: #1a1a2e; color: white; }
+
 /* ─── Marketing Pages ─── */
 .mkt-page { background: var(--bg-page); color: var(--text-primary); min-height: 100vh; font-family: 'Outfit', sans-serif; }
 .mkt-grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 24px; }

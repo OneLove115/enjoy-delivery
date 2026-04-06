@@ -69,13 +69,18 @@ function dayKey(dateStr: string): string {
   return days[new Date(dateStr + 'T12:00:00').getDay()];
 }
 
+const PAGE_BG   = '#0A0A0F';
+const CARD_BG   = '#13131a';
+const INPUT_BG  = 'rgba(255,255,255,0.06)';
+const BORDER    = 'rgba(255,255,255,0.10)';
+
 const inputStyle: React.CSSProperties = {
   width: '100%',
   padding: '14px 16px',
   borderRadius: 12,
-  border: '1px solid rgba(255,255,255,0.10)',
-  background: 'rgba(255,255,255,0.05)',
-  color: 'var(--text-primary)',
+  border: `1px solid ${BORDER}`,
+  background: INPUT_BG,
+  color: '#ffffff',
   fontSize: 15,
   fontFamily: 'Outfit, sans-serif',
   outline: 'none',
@@ -186,7 +191,7 @@ export default function ReservePage() {
 
   if (loading) {
     return (
-      <div style={{ background: 'var(--bg-page)', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Outfit, sans-serif' }}>
+      <div style={{ background: PAGE_BG, minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Outfit, sans-serif' }}>
         <div style={{ width: 44, height: 44, borderRadius: '50%', border: `3px solid ${PURPLE}`, borderTopColor: 'transparent', animation: 'spin 0.8s linear infinite' }} />
         <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
       </div>
@@ -195,7 +200,7 @@ export default function ReservePage() {
 
   if (!restaurant) {
     return (
-      <div style={{ background: 'var(--bg-page)', minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 16, fontFamily: 'Outfit, sans-serif', color: 'var(--text-primary)' }}>
+      <div style={{ background: PAGE_BG, minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 16, fontFamily: 'Outfit, sans-serif', color: '#ffffff' }}>
         <div style={{ fontSize: 48 }}>😕</div>
         <div style={{ fontSize: 20, fontWeight: 800 }}>Restaurant niet gevonden</div>
         <Link href="/discover" style={{ background: `linear-gradient(135deg,${PURPLE},${PINK})`, color: 'white', padding: '10px 24px', borderRadius: 12, fontWeight: 800, textDecoration: 'none' }}>
@@ -210,12 +215,13 @@ export default function ReservePage() {
   const deposit  = restaurant.depositRequired ? (restaurant.depositAmount || 0) : 0;
 
   return (
-    <div style={{ background: 'var(--bg-page)', minHeight: '100vh', color: 'var(--text-primary)', fontFamily: 'Outfit, sans-serif' }}>
+    <div style={{ background: PAGE_BG, minHeight: '100vh', color: '#ffffff', fontFamily: 'Outfit, sans-serif' }}>
       <style>{`
         @keyframes spin { to { transform: rotate(360deg); } }
         input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0.6); cursor: pointer; }
-        select option { background: #1a1a2e; color: white; }
+        select option { background: #1a1a2e !important; color: white !important; }
         input:focus, select:focus, textarea:focus { border-color: ${PURPLE} !important; }
+        input[type="date"] { color-scheme: dark; }
       `}</style>
 
       {/* Nav */}
@@ -223,11 +229,12 @@ export default function ReservePage() {
         height: 60,
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         padding: '0 20px',
-        background: 'var(--bg-nav)',
-        borderBottom: '1px solid var(--border)',
+        background: 'rgba(10,10,15,0.92)',
+        borderBottom: '1px solid rgba(255,255,255,0.08)',
         position: 'sticky', top: 0, zIndex: 100,
+        backdropFilter: 'blur(12px)',
       }}>
-        <Link href={`/menu/${slug}`} style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'var(--text-secondary)', fontWeight: 700, fontSize: 14, textDecoration: 'none' }}>
+        <Link href={`/menu/${slug}`} style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'rgba(255,255,255,0.55)', fontWeight: 700, fontSize: 14, textDecoration: 'none' }}>
           <span>←</span><span>Menu</span>
         </Link>
         <Link href="/" style={{ textDecoration: 'none' }}>
@@ -269,10 +276,11 @@ export default function ReservePage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.45, delay: 0.08 }}
           style={{
-            background: 'var(--bg-card)',
+            background: CARD_BG,
             borderRadius: 24,
-            border: '1px solid rgba(255,255,255,0.07)',
+            border: '1px solid rgba(255,255,255,0.09)',
             overflow: 'hidden',
+            boxShadow: '0 24px 64px rgba(0,0,0,0.5)',
           }}
         >
           {/* Date & Time */}
@@ -314,19 +322,19 @@ export default function ReservePage() {
             {/* Party size */}
             <div style={{ marginBottom: 20 }}>
               <label style={labelStyle}>Aantal personen *</label>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 0, background: 'rgba(255,255,255,0.05)', borderRadius: 12, border: '1px solid rgba(255,255,255,0.10)', overflow: 'hidden' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 0, background: INPUT_BG, borderRadius: 12, border: `1px solid ${BORDER}`, overflow: 'hidden' }}>
                 <button
                   type="button"
                   onClick={() => setPartySize(p => Math.max(1, p - 1))}
-                  style={{ width: 48, height: 48, border: 'none', background: 'transparent', color: 'var(--text-primary)', fontSize: 22, fontWeight: 900, cursor: 'pointer', flexShrink: 0 }}
+                  style={{ width: 48, height: 48, border: 'none', background: 'transparent', color: '#ffffff', fontSize: 22, fontWeight: 900, cursor: 'pointer', flexShrink: 0 }}
                 >
                   −
                 </button>
-                <span style={{ flex: 1, textAlign: 'center', fontSize: 18, fontWeight: 900 }}>{partySize}</span>
+                <span style={{ flex: 1, textAlign: 'center', fontSize: 18, fontWeight: 900, color: '#ffffff' }}>{partySize}</span>
                 <button
                   type="button"
                   onClick={() => setPartySize(p => Math.min(12, p + 1))}
-                  style={{ width: 48, height: 48, border: 'none', background: 'transparent', color: 'var(--text-primary)', fontSize: 22, fontWeight: 900, cursor: 'pointer', flexShrink: 0 }}
+                  style={{ width: 48, height: 48, border: 'none', background: 'transparent', color: '#ffffff', fontSize: 22, fontWeight: 900, cursor: 'pointer', flexShrink: 0 }}
                 >
                   +
                 </button>
@@ -479,7 +487,7 @@ export default function ReservePage() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.5 }}
-          style={{ textAlign: 'center', fontSize: 12, color: 'rgba(255,255,255,0.3)', marginTop: 20, lineHeight: 1.6 }}
+          style={{ textAlign: 'center', fontSize: 12, color: 'rgba(255,255,255,0.35)', marginTop: 20, lineHeight: 1.6 }}
         >
           Je ontvangt een bevestiging per e-mail. Gratis annuleren tot 2 uur voor aanvang.
         </motion.p>

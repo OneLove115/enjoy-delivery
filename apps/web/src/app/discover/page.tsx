@@ -83,9 +83,10 @@ const FILTER_CHIPS: FilterChip[] = [
 ];
 
 const DEALS = [
-  { name: 'Royal Kitchen', deal: '30% korting',     emoji: '🍛', color: '#E8703A' },
-  { name: 'Burger Empire', deal: 'Gratis bezorging', emoji: '🍔', color: '#3D2B6B' },
-  { name: 'Sushi Palace',  deal: '2+1 gratis',      emoji: '🍣', color: '#D4608A' },
+  { name: 'Royal Kitchen', deal: '-30%',            badge: '30% korting',      img: '/food/royal-kitchen.png',  color: '#E8703A', gradient: 'linear-gradient(135deg,#E8703A,#C8451A)' },
+  { name: 'Burger Empire', deal: 'Gratis',          badge: 'Gratis bezorging', img: '/food/burger-empire.png',  color: '#3D2B6B', gradient: 'linear-gradient(135deg,#3D2B6B,#6A3DA8)' },
+  { name: 'Sushi Palace',  deal: '2+1',             badge: '2+1 gratis',       img: '/food/cat-sushi.png',      color: '#D4608A', gradient: 'linear-gradient(135deg,#D4608A,#FF0080)' },
+  { name: 'Pizza Throne',  deal: '-20%',            badge: '20% korting',      img: '/food/pizza-throne.png',   color: '#C0392B', gradient: 'linear-gradient(135deg,#C0392B,#8B1E1E)' },
 ];
 
 const DEMO: RestaurantRow[] = [
@@ -530,7 +531,7 @@ function DiscoverContent() {
   const [activeTopCat, setActiveTopCat]     = useState(0);
   const [activeCuisines, setActiveCuisines] = useState<Set<string>>(new Set());
   const [activeChips, setActiveChips]       = useState<Set<string>>(new Set());
-  const [deliveryMode, setDeliveryMode]     = useState<'bezorgen' | 'afhalen'>('bezorgen');
+  const [deliveryMode, setDeliveryMode]     = useState<'bezorgen' | 'afhalen' | 'tafels'>('bezorgen');
   const [filtersOpen, setFiltersOpen]       = useState(false);
   const [accountOpen, setAccountOpen]       = useState(false);
   const [allCatsOpen, setAllCatsOpen]       = useState(false);
@@ -600,6 +601,7 @@ function DiscoverContent() {
 
   const filtered = restaurants.filter(r => {
     if (selectedCat.key !== 'restaurant' && r.category !== selectedCat.key) return false;
+    if (deliveryMode === 'tafels' && !(r as any).reservationsEnabled) return false;
     if (search && !r.name.toLowerCase().includes(search.toLowerCase()) && !r.cuisine.toLowerCase().includes(search.toLowerCase())) return false;
     if (openOnly && !r.open) return false;
     if (applyFreeDelivery && r.delivery !== 'Gratis') return false;
@@ -749,11 +751,12 @@ function DiscoverContent() {
             </button>
           </div>
 
-          {/* Row 2: Bezorgen / Afhalen full-width toggle */}
+          {/* Row 2: Bezorgen / Afhalen / Tafels full-width toggle */}
           <div style={{ padding: '0 16px 10px' }}>
-            <div style={{ display: 'flex', background: 'var(--discover-input)', borderRadius: 24, border: '1px solid var(--border-strong)', padding: 3 }}>
-              <button onClick={() => setDeliveryMode('bezorgen')} style={{ flex: 1, padding: '9px 0', borderRadius: 20, border: 'none', cursor: 'pointer', background: deliveryMode === 'bezorgen' ? 'var(--text-primary)' : 'transparent', color: deliveryMode === 'bezorgen' ? 'var(--discover-bg)' : 'var(--t55)', fontSize: 13, fontWeight: 700, transition: 'all 0.2s', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>🚲 Bezorgen</button>
-              <button onClick={() => setDeliveryMode('afhalen')} style={{ flex: 1, padding: '9px 0', borderRadius: 20, border: 'none', cursor: 'pointer', background: deliveryMode === 'afhalen' ? 'var(--text-primary)' : 'transparent', color: deliveryMode === 'afhalen' ? 'var(--discover-bg)' : 'var(--t55)', fontSize: 13, fontWeight: 700, transition: 'all 0.2s', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>🥡 Afhalen</button>
+            <div style={{ display: 'flex', background: 'var(--discover-input)', borderRadius: 24, border: '1px solid var(--border-strong)', padding: 3, gap: 2 }}>
+              <button onClick={() => setDeliveryMode('bezorgen')} style={{ flex: 1, padding: '9px 4px', borderRadius: 20, border: 'none', cursor: 'pointer', background: deliveryMode === 'bezorgen' ? 'var(--text-primary)' : 'transparent', color: deliveryMode === 'bezorgen' ? 'var(--discover-bg)' : 'var(--t55)', fontSize: 12, fontWeight: 700, transition: 'all 0.2s', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4 }}>🚲 Bezorgen</button>
+              <button onClick={() => setDeliveryMode('afhalen')} style={{ flex: 1, padding: '9px 4px', borderRadius: 20, border: 'none', cursor: 'pointer', background: deliveryMode === 'afhalen' ? 'var(--text-primary)' : 'transparent', color: deliveryMode === 'afhalen' ? 'var(--discover-bg)' : 'var(--t55)', fontSize: 12, fontWeight: 700, transition: 'all 0.2s', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4 }}>🥡 Afhalen</button>
+              <button onClick={() => setDeliveryMode('tafels')} style={{ flex: 1, padding: '9px 4px', borderRadius: 20, border: 'none', cursor: 'pointer', background: deliveryMode === 'tafels' ? `linear-gradient(135deg,${PURPLE},${PINK})` : 'transparent', color: deliveryMode === 'tafels' ? 'white' : 'var(--t55)', fontSize: 12, fontWeight: 700, transition: 'all 0.2s', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4 }}>🪑 Tafels</button>
             </div>
           </div>
 
@@ -815,9 +818,10 @@ function DiscoverContent() {
                 <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', maxWidth: 220, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{address || 'Voeg adres toe'}</span>
                 <span style={{ color: 'var(--t40)', fontSize: 11 }}>▼</span>
               </Link>
-              <div style={{ display: 'flex', background: 'var(--discover-input)', borderRadius: 24, border: '1px solid var(--border-strong)', padding: 3 }}>
+              <div style={{ display: 'flex', background: 'var(--discover-input)', borderRadius: 24, border: '1px solid var(--border-strong)', padding: 3, gap: 2 }}>
                 <button onClick={() => setDeliveryMode('bezorgen')} style={{ padding: '8px 20px', borderRadius: 20, border: 'none', cursor: 'pointer', background: deliveryMode === 'bezorgen' ? 'var(--text-primary)' : 'transparent', color: deliveryMode === 'bezorgen' ? 'var(--discover-bg)' : 'var(--t55)', fontSize: 13, fontWeight: 700, transition: 'all 0.2s' }}>Bezorgen</button>
                 <button onClick={() => setDeliveryMode('afhalen')} style={{ padding: '8px 20px', borderRadius: 20, border: 'none', cursor: 'pointer', background: deliveryMode === 'afhalen' ? 'var(--text-primary)' : 'transparent', color: deliveryMode === 'afhalen' ? 'var(--discover-bg)' : 'var(--t55)', fontSize: 13, fontWeight: 700, transition: 'all 0.2s' }}>Afhalen</button>
+                <button onClick={() => setDeliveryMode('tafels')} style={{ padding: '8px 20px', borderRadius: 20, border: 'none', cursor: 'pointer', background: deliveryMode === 'tafels' ? `linear-gradient(135deg,${PURPLE},${PINK})` : 'transparent', color: deliveryMode === 'tafels' ? 'white' : 'var(--t55)', fontSize: 13, fontWeight: 700, transition: 'all 0.2s' }}>Tafels</button>
               </div>
             </div>
 
@@ -882,15 +886,22 @@ function DiscoverContent() {
 
           {/* Deals — mobile */}
           {isRestaurant && (
-            <div style={{ marginBottom: 22 }}>
-              <h2 style={{ fontSize: 16, fontWeight: 900, marginBottom: 12 }}>Aanbiedingen van vandaag 🔥</h2>
-              <div className="scroll-x" style={{ display: 'flex', gap: 10, paddingBottom: 4 }}>
+            <div style={{ margin: '0 -16px 22px', padding: '18px 16px 22px', background: 'linear-gradient(135deg,rgba(90,49,244,0.12),rgba(255,0,128,0.08))', borderTop: '1px solid rgba(90,49,244,0.18)', borderBottom: '1px solid rgba(255,0,128,0.12)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+                <h2 style={{ fontSize: 16, fontWeight: 900 }}>Aanbiedingen van vandaag 🔥</h2>
+                <span style={{ fontSize: 11, fontWeight: 700, color: PURPLE, background: 'rgba(90,49,244,0.12)', padding: '4px 10px', borderRadius: 20 }}>Bekijk alles</span>
+              </div>
+              <div className="scroll-x" style={{ display: 'flex', gap: 12, paddingBottom: 4 }}>
                 {DEALS.map((d, i) => (
-                  <div key={i} style={{ borderRadius: 14, overflow: 'hidden', position: 'relative', minWidth: 180, height: 110, background: d.color, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0 }}>
-                    <span style={{ fontSize: 52, filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.4))' }}>{d.emoji}</span>
-                    <div style={{ position: 'absolute', top: 8, left: 8, background: '#F5C518', borderRadius: 6, padding: '3px 8px', fontSize: 11, fontWeight: 800, color: '#1C1C1C' }}>{d.deal}</div>
-                    <div style={{ position: 'absolute', bottom: 8, left: 10 }}>
-                      <p style={{ fontSize: 12, fontWeight: 800, color: 'white' }}>{d.name}</p>
+                  <div key={i} style={{ borderRadius: 16, overflow: 'hidden', position: 'relative', minWidth: 200, height: 130, background: d.gradient, display: 'flex', alignItems: 'flex-end', cursor: 'pointer', flexShrink: 0, boxShadow: '0 8px 24px rgba(0,0,0,0.35)' }}>
+                    {d.img && (
+                      <img src={d.img} alt={d.name} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: 0.55, mixBlendMode: 'luminosity' }} />
+                    )}
+                    <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top,rgba(0,0,0,0.72) 0%,transparent 55%)' }} />
+                    <div style={{ position: 'absolute', top: 10, left: 10, background: '#F5C518', borderRadius: 8, padding: '4px 10px', fontSize: 13, fontWeight: 900, color: '#1C1C1C', letterSpacing: '-0.01em' }}>{d.deal}</div>
+                    <div style={{ position: 'relative', padding: '0 12px 10px' }}>
+                      <p style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.75)', marginBottom: 1 }}>{d.badge}</p>
+                      <p style={{ fontSize: 14, fontWeight: 900, color: 'white' }}>{d.name}</p>
                     </div>
                   </div>
                 ))}
@@ -991,17 +1002,24 @@ function DiscoverContent() {
                 </div>
 
                 {/* Deals section */}
-                <div style={{ marginBottom: 32 }}>
-                  <h2 style={{ fontSize: 20, fontWeight: 900, marginBottom: 16 }}>De aanbiedingen van vandaag 🔥</h2>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14 }}>
+                <div style={{ marginBottom: 32, borderRadius: 20, padding: '22px 24px', background: 'linear-gradient(135deg,rgba(90,49,244,0.10),rgba(255,0,128,0.07))', border: '1px solid rgba(90,49,244,0.16)' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 }}>
+                    <h2 style={{ fontSize: 20, fontWeight: 900 }}>De aanbiedingen van vandaag 🔥</h2>
+                    <span style={{ fontSize: 12, fontWeight: 700, color: PURPLE, background: 'rgba(90,49,244,0.12)', padding: '5px 14px', borderRadius: 20, cursor: 'pointer' }}>Bekijk alles</span>
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 14 }}>
                     {DEALS.map((d, i) => (
-                      <div key={i} style={{ borderRadius: 16, overflow: 'hidden', position: 'relative', height: 150, background: d.color, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
-                        <span style={{ fontSize: 72, filter: 'drop-shadow(0 4px 16px rgba(0,0,0,0.4))' }}>{d.emoji}</span>
-                        <div style={{ position: 'absolute', top: 10, left: 10, background: '#F5C518', borderRadius: 8, padding: '4px 10px', fontSize: 12, fontWeight: 800, color: '#1C1C1C' }}>{d.deal}</div>
-                        <div style={{ position: 'absolute', bottom: 10, left: 12 }}>
-                          <p style={{ fontSize: 13, fontWeight: 800, color: 'white' }}>{d.name}</p>
+                      <motion.div key={i} whileHover={{ y: -4, boxShadow: '0 16px 40px rgba(0,0,0,0.5)' }} style={{ borderRadius: 16, overflow: 'hidden', position: 'relative', height: 170, background: d.gradient, display: 'flex', alignItems: 'flex-end', cursor: 'pointer', boxShadow: '0 8px 24px rgba(0,0,0,0.3)' }}>
+                        {d.img && (
+                          <img src={d.img} alt={d.name} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: 0.5, mixBlendMode: 'luminosity' }} />
+                        )}
+                        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top,rgba(0,0,0,0.75) 0%,transparent 50%)' }} />
+                        <div style={{ position: 'absolute', top: 10, left: 10, background: '#F5C518', borderRadius: 8, padding: '4px 10px', fontSize: 14, fontWeight: 900, color: '#1C1C1C', letterSpacing: '-0.01em' }}>{d.deal}</div>
+                        <div style={{ position: 'relative', padding: '0 12px 12px' }}>
+                          <p style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.75)', marginBottom: 2 }}>{d.badge}</p>
+                          <p style={{ fontSize: 14, fontWeight: 900, color: 'white' }}>{d.name}</p>
                         </div>
-                      </div>
+                      </motion.div>
                     ))}
                   </div>
                 </div>
