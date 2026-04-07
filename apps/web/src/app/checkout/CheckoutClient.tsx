@@ -42,8 +42,10 @@ export default function CheckoutClient() {
 
   const subtotal = total();
   const TAX_RATE = 0.09;
+  const SERVICE_FEE_RATE = 0.05;
   const taxAmount = subtotal * TAX_RATE;
-  const grandTotal = subtotal + taxAmount + tip;
+  const serviceFee = subtotal * SERVICE_FEE_RATE;
+  const grandTotal = subtotal + taxAmount + serviceFee + tip;
 
   const formatPrice = (n: number) =>
     new Intl.NumberFormat(locale || 'nl-NL', { style: 'currency', currency: currency || 'EUR' }).format(n);
@@ -572,6 +574,7 @@ export default function CheckoutClient() {
             }}>
               <PriceRow label="Subtotaal" value={formatPrice(subtotal)} />
               <PriceRow label="BTW (9%)" value={formatPrice(taxAmount)} />
+              <PriceRow label="Servicekosten (5%)" value={formatPrice(serviceFee)} />
               <PriceRow
                 label="Bezorgkosten"
                 value="Gratis"
