@@ -92,6 +92,14 @@ export default function CheckoutClient() {
             name: i.name,
             quantity: i.qty,
             unitPrice: i.basePrice,
+            price: (parseFloat(i.basePrice) + (i.modifiers || []).reduce((sum: number, m: any) => sum + (m.priceAdjustment || 0), 0)).toFixed(2),
+            modifiers: (i.modifiers || []).map(m => ({
+              groupId: m.groupId,
+              groupName: m.groupName,
+              modifierId: m.modifierId,
+              name: m.name,
+              priceAdjustment: m.priceAdjustment,
+            })),
           })),
           restaurantSlug: restaurantSlug || undefined,
           deliveryAddress: `${form.street}, ${form.postcode} ${form.city}`,
@@ -501,38 +509,57 @@ export default function CheckoutClient() {
                   overflowY: 'auto',
                   paddingRight: 4,
                 }}>
-                  {items.map(item => (
-                    <div key={item.id} style={{
-                      display: 'flex', justifyContent: 'space-between',
-                      alignItems: 'flex-start', fontSize: 14,
-                    }}>
-                      <div style={{ display: 'flex', gap: 10, flex: 1, minWidth: 0 }}>
-                        <span style={{
-                          fontWeight: 800, fontSize: 12,
-                          minWidth: 22, height: 22,
-                          display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          borderRadius: 6,
-                          background: 'rgba(90,49,244,0.15)',
-                          color: '#a78bfa',
-                          flexShrink: 0,
+                  {items.map(item => {
+                    const modExtra = (item.modifiers || []).reduce((s: number, m: any) => s + (m.priceAdjustment || 0), 0);
+                    const linePrice = (parseFloat(item.basePrice) + modExtra) * item.qty;
+                    return (
+                      <div key={item.id} style={{ fontSize: 14 }}>
+                        <div style={{
+                          display: 'flex', justifyContent: 'space-between',
+                          alignItems: 'flex-start',
                         }}>
-                          {item.qty}
-                        </span>
-                        <span style={{
-                          fontWeight: 500, lineHeight: 1.4,
-                          color: 'var(--text-secondary, rgba(255,255,255,0.8))',
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
-                          whiteSpace: 'nowrap',
-                        }}>
-                          {item.name}
-                        </span>
+                          <div style={{ display: 'flex', gap: 10, flex: 1, minWidth: 0 }}>
+                            <span style={{
+                              fontWeight: 800, fontSize: 12,
+                              minWidth: 22, height: 22,
+                              display: 'flex', alignItems: 'center', justifyContent: 'center',
+                              borderRadius: 6,
+                              background: 'rgba(90,49,244,0.15)',
+                              color: '#a78bfa',
+                              flexShrink: 0,
+                            }}>
+                              {item.qty}
+                            </span>
+                            <span style={{
+                              fontWeight: 500, lineHeight: 1.4,
+                              color: 'var(--text-secondary, rgba(255,255,255,0.8))',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              whiteSpace: 'nowrap',
+                            }}>
+                              {item.name}
+                            </span>
+                          </div>
+                          <span style={{ fontWeight: 700, flexShrink: 0, marginLeft: 10, fontSize: 14 }}>
+                            {formatPrice(linePrice)}
+                          </span>
+                        </div>
+                        {item.modifiers && item.modifiers.length > 0 && (
+                          <div style={{ paddingLeft: 32, marginTop: 2 }}>
+                            {item.modifiers.map((m: any, idx: number) => (
+                              <div key={idx} style={{
+                                fontSize: 11,
+                                color: 'var(--text-muted, rgba(255,255,255,0.35))',
+                                lineHeight: 1.6,
+                              }}>
+                                {m.name}{m.priceAdjustment > 0 ? ` (+${formatPrice(m.priceAdjustment)})` : m.priceAdjustment === 0 ? '' : ''}
+                              </div>
+                            ))}
+                          </div>
+                        )}
                       </div>
-                      <span style={{ fontWeight: 700, flexShrink: 0, marginLeft: 10, fontSize: 14 }}>
-                        {formatPrice(parseFloat(item.basePrice) * item.qty)}
-                      </span>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </div>
