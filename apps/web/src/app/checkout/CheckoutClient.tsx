@@ -39,6 +39,14 @@ export default function CheckoutClient() {
   const [form, setForm] = useState<CheckoutDetails>(EMPTY);
   const [showSuccess, setShowSuccess] = useState(false);
   const pendingRedirect = useRef<() => void>(() => {});
+  const [authChecked, setAuthChecked] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    fetch('/api/auth/me')
+      .then(r => { setIsLoggedIn(r.ok); setAuthChecked(true); })
+      .catch(() => { setIsLoggedIn(false); setAuthChecked(true); });
+  }, []);
 
   const subtotal = total();
   const TAX_RATE = 0.09;
@@ -137,6 +145,113 @@ export default function CheckoutClient() {
   };
 
   const isDisabled = submitting || items.length === 0;
+
+  if (authChecked && !isLoggedIn) {
+    return (
+      <div style={{
+        background: '#0A0A0F',
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontFamily: "'Outfit', system-ui, sans-serif",
+        padding: 24,
+      }}>
+        <motion.div
+          initial={{ opacity: 0, y: 24, scale: 0.96 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] }}
+          style={{
+            background: 'rgba(255,255,255,0.03)',
+            border: '1px solid rgba(255,255,255,0.08)',
+            borderRadius: 24,
+            padding: '48px 40px',
+            maxWidth: 420,
+            width: '100%',
+            textAlign: 'center',
+          }}
+        >
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ type: 'spring', stiffness: 260, damping: 20, delay: 0.15 }}
+            style={{ fontSize: 56, marginBottom: 20, lineHeight: 1 }}
+          >
+            🔒
+          </motion.div>
+          <h2 style={{
+            fontSize: 26,
+            fontWeight: 900,
+            color: '#fff',
+            marginBottom: 10,
+            letterSpacing: '-0.02em',
+          }}>
+            Log in om te bestellen
+          </h2>
+          <p style={{
+            color: 'rgba(255,255,255,0.45)',
+            fontSize: 15,
+            lineHeight: 1.6,
+            marginBottom: 32,
+          }}>
+            Je moet ingelogd zijn om een bestelling te plaatsen. Log in of maak een account aan om verder te gaan.
+          </p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <Link
+              href="/login?next=/checkout"
+              style={{
+                display: 'block',
+                padding: '15px 24px',
+                borderRadius: 14,
+                background: GRADIENT,
+                color: '#fff',
+                fontSize: 15,
+                fontWeight: 800,
+                textDecoration: 'none',
+                textAlign: 'center',
+                boxShadow: '0 6px 24px rgba(90,49,244,0.35)',
+                transition: 'transform 0.15s, box-shadow 0.15s',
+              }}
+            >
+              Inloggen
+            </Link>
+            <Link
+              href="/signup?next=/checkout"
+              style={{
+                display: 'block',
+                padding: '15px 24px',
+                borderRadius: 14,
+                background: 'rgba(255,255,255,0.06)',
+                border: '1px solid rgba(255,255,255,0.1)',
+                color: '#fff',
+                fontSize: 15,
+                fontWeight: 700,
+                textDecoration: 'none',
+                textAlign: 'center',
+                transition: 'background 0.15s',
+              }}
+            >
+              Account aanmaken
+            </Link>
+          </div>
+          <Link
+            href={restaurantSlug ? `/menu/${restaurantSlug}` : '/discover'}
+            style={{
+              display: 'inline-block',
+              marginTop: 24,
+              color: 'rgba(255,255,255,0.35)',
+              fontSize: 13,
+              fontWeight: 600,
+              textDecoration: 'none',
+              transition: 'color 0.15s',
+            }}
+          >
+            ← Terug naar menu
+          </Link>
+        </motion.div>
+      </div>
+    );
+  }
 
   return (
     <div style={{

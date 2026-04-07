@@ -78,11 +78,16 @@ export default function AccountOrdersPage() {
 
   useEffect(() => {
     fetch('/api/auth/me')
-      .then(r => { if (!r.ok) { router.push('/login?next=/account/orders'); return false; } return true; })
-      .then(ok => ok && fetch('/api/account/orders'))
-      .then(r => r && r.json())
-      .then(data => { if (data) setOrders(Array.isArray(data) ? data : []); })
-      .catch(console.error)
+      .then(r => {
+        if (!r.ok) { router.push('/login?next=/account/orders'); return null; }
+        return fetch('/api/account/orders');
+      })
+      .then(r => r ? r.json() : null)
+      .then(data => {
+        if (data && Array.isArray(data)) setOrders(data);
+        else if (data?.error) console.error('Orders error:', data.error);
+      })
+      .catch(err => console.error('Failed to load orders:', err))
       .finally(() => setLoading(false));
   }, [router]);
 
