@@ -115,12 +115,23 @@ function OrderSuccessContent() {
   const params = useSearchParams();
   const orderNumber = params.get('order');
   const orderId = params.get('orderId') || params.get('order_id');
+  const sessionId = params.get('session_id');
   const [showConfetti, setShowConfetti] = useState(true);
 
   useEffect(() => {
     const t = setTimeout(() => setShowConfetti(false), 4500);
     return () => clearTimeout(t);
   }, []);
+
+  // Confirm the order payment on the backend (update status from pending_payment → confirmed)
+  useEffect(() => {
+    if (!orderId) return;
+    fetch('/api/orders/confirm', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ orderId, sessionId }),
+    }).catch(() => {}); // non-blocking
+  }, [orderId, sessionId]);
 
   return (
     <div style={{
