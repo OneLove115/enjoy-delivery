@@ -307,10 +307,8 @@ export default function OrderTrackingPage() {
         })
         .catch(() => setError('Failed to load order'));
 
-    fetch('/api/auth/me')
-      .then(r => { if (!r.ok) { router.push('/login'); return false; } return true; })
-      .then(ok => ok && load())
-      .finally(() => setLoading(false));
+    // Load order directly — no auth required for order tracking (guest checkout)
+    load().finally(() => setLoading(false));
 
     const interval = setInterval(load, 30000);
     return () => clearInterval(interval);

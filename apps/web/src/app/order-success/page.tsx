@@ -114,7 +114,7 @@ function AnimatedCheck() {
 function OrderSuccessContent() {
   const params = useSearchParams();
   const orderNumber = params.get('order');
-  const orderId = params.get('session_id') || params.get('orderId');
+  const orderId = params.get('orderId') || params.get('order_id');
   const [showConfetti, setShowConfetti] = useState(true);
 
   useEffect(() => {
@@ -124,7 +124,7 @@ function OrderSuccessContent() {
 
   return (
     <div style={{
-      background: 'var(--bg-page)', minHeight: '100vh', color: 'var(--text-primary)',
+      background: '#0A0A0F', minHeight: '100vh', color: '#ffffff',
       fontFamily: 'Outfit, sans-serif', display: 'flex', alignItems: 'center', justifyContent: 'center',
       position: 'relative', overflow: 'hidden',
     }}>
@@ -142,7 +142,7 @@ function OrderSuccessContent() {
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4, duration: 0.5 }}
-          style={{ fontSize: 32, fontWeight: 950, marginBottom: 12 }}
+          style={{ fontSize: 32, fontWeight: 950, marginBottom: 12, color: '#ffffff' }}
         >
           Bestelling geplaatst!
         </motion.h1>
@@ -152,9 +152,9 @@ function OrderSuccessContent() {
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.55, duration: 0.5 }}
-            style={{ fontSize: 18, color: 'var(--text-muted)', marginBottom: 8 }}
+            style={{ fontSize: 18, color: 'rgba(255,255,255,0.6)', marginBottom: 8 }}
           >
-            Bestelnummer: <strong style={{ color: 'var(--text-primary)' }}>{orderNumber}</strong>
+            Bestelnummer: <strong style={{ color: '#ffffff' }}>{orderNumber}</strong>
           </motion.p>
         )}
 
@@ -162,7 +162,7 @@ function OrderSuccessContent() {
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.65, duration: 0.5 }}
-          style={{ fontSize: 16, color: 'var(--text-muted)', lineHeight: 1.6, marginBottom: 32 }}
+          style={{ fontSize: 16, color: 'rgba(255,255,255,0.55)', lineHeight: 1.6, marginBottom: 32 }}
         >
           Je bestelling is ontvangen en wordt bereid. Je ontvangt een bevestiging per e-mail.
         </motion.p>
