@@ -50,7 +50,7 @@ export default function CheckoutClient() {
 
   const subtotal = total();
   const TAX_RATE = 0.09;
-  const SERVICE_FEE_RATE = 0.05;
+  const SERVICE_FEE_RATE = 0.025;
   const taxAmount = subtotal * TAX_RATE;
   const serviceFee = subtotal * SERVICE_FEE_RATE;
   const grandTotal = subtotal + taxAmount + serviceFee + tip;
@@ -689,7 +689,7 @@ export default function CheckoutClient() {
             }}>
               <PriceRow label="Subtotaal" value={formatPrice(subtotal)} />
               <PriceRow label="BTW (9%)" value={formatPrice(taxAmount)} />
-              <PriceRow label="Servicekosten (5%)" value={formatPrice(serviceFee)} />
+              <PriceRow label="Administratiekosten (2,5%)" value={formatPrice(serviceFee)} />
               <PriceRow
                 label="Bezorgkosten"
                 value="Gratis"
