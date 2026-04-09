@@ -117,40 +117,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           {children}
         </ThemeProvider>
         <CookieConsent />
-        <script
-          id="weglot-loader"
-          dangerouslySetInnerHTML={{
-            __html: `
-              (function() {
-                var s = document.createElement('script');
-                s.src = 'https://cdn.weglot.com/weglot.min.js';
-                s.onload = function() {
-                  Weglot.initialize({
-                    api_key: 'wg_69790b255ca245dc694645e23cb984075',
-                    auto_switch: true,
-                    host_language: 'en',
-                    destination_languages: ['nl','fr','de','tr','ar','es'],
-                    hide_switcher: true,
-                    cache: true,
-                    dynamic: '.main-content',
-                    translate_search: true
-                  });
-                  // Re-translate on Next.js client navigation
-                  var observer = new MutationObserver(function() {
-                    if (typeof Weglot !== 'undefined' && Weglot.getCurrentLang && Weglot.getCurrentLang() !== 'en') {
-                      clearTimeout(window._weglotTimer);
-                      window._weglotTimer = setTimeout(function() {
-                        try { Weglot.translate(); } catch(e) {}
-                      }, 300);
-                    }
-                  });
-                  observer.observe(document.body, { childList: true, subtree: true });
-                };
-                document.head.appendChild(s);
-              })();
-            `,
-          }}
-        />
+        <Script src="/translate-full.js" strategy="afterInteractive" />
+        <Script src="/translate-full.js" strategy="afterInteractive" />
       </body>
     </html>
   );
