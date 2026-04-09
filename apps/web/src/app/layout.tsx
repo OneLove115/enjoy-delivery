@@ -117,8 +117,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           {children}
         </ThemeProvider>
         <CookieConsent />
-        <Script src="/translate-full.js" strategy="afterInteractive" />
-        <Script src="/translate-full.js" strategy="afterInteractive" />
+        <Script src="/translate-all.js" strategy="afterInteractive" />
       </body>
     </html>
   );
