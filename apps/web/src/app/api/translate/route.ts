@@ -22,6 +22,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'texts[] and targetLang required' }, { status: 400 });
     }
 
+    if (texts.length > 100) {
+      return NextResponse.json({ error: 'Max 100 texts per request' }, { status: 400 });
+    }
+
     if (targetLang.toUpperCase() === 'EN') {
       return NextResponse.json({ translations: texts });
     }
