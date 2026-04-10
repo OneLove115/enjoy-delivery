@@ -1,39 +1,42 @@
 'use client';
 import Link from 'next/link';
+import { t } from '@/lib/translations';
 
 const PURPLE = '#5A31F4';
 const PINK   = '#FF0080';
 
-const sections: Record<string, { label: string; href: string }[]> = {
-  Order: [
-    { label: 'Discover restaurants', href: '/discover' },
-    { label: 'How it works',         href: '/how-it-works' },
-    { label: 'Promotions',           href: '/promotions' },
-    { label: 'Cities',               href: '/cities' },
-  ],
-  Partners: [
-    { label: 'Add your restaurant', href: '/partners' },
-    { label: 'Ride with us',        href: '/riders' },
-    { label: 'Business orders',     href: '/business' },
-    { label: 'Referral Program',    href: 'https://www.veloci.online/referral' },
-  ],
-  Company: [
-    { label: 'About us', href: '/about' },
-    { label: 'Careers',  href: '/careers' },
-    { label: 'Blog',     href: '/blog' },
-    { label: 'Press',    href: '/press' },
-  ],
-  Support: [
-    { label: 'Help center', href: '/help' },
-    { label: 'Contact',     href: '/contact' },
-    { label: 'FAQ',         href: '/faq' },
-  ],
-  Legal: [
-    { label: 'Privacy', href: '/privacy' },
-    { label: 'Terms',   href: '/terms' },
-    { label: 'Cookies', href: '/cookies' },
-  ],
-};
+function getSections() {
+  return {
+    [t('footer.order')]: [
+      { label: t('footer.discoverRestaurants'), href: '/discover' },
+      { label: t('footer.howItWorks'),          href: '/how-it-works' },
+      { label: t('footer.promotions'),          href: '/promotions' },
+      { label: t('footer.cities'),              href: '/cities' },
+    ],
+    [t('footer.partners')]: [
+      { label: t('footer.addRestaurant'), href: '/partners' },
+      { label: t('footer.rideWithUs'),    href: '/riders' },
+      { label: t('footer.businessOrders'),href: '/business' },
+      { label: t('footer.referralProgram'), href: 'https://www.veloci.online/referral' },
+    ],
+    [t('footer.company')]: [
+      { label: t('footer.about'),   href: '/about' },
+      { label: t('footer.careers'), href: '/careers' },
+      { label: t('footer.blog'),    href: '/blog' },
+      { label: t('footer.press'),   href: '/press' },
+    ],
+    [t('footer.support')]: [
+      { label: t('footer.helpCenter'), href: '/help' },
+      { label: t('footer.contact'),    href: '/contact' },
+      { label: t('footer.faq'),        href: '/faq' },
+    ],
+    [t('footer.legal')]: [
+      { label: t('footer.privacy'), href: '/privacy' },
+      { label: t('footer.terms'),   href: '/terms' },
+      { label: t('footer.cookies'), href: '/cookies' },
+    ],
+  };
+}
 
 function SocialIcon({ href, label, d }: { href: string; label: string; d: string }) {
   return (
@@ -46,6 +49,8 @@ function SocialIcon({ href, label, d }: { href: string; label: string; d: string
 }
 
 export function Footer() {
+  const sections = getSections();
+
   return (
     <footer style={{ borderTop: '1px solid var(--border)', background: 'var(--bg-page)' }}>
       <div style={{ maxWidth: 1280, margin: '0 auto', padding: '60px 40px 32px' }} className="footer-inner">
@@ -57,13 +62,13 @@ export function Footer() {
               <img src="/logo-enjoy.png" alt="EnJoy" style={{ height: 40, width: 'auto' }} width={128} height={40} />
             </Link>
             <p style={{ color: 'var(--text-muted)', marginTop: 12, fontSize: 14, lineHeight: 1.6 }}>
-              Elite gourmet delivery. Royally crafted, impeccably delivered.
+              {t('footer.tagline')}
             </p>
             {/* App store badges */}
             <div style={{ display: 'flex', gap: 10, marginTop: 20 }}>
               {[
-                { icon: '🍎', label: 'App Store' },
-                { icon: '🤖', label: 'Google Play' },
+                { icon: '🍎', label: t('footer.appStore') },
+                { icon: '🤖', label: t('footer.googlePlay') },
               ].map(b => (
                 <div key={b.label} style={{
                   display: 'flex', alignItems: 'center', gap: 8,
@@ -117,12 +122,12 @@ export function Footer() {
 
         {/* Bottom */}
         <div style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: 13, paddingBottom: 8 }}>
-          © 2026 EnJoy. All rights reserved. &nbsp;·&nbsp;
-          <Link href="/privacy" style={{ color: 'var(--text-muted)' }}>Privacy</Link>
+          © 2026 EnJoy. {t('footer.allRights')} &nbsp;·&nbsp;
+          <Link href="/privacy" style={{ color: 'var(--text-muted)' }}>{t('footer.privacy')}</Link>
           &nbsp;·&nbsp;
-          <Link href="/terms" style={{ color: 'var(--text-muted)' }}>Terms</Link>
+          <Link href="/terms" style={{ color: 'var(--text-muted)' }}>{t('footer.terms')}</Link>
           &nbsp;·&nbsp;
-          <Link href="/cookies" style={{ color: 'var(--text-muted)' }}>Cookies</Link>
+          <Link href="/cookies" style={{ color: 'var(--text-muted)' }}>{t('footer.cookies')}</Link>
         </div>
       </div>
 

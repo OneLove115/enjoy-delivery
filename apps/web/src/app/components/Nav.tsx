@@ -2,22 +2,26 @@
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
+import { t } from '@/lib/translations';
 
 const PURPLE = '#5A31F4';
 const PINK   = '#FF0080';
 
-const navLinks = [
-  { href: '/discover',    label: 'Order' },
-  { href: '/how-it-works',label: 'How it works' },
-  { href: '/riders',      label: 'Ride with us' },
-  { href: '/partners',    label: 'Partner' },
-  { href: '/business',    label: 'Business' },
-];
+function getNavLinks() {
+  return [
+    { href: '/discover',     label: t('nav.order') },
+    { href: '/how-it-works', label: t('nav.howItWorks') },
+    { href: '/riders',       label: t('nav.rideWithUs') },
+    { href: '/partners',     label: t('nav.partner') },
+    { href: '/business',     label: t('nav.business') },
+  ];
+}
 
 export function Nav() {
   const [user, setUser]       = useState<{ name: string; avatarUrl?: string } | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const pathname  = usePathname();
+  const navLinks = getNavLinks();
 
   useEffect(() => {
     fetch('/api/auth/me').then(r => r.ok ? r.json() : null).then(setUser).catch(() => null);
@@ -75,15 +79,15 @@ export function Nav() {
                   background: 'var(--bg-card)', border: '1px solid var(--border)',
                   color: 'var(--text-secondary)', padding: '8px 16px', borderRadius: 10,
                   cursor: 'pointer', fontSize: 13, fontWeight: 600,
-                }}>Sign out</button>
+                }}>{t('nav.signOut')}</button>
               </>
             ) : (
               <>
-                <Link href="/login" style={{ color: 'rgba(255,255,255,0.8)', fontSize: 14, fontWeight: 600 }}>Sign in</Link>
+                <Link href="/login" style={{ color: 'rgba(255,255,255,0.8)', fontSize: 14, fontWeight: 600 }}>{t('nav.signIn')}</Link>
                 <Link href="/signup" style={{
                   background: `linear-gradient(135deg,${PURPLE},${PINK})`, color: 'white',
                   padding: '9px 20px', borderRadius: 10, fontSize: 14, fontWeight: 700,
-                }}>Get started</Link>
+                }}>{t('nav.getStarted')}</Link>
               </>
             )}
           </div>
@@ -125,24 +129,24 @@ export function Nav() {
                 <>
                   <Link href="/account/orders" onClick={() => setDrawerOpen(false)}
                     style={{ color: 'var(--text-primary)', fontSize: 16, fontWeight: 600 }}>
-                    👤 My Account
+                    {t('nav.myAccount')}
                   </Link>
                   <button onClick={signOut} style={{
                     background: 'var(--bg-card)', border: '1px solid var(--border)',
                     color: 'var(--text-primary)', padding: '13px', borderRadius: 12,
                     cursor: 'pointer', fontSize: 15, fontWeight: 600,
-                  }}>Sign out</button>
+                  }}>{t('nav.signOut')}</button>
                 </>
               ) : (
                 <>
                   <Link href="/login" onClick={() => setDrawerOpen(false)} style={{
                     color: 'var(--text-primary)', fontSize: 16, fontWeight: 600,
                     textAlign: 'center', padding: '13px', border: '1px solid var(--border)', borderRadius: 12,
-                  }}>Sign in</Link>
+                  }}>{t('nav.signIn')}</Link>
                   <Link href="/signup" onClick={() => setDrawerOpen(false)} style={{
                     background: `linear-gradient(135deg,${PURPLE},${PINK})`, color: 'white',
                     padding: '13px', borderRadius: 12, fontSize: 15, fontWeight: 700, textAlign: 'center', display: 'block',
-                  }}>Get started</Link>
+                  }}>{t('nav.getStarted')}</Link>
                 </>
               )}
             </div>
