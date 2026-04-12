@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useCartStore } from '../../store/cart';
 import { motion, AnimatePresence } from 'framer-motion';
 import { analytics, type EcomItem } from '@/lib/analytics';
+import { calculateServiceFee, calculateStatiegeld } from '@/lib/service-fee';
 
 const STORAGE_KEY = 'enjoy-checkout-details';
 
@@ -50,11 +51,11 @@ export default function CheckoutClient() {
   }, []);
 
   const subtotal = total();
-  const TAX_RATE = 0.09;
-  const SERVICE_FEE_RATE = 0.025;
-  const taxAmount = subtotal * TAX_RATE;
-  const serviceFee = subtotal * SERVICE_FEE_RATE;
-  const grandTotal = subtotal + taxAmount + serviceFee + tip;
+  // Menu prices are tax-inclusive — no separate BTW line shown to the customer.
+  const serviceFee = calculateServiceFee(subtotal, currency || 'EUR');
+  const statiegeld = calculateStatiegeld(items as Array<{ depositAmount?: number | string | null; qty?: number }>);
+  const deliveryFee = 0; // Gratis for now
+  const grandTotal = subtotal + serviceFee + statiegeld + deliveryFee + tip;
 
   const formatPrice = (n: number) =>
     new Intl.NumberFormat(locale || 'nl-NL', { style: 'currency', currency: currency || 'EUR' }).format(n);
@@ -703,13 +704,13 @@ export default function CheckoutClient() {
               display: 'flex', flexDirection: 'column', gap: 9,
             }}>
               <PriceRow label="Subtotaal" value={formatPrice(subtotal)} />
-              <PriceRow label="BTW (9%)" value={formatPrice(taxAmount)} />
-              <PriceRow label="Administratiekosten (2,5%)" value={formatPrice(serviceFee)} />
               <PriceRow
                 label="Bezorgkosten"
                 value="Gratis"
                 valueStyle={{ color: '#4ade80', fontWeight: 700 }}
               />
+              <PriceRow label="Servicekosten" value={formatPrice(serviceFee)} />
+              {statiegeld > 0 && <PriceRow label="Statiegeld" value={formatPrice(statiegeld)} />}
               {tip > 0 && <PriceRow label="Tip bezorger" value={formatPrice(tip)} />}
             </div>
 
