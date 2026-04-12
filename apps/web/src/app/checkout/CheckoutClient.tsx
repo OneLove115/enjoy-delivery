@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useCartStore } from '../../store/cart';
 import { motion, AnimatePresence } from 'framer-motion';
 import { analytics, type EcomItem } from '@/lib/analytics';
-import { calculateServiceFee, calculateStatiegeld } from '@/lib/service-fee';
+import { calculateServiceFee, calculateStatiegeld, SERVICE_FEE_CAP, SERVICE_FEE_PERCENT } from '@/lib/service-fee';
 
 const STORAGE_KEY = 'enjoy-checkout-details';
 
@@ -56,6 +56,13 @@ export default function CheckoutClient() {
   const statiegeld = calculateStatiegeld(items as Array<{ depositAmount?: number | string | null; qty?: number }>);
   const deliveryFee = 0; // Gratis for now
   const grandTotal = subtotal + serviceFee + statiegeld + deliveryFee + tip;
+
+  // Dutch-formatted service fee disclosure label, e.g. "Servicekosten (2,5%, max €1,99)"
+  const serviceFeeCurrency = (currency || 'EUR').toUpperCase();
+  const serviceFeeCap = SERVICE_FEE_CAP[serviceFeeCurrency] ?? 2.0;
+  const serviceFeePercentLabel = String(SERVICE_FEE_PERCENT).replace('.', ',');
+  const serviceFeeCapLabel = serviceFeeCap.toFixed(2).replace('.', ',');
+  const serviceFeeLabel = `Servicekosten (${serviceFeePercentLabel}%, max €${serviceFeeCapLabel})`;
 
   const formatPrice = (n: number) =>
     new Intl.NumberFormat(locale || 'nl-NL', { style: 'currency', currency: currency || 'EUR' }).format(n);
@@ -119,6 +126,8 @@ export default function CheckoutClient() {
             quantity: i.qty,
             unitPrice: i.basePrice,
             price: (parseFloat(i.basePrice) + (i.modifiers || []).reduce((sum: number, m: any) => sum + (m.priceAdjustment || 0), 0)).toFixed(2),
+            // Display hint only — server re-verifies depositAmount from its own DB (authoritative).
+            depositAmount: i.depositAmount ?? 0,
             modifiers: (i.modifiers || []).map(m => ({
               groupId: m.groupId,
               groupName: m.groupName,
@@ -709,7 +718,7 @@ export default function CheckoutClient() {
                 value="Gratis"
                 valueStyle={{ color: '#4ade80', fontWeight: 700 }}
               />
-              <PriceRow label="Servicekosten" value={formatPrice(serviceFee)} />
+              <PriceRow label={serviceFeeLabel} value={formatPrice(serviceFee)} />
               {statiegeld > 0 && <PriceRow label="Statiegeld" value={formatPrice(statiegeld)} />}
               {tip > 0 && <PriceRow label="Tip bezorger" value={formatPrice(tip)} />}
             </div>

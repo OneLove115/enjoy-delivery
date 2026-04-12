@@ -17,6 +17,8 @@ type MenuItem = {
   id: string; name: string; description: string;
   basePrice: string; imageUrl: string | null; category: string;
   modifierGroups?: MenuModifierGroup[];
+  /** Statiegeld (EU beverage deposit) per unit in EUR, if set on the menu item. */
+  depositAmount?: number | string | null;
 };
 type MenuCategory = { id: string; name: string; items: MenuItem[] };
 type BusinessHours = {
@@ -317,7 +319,9 @@ export default function MenuPage() {
 
   const handleAdd = useCallback((item: MenuItem) => {
     if (!restaurant) return;
-    addItem(slug, restaurant.name, { id: item.id, name: item.name, basePrice: item.basePrice, imageUrl: item.imageUrl }, currency, locale);
+    const rawDeposit = typeof item.depositAmount === 'string' ? parseFloat(item.depositAmount) : item.depositAmount;
+    const depositAmount = Number.isFinite(rawDeposit as number) ? (rawDeposit as number) : 0;
+    addItem(slug, restaurant.name, { id: item.id, name: item.name, basePrice: item.basePrice, imageUrl: item.imageUrl, depositAmount }, currency, locale);
   }, [restaurant, slug, addItem]);
 
   const handleDec = useCallback((id: string) => {
@@ -659,11 +663,16 @@ export default function MenuPage() {
                           onAdd={() => handleAdd(item)}
                           onInc={() => handleAdd(item)}
                           onDec={() => handleDec(item.id)}
-                          onItemClick={() => setSelectedItem({
-                            id: item.id, name: item.name, description: item.description,
-                            basePrice: item.basePrice, imageUrl: item.imageUrl,
-                            modifierGroups: item.modifierGroups || [],
-                          })}
+                          onItemClick={() => {
+                            const rawDeposit = typeof item.depositAmount === 'string' ? parseFloat(item.depositAmount) : item.depositAmount;
+                            const depositAmount = Number.isFinite(rawDeposit as number) ? (rawDeposit as number) : 0;
+                            setSelectedItem({
+                              id: item.id, name: item.name, description: item.description,
+                              basePrice: item.basePrice, imageUrl: item.imageUrl,
+                              modifierGroups: item.modifierGroups || [],
+                              depositAmount,
+                            });
+                          }}
                           currency={currency} locale={locale}
                         />
                       </motion.div>
@@ -855,13 +864,15 @@ export default function MenuPage() {
         locale={locale}
         upsellItems={(() => {
           // Get drinks + desserts for upsell in item modal
-          const upsells: Array<{id: string; name: string; basePrice: string; imageUrl: string | null}> = [];
+          const upsells: Array<{id: string; name: string; basePrice: string; imageUrl: string | null; depositAmount?: number}> = [];
           const drinkCats = ['DRINKS', 'DRANKEN', 'DRANKJES', 'DESSERTS', 'NAGERECHTEN'];
           for (const cat of menu) {
             if (drinkCats.some(d => cat.name.toUpperCase().includes(d))) {
               for (const item of cat.items.slice(0, 4)) {
                 if (item.id !== selectedItem?.id && upsells.length < 5) {
-                  upsells.push({ id: item.id, name: item.name, basePrice: item.basePrice, imageUrl: item.imageUrl });
+                  const rawDeposit = typeof item.depositAmount === 'string' ? parseFloat(item.depositAmount) : item.depositAmount;
+                  const depositAmount = Number.isFinite(rawDeposit as number) ? (rawDeposit as number) : 0;
+                  upsells.push({ id: item.id, name: item.name, basePrice: item.basePrice, imageUrl: item.imageUrl, depositAmount });
                 }
               }
             }

@@ -16,6 +16,8 @@ export type CartItem = {
   imageUrl: string | null;
   qty: number;
   modifiers?: CartItemModifier[];
+  /** Statiegeld (EU beverage deposit) per unit, in the cart's currency. */
+  depositAmount?: number;
 };
 
 type CartStore = {

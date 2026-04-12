@@ -34,6 +34,8 @@ export interface MenuItemForModal {
   basePrice: string;
   imageUrl: string | null;
   modifierGroups: MenuModifierGroup[];
+  /** Statiegeld (EU beverage deposit) per unit in EUR. */
+  depositAmount?: number;
 }
 
 interface UpsellItem {
@@ -41,6 +43,7 @@ interface UpsellItem {
   name: string;
   basePrice: string;
   imageUrl: string | null;
+  depositAmount?: number;
 }
 
 interface MenuItemModalProps {
@@ -185,6 +188,7 @@ export function MenuItemModal({ item, onClose, restaurantSlug, restaurantName, c
         basePrice: item.basePrice,
         imageUrl: item.imageUrl,
         modifiers,
+        depositAmount: item.depositAmount ?? 0,
       }, currency, locale);
     }
 
@@ -205,6 +209,7 @@ export function MenuItemModal({ item, onClose, restaurantSlug, restaurantName, c
           name: upsell.name,
           basePrice: upsell.basePrice,
           imageUrl: upsell.imageUrl,
+          depositAmount: upsell.depositAmount ?? 0,
         }, currency, locale);
         analytics.addToCart({
           item_id: upsell.id,
