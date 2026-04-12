@@ -123,14 +123,28 @@ function OrderSuccessContent() {
     return () => clearTimeout(t);
   }, []);
 
-  // Confirm the order payment on the backend (update status from pending_payment → confirmed)
+  // Confirm the order payment on the backend, then fire GA4 + Meta Pixel purchase event
   useEffect(() => {
     if (!orderId) return;
     fetch('/api/orders/confirm', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ orderId, sessionId }),
-    }).catch(() => {}); // non-blocking
+    })
+      .then(r => r.ok ? r.json() : null)
+      .then(data => {
+        if (!data || !data.confirmed) return;
+        // Fire purchase event only after backend confirms — prevents fake purchase events from reloads
+        import('@/lib/analytics').then(({ analytics }) => {
+          analytics.purchase(
+            data.orderNumber || orderId,
+            data.items || [],
+            data.total || 0,
+            data.currency || 'EUR',
+          );
+        }).catch(() => {});
+      })
+      .catch(() => {});
   }, [orderId, sessionId]);
 
   return (

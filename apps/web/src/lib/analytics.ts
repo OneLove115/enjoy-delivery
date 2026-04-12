@@ -30,36 +30,80 @@ export function pushDataLayer(data: Record<string, unknown>) {
 
 // ─── Standard Events ───
 
-export const analytics = {
-  // Funnel
-  signupStarted: (method: string) =>
-    trackEvent('signup_started', { method }),
-  signupCompleted: (method: string, userId?: string) =>
-    trackEvent('signup_completed', { method, ...(userId ? { user_id: userId } : {}) }),
+/**
+ * GA4 e-commerce item shape. Also compatible with Meta Pixel content_ids mapping.
+ */
+export interface EcomItem {
+  item_id: string;
+  item_name: string;
+  price: number;
+  quantity?: number;
+  item_category?: string;
+  affiliation?: string; // restaurant name
+}
 
-  // Ordering
+/** Fire both GA4 event and Meta Pixel standard event for e-commerce actions */
+function trackEcom(
+  gaEvent: string,
+  metaEvent: string,
+  params: { value: number; currency: string; items: EcomItem[]; transaction_id?: string },
+) {
+  const w = typeof window !== 'undefined'
+    ? (window as unknown as { gtag?: (...a: unknown[]) => void; fbq?: (...a: unknown[]) => void })
+    : null;
+  if (!w) return;
+
+  // GA4
+  w.gtag?.('event', gaEvent, params);
+
+  // Meta Pixel
+  const metaParams = {
+    currency: params.currency,
+    value: params.value,
+    content_type: 'product',
+    content_ids: params.items.map(i => i.item_id),
+    contents: params.items.map(i => ({ id: i.item_id, quantity: i.quantity ?? 1 })),
+    num_items: params.items.reduce((s, i) => s + (i.quantity ?? 1), 0),
+  };
+  w.fbq?.('track', metaEvent, metaParams);
+}
+
+export const analytics = {
+  // Auth
+  signupStarted: (method: string) => trackEvent('signup_started', { method }),
+  signupCompleted: (method: string, userId?: string) =>
+    trackEvent('sign_up', { method, ...(userId ? { user_id: userId } : {}) }),
+
+  // Discovery
   restaurantViewed: (slug: string, name: string) =>
     trackEvent('restaurant_viewed', { restaurant_slug: slug, restaurant_name: name }),
-  menuViewed: (slug: string) =>
-    trackEvent('menu_viewed', { restaurant_slug: slug }),
-  cartItemAdded: (itemName: string, price: number) =>
-    trackEvent('cart_item_added', { item_name: itemName, value: price, currency: 'EUR' }),
-  orderStarted: (restaurantSlug: string, value: number) =>
-    trackEvent('order_started', { restaurant_slug: restaurantSlug, value, currency: 'EUR' }),
-  orderCompleted: (orderId: string, value: number) =>
-    trackEvent('order_completed', { order_id: orderId, value, currency: 'EUR' }),
-
-  // Engagement
+  menuViewed: (slug: string) => trackEvent('menu_viewed', { restaurant_slug: slug }),
   cityViewed: (citySlug: string, country: string) =>
     trackEvent('city_viewed', { city_slug: citySlug, country }),
-  cuisineFiltered: (cuisine: string) =>
-    trackEvent('cuisine_filtered', { cuisine }),
-  joyaChatOpened: () =>
-    trackEvent('joya_chat_opened'),
+  cuisineFiltered: (cuisine: string) => trackEvent('cuisine_filtered', { cuisine }),
+
+  // Standard GA4 e-commerce funnel — fires GA4 + Meta standard events
+  viewItem: (item: EcomItem, currency = 'EUR') =>
+    trackEcom('view_item', 'ViewContent', { value: item.price, currency, items: [item] }),
+
+  addToCart: (item: EcomItem, currency = 'EUR') =>
+    trackEcom('add_to_cart', 'AddToCart', {
+      value: item.price * (item.quantity ?? 1),
+      currency,
+      items: [item],
+    }),
+
+  beginCheckout: (items: EcomItem[], value: number, currency = 'EUR') =>
+    trackEcom('begin_checkout', 'InitiateCheckout', { value, currency, items }),
+
+  purchase: (transactionId: string, items: EcomItem[], value: number, currency = 'EUR') =>
+    trackEcom('purchase', 'Purchase', { transaction_id: transactionId, value, currency, items }),
+
+  // Engagement
+  joyaChatOpened: () => trackEvent('joya_chat_opened'),
   contactFormSubmitted: (topic: string) =>
     trackEvent('form_submitted', { form_name: 'contact', form_topic: topic }),
-  partnerFormSubmitted: () =>
-    trackEvent('form_submitted', { form_name: 'partner' }),
+  partnerFormSubmitted: () => trackEvent('form_submitted', { form_name: 'partner' }),
   riderFormSubmitted: (city: string) =>
     trackEvent('form_submitted', { form_name: 'rider', city }),
   ctaClicked: (ctaName: string, location: string) =>

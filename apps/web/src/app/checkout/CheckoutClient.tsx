@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useCartStore } from '../../store/cart';
 import { motion, AnimatePresence } from 'framer-motion';
+import { analytics, type EcomItem } from '@/lib/analytics';
 
 const STORAGE_KEY = 'enjoy-checkout-details';
 
@@ -92,6 +93,20 @@ export default function CheckoutClient() {
     if (err) { setError(err); return; }
     setError('');
     setSubmitting(true);
+
+    // GA4 + Meta Pixel: begin_checkout / InitiateCheckout fires right before we post to the server
+    const ecomItems: EcomItem[] = items.map(i => {
+      const modTotal = (i.modifiers || []).reduce((sum: number, m: any) => sum + (m.priceAdjustment || 0), 0);
+      return {
+        item_id: i.id,
+        item_name: i.name,
+        price: parseFloat(i.basePrice) + modTotal,
+        quantity: i.qty,
+        affiliation: restaurantName,
+      };
+    });
+    analytics.beginCheckout(ecomItems, grandTotal, currency || 'EUR');
+
     try {
       const res = await fetch('/api/consumer/checkout', {
         method: 'POST',

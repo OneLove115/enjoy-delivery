@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, Minus, Plus, Check } from 'lucide-react';
 import { useCartStore } from '../../store/cart';
 import type { CartItemModifier } from '../../store/cart';
+import { analytics } from '@/lib/analytics';
 
 /* ─── Types (matching Veloci public menu API) ─── */
 export interface MenuModifier {
@@ -173,6 +174,10 @@ export function MenuItemModal({ item, onClose, restaurantSlug, restaurantName, c
       }
     }
 
+    const basePriceNum = parsePrice(item.basePrice);
+    const modifierTotal = modifiers.reduce((sum, m) => sum + m.priceAdjustment, 0);
+    const itemUnitPrice = basePriceNum + modifierTotal;
+
     for (let i = 0; i < quantity; i++) {
       addItem(restaurantSlug, restaurantName, {
         id: item.id,
@@ -182,6 +187,16 @@ export function MenuItemModal({ item, onClose, restaurantSlug, restaurantName, c
         modifiers,
       }, currency, locale);
     }
+
+    // GA4 + Meta Pixel: standard e-commerce add_to_cart event
+    analytics.addToCart({
+      item_id: item.id,
+      item_name: item.name,
+      price: itemUnitPrice,
+      quantity,
+      affiliation: restaurantName,
+    }, currency || 'EUR');
+
     // Add selected upsell items
     for (const upsell of upsellItems) {
       if (selectedUpsells.has(upsell.id)) {
@@ -191,6 +206,13 @@ export function MenuItemModal({ item, onClose, restaurantSlug, restaurantName, c
           basePrice: upsell.basePrice,
           imageUrl: upsell.imageUrl,
         }, currency, locale);
+        analytics.addToCart({
+          item_id: upsell.id,
+          item_name: upsell.name,
+          price: parsePrice(upsell.basePrice),
+          quantity: 1,
+          affiliation: restaurantName,
+        }, currency || 'EUR');
       }
     }
     onClose();
