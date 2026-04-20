@@ -18,7 +18,15 @@ export type CartItem = {
   modifiers?: CartItemModifier[];
   /** Statiegeld (EU beverage deposit) per unit, in the cart's currency. */
   depositAmount?: number;
+  /** Free-text per-item note ("voeg een opmerking toe"). */
+  note?: string;
 };
+
+export type OrderType = 'delivery' | 'pickup';
+
+export type DeliveryTime =
+  | { kind: 'asap' }
+  | { kind: 'scheduled'; isoTime: string };
 
 type CartStore = {
   restaurantSlug: string | null;
@@ -26,9 +34,20 @@ type CartStore = {
   currency: string;
   locale: string;
   items: CartItem[];
+  orderType: OrderType;
+  deliveryTime: DeliveryTime;
+  tip: number;
+  voucherCode: string | null;
+  notes: string;
   addItem: (restaurantSlug: string, restaurantName: string, item: Omit<CartItem, 'qty'>, currency?: string, locale?: string) => void;
   removeItem: (id: string) => void;
   updateQty: (id: string, qty: number) => void;
+  updateNote: (id: string, note: string) => void;
+  setOrderType: (t: OrderType) => void;
+  setDeliveryTime: (t: DeliveryTime) => void;
+  setTip: (n: number) => void;
+  setVoucherCode: (c: string | null) => void;
+  setNotes: (s: string) => void;
   clearCart: () => void;
   total: () => number;
   itemCount: () => number;
@@ -57,6 +76,19 @@ export const useCartStore = create<CartStore>()(
       currency: 'EUR',
       locale: 'nl-NL',
       items: [],
+      orderType: 'delivery' as OrderType,
+      deliveryTime: { kind: 'asap' } as DeliveryTime,
+      tip: 0,
+      voucherCode: null,
+      notes: '',
+
+      updateNote: (id, note) =>
+        set(state => ({ items: state.items.map(i => i.id === id ? { ...i, note } : i) })),
+      setOrderType: (orderType) => set({ orderType }),
+      setDeliveryTime: (deliveryTime) => set({ deliveryTime }),
+      setTip: (tip) => set({ tip: Math.max(0, tip) }),
+      setVoucherCode: (voucherCode) => set({ voucherCode }),
+      setNotes: (notes) => set({ notes }),
 
       addItem: (restaurantSlug, restaurantName, item, currency, locale) => {
         const { restaurantSlug: current } = get();
@@ -96,7 +128,11 @@ export const useCartStore = create<CartStore>()(
         })),
 
       clearCart: () =>
-        set({ restaurantSlug: null, restaurantName: '', items: [] }),
+        set({
+          restaurantSlug: null, restaurantName: '', items: [],
+          tip: 0, voucherCode: null, notes: '',
+          orderType: 'delivery', deliveryTime: { kind: 'asap' },
+        }),
 
       total: () =>
         get().items.reduce((sum, i) => sum + calcItemPrice(i), 0),
