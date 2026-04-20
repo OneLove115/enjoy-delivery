@@ -32,6 +32,7 @@ type Restaurant = {
   contactEmail: string | null;
   deliveryTimeMin: number; deliveryTimeMax: number;
   businessHours: BusinessHours | null; timezone: string; currency: string; locale: string;
+  acceptOrders?: boolean;
 };
 
 /* ─── Helpers ─── */
@@ -319,6 +320,10 @@ export default function MenuPage() {
 
   const handleAdd = useCallback((item: MenuItem) => {
     if (!restaurant) return;
+    if (restaurant.acceptOrders === false) {
+      alert(`${restaurant.name} is op dit moment gesloten en neemt geen bestellingen aan.`);
+      return;
+    }
     const rawDeposit = typeof item.depositAmount === 'string' ? parseFloat(item.depositAmount) : item.depositAmount;
     const depositAmount = Number.isFinite(rawDeposit as number) ? (rawDeposit as number) : 0;
     addItem(slug, restaurant.name, { id: item.id, name: item.name, basePrice: item.basePrice, imageUrl: item.imageUrl, depositAmount }, currency, locale);
@@ -428,6 +433,20 @@ export default function MenuPage() {
           )}
         </button>
       </nav>
+
+      {/* ─── Closed banner ─── */}
+      {restaurant.acceptOrders === false && (
+        <div style={{
+          background: 'linear-gradient(135deg, #dc2626, #991b1b)',
+          color: 'white',
+          padding: '12px 20px',
+          textAlign: 'center',
+          fontSize: 14,
+          fontWeight: 700,
+        }}>
+          🔴 Dit restaurant is op dit moment gesloten — bestellingen zijn tijdelijk niet mogelijk
+        </div>
+      )}
 
       {/* ─── Hero ─── */}
       <div>
