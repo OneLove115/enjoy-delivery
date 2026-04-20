@@ -20,11 +20,11 @@ type Order = {
 };
 
 const STAGES = [
-  { key: 'confirmed', label: 'Order confirmed', icon: '✅' },
-  { key: 'preparing', label: 'Being prepared', icon: '👨‍🍳' },
-  { key: 'ready', label: 'Ready for pickup', icon: '📦' },
-  { key: 'on_the_way', label: 'On the way', icon: '🚲' },
-  { key: 'delivered', label: 'Delivered', icon: '🎉' },
+  { key: 'confirmed',  label: 'Bedankt voor je bestelling', sub: 'We hebben je bestelling ontvangen en gaan ermee aan de slag.', icon: '✅' },
+  { key: 'preparing',  label: 'Bereiden en bezorgen',       sub: 'Je bestelling wordt bereid in de keuken.', icon: '👨‍🍳' },
+  { key: 'ready',      label: 'Klaar voor afhaal',          sub: 'Je bestelling staat klaar.', icon: '📦' },
+  { key: 'on_the_way', label: 'Onderweg',                   sub: 'Je bezorger is onderweg.', icon: '🚲' },
+  { key: 'delivered',  label: 'Bezorgd',                    sub: 'Eet smakelijk!', icon: '🎉' },
 ];
 
 /* ── Shimmer keyframes (injected once) ── */
@@ -310,7 +310,7 @@ export default function OrderTrackingPage() {
     // Load order directly — no auth required for order tracking (guest checkout)
     load().finally(() => setLoading(false));
 
-    const interval = setInterval(load, 30000);
+    const interval = setInterval(load, 20000);
     return () => clearInterval(interval);
   }, [id, router]);
 
