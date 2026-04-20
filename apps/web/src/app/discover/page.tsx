@@ -552,7 +552,9 @@ function DiscoverContent() {
         const real: RestaurantRow[] = (data.restaurants || []).map((t: any) => ({
           name: t.name, slug: t.slug || '', cuisine: t.tagline || 'Restaurant',
           rating: 0, time: '30–45', img: t.logo || '',
-          delivery: 'Gratis', min: 0, open: true, category: 'restaurant',
+          delivery: 'Gratis', min: 0,
+          open: t.acceptOrders !== false, // respect Veloci close toggle
+          category: 'restaurant',
           cuisineCategories: t.cuisineCategories || [],
         }));
         if (real.length > 0) setRestaurants(real);
