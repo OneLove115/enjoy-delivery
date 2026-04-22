@@ -6,6 +6,7 @@ import { PWAInstall } from './components/PWAInstall';
 import { GoogleAnalytics } from './components/GoogleAnalytics';
 import { MetaPixel } from './components/MetaPixel';
 import { CookieConsent } from './components/CookieConsent';
+import { ServiceWorkerRegister } from './components/ServiceWorkerRegister';
 
 export const metadata: Metadata = {
   title: 'EnJoy — Elite Gourmet Delivery | Order Signature Local Favorites',
@@ -97,20 +98,28 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         `}} />
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
         <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+        {/* PWA manifest — .webmanifest is the spec-compliant extension */}
+        <link rel="manifest" href="/manifest.webmanifest" />
+        {/* Keep legacy manifest.json reference for older crawlers */}
         <link rel="manifest" href="/manifest.json" />
         <meta name="msvalidate.01" content="4F0157ECF36BED1E2A38D246D51BAED2" />
         <meta name="theme-color" content="#5A31F4" />
+        {/* Viewport: viewport-fit=cover lets the app extend under iOS safe areas */}
+        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="apple-mobile-web-app-title" content="EnJoy" />
         <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png" />
+        <link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png" />
+        <link rel="apple-touch-icon" sizes="144x144" href="/icons/icon-144.png" />
         <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
         <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png" />
         <link rel="icon" type="image/png" sizes="512x512" href="/icons/icon-512.png" />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       </head>
       <body style={{ fontFamily: 'Outfit, sans-serif' }}>
+        <ServiceWorkerRegister />
         <GoogleAnalytics />
         <MetaPixel />
         <ThemeProvider>

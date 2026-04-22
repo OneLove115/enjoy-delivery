@@ -13,12 +13,6 @@ function getSections() {
       { label: t('footer.promotions'),          href: '/promotions' },
       { label: t('footer.cities'),              href: '/cities' },
     ],
-    [t('footer.partners')]: [
-      { label: t('footer.addRestaurant'), href: '/partners' },
-      { label: t('footer.rideWithUs'),    href: '/riders' },
-      { label: t('footer.businessOrders'),href: '/business' },
-      { label: t('footer.referralProgram'), href: 'https://www.veloci.online/referral' },
-    ],
     [t('footer.company')]: [
       { label: t('footer.about'),   href: '/about' },
       { label: t('footer.careers'), href: '/careers' },

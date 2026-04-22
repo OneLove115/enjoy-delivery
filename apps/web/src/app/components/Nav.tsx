@@ -11,9 +11,6 @@ function getNavLinks() {
   return [
     { href: '/discover',     label: t('nav.order') },
     { href: '/how-it-works', label: t('nav.howItWorks') },
-    { href: '/riders',       label: t('nav.rideWithUs') },
-    { href: '/partners',     label: t('nav.partner') },
-    { href: '/business',     label: t('nav.business') },
   ];
 }
 

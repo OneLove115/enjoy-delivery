@@ -422,11 +422,6 @@ function AccountDrawer({ open, onClose }: { open: boolean; onClose: () => void }
     { icon: 'ℹ', label: 'Hulp nodig?',     href: '/help'               },
     { icon: '🎁', label: 'Cadeaukaarten',   href: '/account/gift-card'  },
   ];
-  const footerItems = [
-    { icon: '🛵', label: 'Word bezorger',          href: '/riders'   },
-    { icon: '🏢', label: 'EnJoy for business',     href: '/business' },
-    { icon: '🏪', label: 'Word partner',            href: '/partners' },
-  ];
 
   return (
     <AnimatePresence>
@@ -485,19 +480,6 @@ function AccountDrawer({ open, onClose }: { open: boolean; onClose: () => void }
                   </Link>
                 ))}
 
-                <div style={{ height: 8, background: 'var(--b8)' }} />
-
-                {/* Footer links */}
-                {footerItems.map((item, i) => (
-                  <Link key={i} href={item.href} onClick={onClose} style={{
-                    display: 'flex', alignItems: 'center', gap: 14, padding: '14px 24px',
-                    textDecoration: 'none', color: 'var(--text-primary)', borderBottom: '1px solid var(--border)',
-                    fontSize: 15, fontWeight: 600,
-                  }}>
-                    <span style={{ fontSize: 20, width: 28, textAlign: 'center' }}>{item.icon}</span>
-                    {item.label}
-                  </Link>
-                ))}
               </div>
             </div>
           </motion.div>

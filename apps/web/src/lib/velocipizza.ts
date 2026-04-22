@@ -20,8 +20,9 @@ export async function vpFetch<T>(path: string, opts: FetchOptions = {}): Promise
   });
 
   if (!res.ok) {
-    const err = await res.json().catch(() => ({ message: res.statusText }));
-    throw Object.assign(new Error(err.message ?? 'VelociPizza API error'), { status: res.status });
+    const err = await res.json().catch(() => ({}));
+    const msg = err?.error ?? err?.message ?? res.statusText ?? 'VelociPizza API error';
+    throw Object.assign(new Error(msg), { status: res.status });
   }
   return res.json() as Promise<T>;
 }

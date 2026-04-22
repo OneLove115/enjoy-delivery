@@ -2,17 +2,13 @@
   "name": "enjoy-monorepo",
   "version": "1.0.0",
   "private": true,
-  "description": "EnJoy Food Delivery Platform",
+  "description": "EnJoy Food Delivery Platform — B2C consumer app",
   "workspaces": [
-    "apps/*",
-    "services/*",
-    "packages/*"
+    "apps/web"
   ],
   "scripts": {
-    "dev:api": "npm run dev --workspace=services/api",
     "dev:web": "npm run dev --workspace=apps/web",
-    "dev:mobile": "npm run start --workspace=apps/mobile",
-    "build": "npm run build --workspaces --if-present",
+    "build": "npm run build --workspace=apps/web",
     "test": "npm run test --workspaces --if-present"
   },
   "devDependencies": {
