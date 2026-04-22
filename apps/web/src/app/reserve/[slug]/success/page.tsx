@@ -66,6 +66,46 @@ function Checkmark() {
   );
 }
 
+/** Build an ICS data-URL for "Add to Calendar" — no external deps */
+function buildIcsDataUrl(opts: {
+  title: string;
+  startIso: string; // e.g. "2025-06-15T19:30:00"
+  durationMinutes: number;
+  description: string;
+  uid: string;
+}): string {
+  const pad = (n: number) => String(n).padStart(2, '0');
+  const toIcsDate = (iso: string) => {
+    const d = new Date(iso);
+    return (
+      `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}` +
+      `T${pad(d.getHours())}${pad(d.getMinutes())}00`
+    );
+  };
+  const dtStart = toIcsDate(opts.startIso);
+  const end = new Date(opts.startIso);
+  end.setMinutes(end.getMinutes() + opts.durationMinutes);
+  const dtEnd = toIcsDate(end.toISOString());
+  const stamp = toIcsDate(new Date().toISOString());
+
+  const ics = [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//EnJoy//Reservation//NL',
+    'BEGIN:VEVENT',
+    `UID:${opts.uid}@enjoy.veloci.online`,
+    `DTSTAMP:${stamp}`,
+    `DTSTART:${dtStart}`,
+    `DTEND:${dtEnd}`,
+    `SUMMARY:${opts.title}`,
+    `DESCRIPTION:${opts.description}`,
+    'END:VEVENT',
+    'END:VCALENDAR',
+  ].join('\r\n');
+
+  return `data:text/calendar;charset=utf-8,${encodeURIComponent(ics)}`;
+}
+
 type SlugParams = { slug: string };
 
 function SuccessContent({ slug }: SlugParams) {
@@ -76,6 +116,16 @@ function SuccessContent({ slug }: SlugParams) {
   const party         = searchParams.get('party') || '2';
   const depositPaid   = parseFloat(searchParams.get('deposit') || '0');
   const confettiRef   = useRef<HTMLDivElement>(null);
+
+  const icsHref = date && time
+    ? buildIcsDataUrl({
+        title: `Reservering via EnJoy`,
+        startIso: `${date}T${time}:00`,
+        durationMinutes: 90,
+        description: `${party} personen. Ref: ${id ? id.slice(0, 8).toUpperCase() : 'n/a'}`,
+        uid: id || `${date}-${time}`,
+      })
+    : null;
 
   // Simple confetti burst on mount using CSS
   useEffect(() => {
@@ -230,6 +280,21 @@ function SuccessContent({ slug }: SlugParams) {
           >
             Terug naar het menu
           </Link>
+          {icsHref && (
+            <a
+              href={icsHref}
+              download={`reservering-${id ? id.slice(0, 8).toLowerCase() : 'enjoy'}.ics`}
+              style={{
+                display: 'block', padding: '15px',
+                background: 'rgba(255,255,255,0.06)',
+                border: '1px solid rgba(255,255,255,0.10)',
+                borderRadius: 14, color: 'rgba(255,255,255,0.75)', fontSize: 15, fontWeight: 700,
+                textDecoration: 'none', textAlign: 'center',
+              }}
+            >
+              Toevoegen aan agenda
+            </a>
+          )}
           <Link
             href="/discover"
             style={{

@@ -2,6 +2,7 @@
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { Suspense, useEffect, useState, useMemo } from 'react';
+import { useOrderStream } from '@/hooks/useOrderStream';
 import { motion } from 'framer-motion';
 
 const PURPLE = '#5A31F4';
@@ -110,6 +111,16 @@ function AnimatedCheck() {
   );
 }
 
+const LIVE_STATUS_LABELS: Record<string, string> = {
+  pending_payment:  'Betaling in afwachting',
+  confirmed:        'Bevestigd',
+  preparing:        'In de keuken',
+  ready_for_pickup: 'Klaar voor afhaal',
+  out_for_delivery: 'Onderweg',
+  delivered:        'Geleverd',
+  cancelled:        'Geannuleerd',
+};
+
 /* ---------- Main content ---------- */
 function OrderSuccessContent() {
   const params = useSearchParams();
@@ -117,6 +128,10 @@ function OrderSuccessContent() {
   const orderId = params.get('orderId') || params.get('order_id');
   const sessionId = params.get('session_id');
   const [showConfetti, setShowConfetti] = useState(true);
+
+  // Live order status via SSE
+  const stream = useOrderStream(orderId ?? null);
+  const liveLabel = stream.status ? (LIVE_STATUS_LABELS[stream.status] ?? stream.status) : null;
 
   useEffect(() => {
     const t = setTimeout(() => setShowConfetti(false), 4500);
@@ -183,14 +198,39 @@ function OrderSuccessContent() {
           </motion.p>
         )}
 
-        <motion.p
+        <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.65, duration: 0.5 }}
-          style={{ fontSize: 16, color: 'rgba(255,255,255,0.55)', lineHeight: 1.6, marginBottom: 32 }}
+          style={{ marginBottom: 32 }}
         >
-          Je bestelling is ontvangen en wordt bereid. Je ontvangt een bevestiging per e-mail.
-        </motion.p>
+          <p style={{ fontSize: 16, color: 'rgba(255,255,255,0.55)', lineHeight: 1.6, marginBottom: liveLabel ? 12 : 0 }}>
+            Je bestelling is ontvangen en wordt bereid. Je ontvangt een bevestiging per e-mail.
+          </p>
+          {liveLabel && (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+              <span style={{
+                display: 'inline-block',
+                padding: '4px 14px',
+                borderRadius: 99,
+                background: stream.status === 'cancelled'
+                  ? 'rgba(239,68,68,0.15)'
+                  : stream.status === 'delivered'
+                    ? 'rgba(34,197,94,0.15)'
+                    : 'rgba(90,49,244,0.15)',
+                color: stream.status === 'cancelled' ? '#EF4444'
+                  : stream.status === 'delivered' ? '#22C55E' : PURPLE,
+                fontSize: 13,
+                fontWeight: 800,
+              }}>
+                {liveLabel}
+              </span>
+              {stream.connected && (
+                <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', fontWeight: 600 }}>Live</span>
+              )}
+            </div>
+          )}
+        </motion.div>
 
         <motion.div
           initial={{ opacity: 0, y: 12 }}

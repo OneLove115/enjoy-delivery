@@ -160,7 +160,7 @@ export default function ReservePage() {
     setError(null);
     setSubmitting(true);
     try {
-      const res = await fetch(`${VP_API}/api/reservations`, {
+      const res = await fetch('/api/consumer/reservations', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

@@ -2,8 +2,9 @@
 import { useEffect, useState, useRef } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { Nav } from '../../components/Nav';
+import { useOrderStream, type OrderStatus } from '@/hooks/useOrderStream';
 
 const PURPLE = '#5A31F4';
 const PINK = '#FF0080';
@@ -264,13 +265,85 @@ const itemVariants = {
   },
 };
 
+/* ── Dutch status labels aligned with Veloci's OrderStatus enum ── */
+const STATUS_LABELS: Record<string, string> = {
+  pending_payment:  'Betaling in afwachting',
+  confirmed:        'Bevestigd',
+  preparing:        'In de keuken',
+  ready_for_pickup: 'Klaar voor afhaal',
+  out_for_delivery: 'Onderweg',
+  delivered:        'Geleverd',
+  cancelled:        'Geannuleerd',
+};
+
+/* Map Veloci's canonical OrderStatus to the visual STAGES array */
+const STATUS_TO_STAGE: Record<string, string> = {
+  pending_payment:  'confirmed',   // show as first step (pre-confirm)
+  confirmed:        'confirmed',
+  preparing:        'preparing',
+  ready_for_pickup: 'ready',
+  out_for_delivery: 'on_the_way',
+  delivered:        'delivered',
+  cancelled:        'delivered',   // render at end but show cancelled banner
+};
+
+const CANCEL_WINDOW_SECS = 120;
+
+function canCancelOrder(streamStatus: string | null, orderCreatedAt?: string): boolean {
+  if (!streamStatus || !['pending_payment', 'confirmed'].includes(streamStatus)) return false;
+  if (!orderCreatedAt) return true;
+  const age = (Date.now() - new Date(orderCreatedAt).getTime()) / 1000;
+  return age < CANCEL_WINDOW_SECS;
+}
+
+/* ── Animated status badge (cross-fades on change) ── */
+function StatusBadge({ status, reduced }: { status: string | null; reduced: boolean }) {
+  const label = status ? (STATUS_LABELS[status] ?? status) : 'Laden...';
+  return (
+    <AnimatePresence mode="wait">
+      <motion.span
+        key={status ?? 'loading'}
+        initial={reduced ? false : { opacity: 0, y: -6 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={reduced ? undefined : { opacity: 0, y: 6 }}
+        transition={{ duration: 0.25 }}
+        style={{
+          display: 'inline-block',
+          padding: '4px 12px',
+          borderRadius: 99,
+          background: status === 'cancelled'
+            ? 'rgba(239,68,68,0.15)'
+            : status === 'delivered'
+              ? 'rgba(34,197,94,0.15)'
+              : 'rgba(90,49,244,0.15)',
+          color: status === 'cancelled' ? '#EF4444'
+            : status === 'delivered' ? '#22C55E' : PURPLE,
+          fontSize: 13,
+          fontWeight: 800,
+          letterSpacing: '0.03em',
+        }}
+      >
+        {label}
+      </motion.span>
+    </AnimatePresence>
+  );
+}
+
 export default function OrderTrackingPage() {
   const router = useRouter();
   const params = useParams();
   const id = params.id as string;
+  const reduced = useReducedMotion() ?? false;
+
+  /* ── Base order data (one-shot fetch) ── */
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [fetchError, setFetchError] = useState('');
+  const [cancelling, setCancelling] = useState(false);
+  const [cancelError, setCancelError] = useState('');
+
+  /* ── Live status from SSE ── */
+  const stream = useOrderStream(id ?? null);
   const prevStatusRef = useRef<string>('');
 
   useEffect(() => {
@@ -279,42 +352,55 @@ export default function OrderTrackingPage() {
     }
   }, []);
 
+  /* Initial order load */
   useEffect(() => {
-    const load = () =>
-      fetch(`/api/orders/${id}`)
-        .then(r => { if (!r.ok) { setError('Order not found'); return null; } return r.json(); })
-        .then(d => {
-          if (!d) return;
-          // Detect status change
-          if (prevStatusRef.current && prevStatusRef.current !== d.status && 'Notification' in window && Notification.permission === 'granted') {
-            const msgs: Record<string, string> = {
-              confirmed: '✅ Je bestelling is bevestigd!',
-              preparing: '👨‍🍳 Je bestelling wordt bereid...',
-              ready:     '📦 Je bestelling is klaar voor afhaal!',
-              on_the_way:'🚲 Je bezorger is onderweg!',
-              delivered: '🎉 Je bestelling is bezorgd. Eet smakelijk!',
-              cancelled: '❌ Je bestelling is geannuleerd.',
-            };
-            const msg = msgs[d.status] || `Status bijgewerkt: ${d.status}`;
-            new Notification('EnJoy Bestelling', {
-              body: msg,
-              icon: '/icons/icon-192.png',
-              tag: `order-${d.id}`,
-            });
-          }
-          prevStatusRef.current = d.status;
-          setOrder(d);
-        })
-        .catch(() => setError('Failed to load order'));
+    if (!id) return;
+    fetch(`/api/consumer/orders/${id}`)
+      .then(r => { if (!r.ok) { setFetchError('Bestelling niet gevonden'); return null; } return r.json(); })
+      .then(d => { if (d) setOrder(d as Order); })
+      .catch(() => setFetchError('Laden mislukt'))
+      .finally(() => setLoading(false));
+  }, [id]);
 
-    // Load order directly — no auth required for order tracking (guest checkout)
-    load().finally(() => setLoading(false));
+  /* Browser push notification on SSE status change */
+  useEffect(() => {
+    const newStatus = stream.status;
+    if (!newStatus || newStatus === prevStatusRef.current) return;
+    if ('Notification' in window && Notification.permission === 'granted') {
+      const msg = STATUS_LABELS[newStatus] ?? `Status: ${newStatus}`;
+      new Notification('EnJoy Bestelling', {
+        body: msg,
+        icon: '/icons/icon-192.png',
+        tag: `order-${id}`,
+      });
+    }
+    prevStatusRef.current = newStatus;
+  }, [stream.status, id]);
 
-    const interval = setInterval(load, 20000);
-    return () => clearInterval(interval);
-  }, [id, router]);
+  /* Merge live SSE status into the order object for progress tracker */
+  const liveStatus = stream.status ?? (order?.status as OrderStatus | undefined) ?? null;
+  const mappedStageKey = liveStatus ? (STATUS_TO_STAGE[liveStatus] ?? liveStatus) : null;
+  const activeStage = mappedStageKey ? STAGES.findIndex(s => s.key === mappedStageKey) : -1;
 
-  const activeStage = order ? STAGES.findIndex(s => s.key === order.status) : -1;
+  const handleCancel = async () => {
+    if (!id) return;
+    setCancelling(true);
+    setCancelError('');
+    try {
+      const res = await fetch(`/api/consumer/orders/${id}`, { method: 'DELETE' });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({})) as { error?: string };
+        throw new Error(body.error ?? 'Annuleren mislukt');
+      }
+      // Stream will push 'cancelled' status shortly; router stays
+    } catch (err: unknown) {
+      setCancelError(err instanceof Error ? err.message : 'Annuleren mislukt');
+    } finally {
+      setCancelling(false);
+    }
+  };
+
+  const error = fetchError;
 
   return (
     <div style={{ background: 'var(--bg-page)', minHeight: '100vh', color: 'var(--text-primary)', fontFamily: 'Outfit, sans-serif' }}>
@@ -341,7 +427,7 @@ export default function OrderTrackingPage() {
               style={{ textAlign: 'center', padding: '80px 0' }}
             >
               <p style={{ color: '#EF4444', marginBottom: 24 }}>{error}</p>
-              <Link href="/account/orders" style={{ color: PURPLE, fontWeight: 700, textDecoration: 'none' }}>← Back to orders</Link>
+              <Link href="/account/orders" style={{ color: PURPLE, fontWeight: 700, textDecoration: 'none' }}>← Mijn bestellingen</Link>
             </motion.div>
           ) : order ? (
             <motion.div
@@ -351,21 +437,42 @@ export default function OrderTrackingPage() {
               animate="visible"
             >
               <motion.div variants={itemVariants}>
-                <Link href="/account/orders" style={{ color: 'var(--text-muted)', fontSize: 14, textDecoration: 'none', display: 'block', marginBottom: 28 }}>← All orders</Link>
+                <Link href="/account/orders" style={{ color: 'var(--text-muted)', fontSize: 14, textDecoration: 'none', display: 'block', marginBottom: 28 }}>← Mijn bestellingen</Link>
               </motion.div>
 
-              <motion.div variants={itemVariants}>
-                <h1 style={{ fontSize: 32, fontWeight: 900, marginBottom: 4 }}>Order from {order.restaurantName}</h1>
-                {order.estimatedMinutes && order.status !== 'delivered' && (
-                  <p style={{ fontSize: 18, color: PURPLE, fontWeight: 700, marginBottom: 32 }}>🕐 Arriving in ~{order.estimatedMinutes} minutes</p>
+              <motion.div variants={itemVariants} style={{ marginBottom: 28 }}>
+                <h1 style={{ fontSize: 32, fontWeight: 900, marginBottom: 8 }}>Bestelling bij {order.restaurantName}</h1>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <StatusBadge status={liveStatus} reduced={reduced} />
+                  {stream.connected && (
+                    <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', fontWeight: 600 }}>Live</span>
+                  )}
+                </div>
+                {order.estimatedMinutes && liveStatus !== 'delivered' && liveStatus !== 'cancelled' && (
+                  <p style={{ fontSize: 16, color: PURPLE, fontWeight: 700, marginTop: 10 }}>Verwachte aankomsttijd: ~{order.estimatedMinutes} min</p>
                 )}
               </motion.div>
+
+              {/* Cancelled banner */}
+              {liveStatus === 'cancelled' && (
+                <motion.div
+                  variants={itemVariants}
+                  style={{ background: 'rgba(239,68,68,0.10)', border: '1px solid rgba(239,68,68,0.25)', borderRadius: 16, padding: '20px 24px', marginBottom: 24 }}
+                >
+                  <p style={{ fontWeight: 800, fontSize: 16, margin: '0 0 6px', color: '#EF4444' }}>Je bestelling is geannuleerd</p>
+                  <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.55)', margin: 0 }}>Als je een betaling hebt gedaan, wordt het bedrag binnen 5–7 werkdagen teruggestort.</p>
+                </motion.div>
+              )}
 
               {/* Progress tracker */}
               <motion.div variants={itemVariants} style={{ background: 'var(--bg-card)', borderRadius: 20, border: '1px solid var(--border)', padding: '32px 28px', marginBottom: 24 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', position: 'relative' }}>
                   <div style={{ position: 'absolute', top: 20, left: '10%', right: '10%', height: 3, background: 'var(--b8)', borderRadius: 4 }} />
-                  <div style={{ position: 'absolute', top: 20, left: '10%', height: 3, background: `linear-gradient(90deg,${PURPLE},${PINK})`, borderRadius: 4, width: `${Math.min(activeStage / (STAGES.length - 1) * 80, 80)}%`, transition: 'width 1s ease' }} />
+                  <motion.div
+                    style={{ position: 'absolute', top: 20, left: '10%', height: 3, background: `linear-gradient(90deg,${PURPLE},${PINK})`, borderRadius: 4 }}
+                    animate={{ width: `${Math.max(0, Math.min(activeStage / (STAGES.length - 1) * 80, 80))}%` }}
+                    transition={reduced ? { duration: 0 } : { duration: 0.8, ease: 'easeOut' }}
+                  />
                   {STAGES.map((s, i) => {
                     const isCompleted = i < activeStage;
                     const isActive = i === activeStage;
@@ -375,6 +482,8 @@ export default function OrderTrackingPage() {
                           style={{
                             width: 40,
                             height: 40,
+                            minWidth: 44,
+                            minHeight: 44,
                             borderRadius: '50%',
                             display: 'flex',
                             alignItems: 'center',
@@ -382,8 +491,8 @@ export default function OrderTrackingPage() {
                             fontSize: 18,
                             position: 'relative',
                             background: i <= activeStage ? `linear-gradient(135deg,${PURPLE},${PINK})` : 'rgba(255,255,255,0.06)',
-                            transition: 'background 0.5s',
-                            animation: isActive ? 'pulse-glow 2s ease-in-out infinite' : 'none',
+                            transition: reduced ? 'none' : 'background 0.5s',
+                            animation: isActive && !reduced ? 'pulse-glow 2s ease-in-out infinite' : 'none',
                             boxShadow: isActive ? `0 0 16px ${PURPLE}60` : 'none',
                           }}
                         >
@@ -402,26 +511,56 @@ export default function OrderTrackingPage() {
               </motion.div>
 
               {/* Rider info */}
-              {order.rider && order.status === 'on_the_way' && (
+              {order.rider && (liveStatus === 'out_for_delivery' || order.status === 'on_the_way') && (
                 <motion.div
                   variants={itemVariants}
                   style={{ background: `${PURPLE}10`, border: `1px solid ${PURPLE}30`, borderRadius: 16, padding: '20px 24px', marginBottom: 24, display: 'flex', alignItems: 'center', gap: 16 }}
                 >
-                  <div style={{ width: 48, height: 48, background: `linear-gradient(135deg,${PURPLE},${PINK})`, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22 }}>🚲</div>
+                  <div style={{ width: 48, height: 48, minWidth: 48, background: `linear-gradient(135deg,${PURPLE},${PINK})`, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22 }}>🚲</div>
                   <div>
-                    <p style={{ fontWeight: 800, fontSize: 16, margin: 0 }}>{order.rider.name} is on the way</p>
-                    <p style={{ color: 'var(--text-muted)', fontSize: 14, margin: 0 }}>Delivering to {order.address}</p>
+                    <p style={{ fontWeight: 800, fontSize: 16, margin: 0 }}>{order.rider.name} is onderweg</p>
+                    <p style={{ color: 'var(--text-muted)', fontSize: 14, margin: 0 }}>Bezorging naar {order.address}</p>
                   </div>
+                </motion.div>
+              )}
+
+              {/* Cancel order button — visible within 120s window */}
+              {canCancelOrder(liveStatus, undefined) && liveStatus !== 'cancelled' && (
+                <motion.div variants={itemVariants} style={{ marginBottom: 24 }}>
+                  {cancelError && (
+                    <p style={{ color: '#EF4444', fontSize: 13, marginBottom: 8 }}>{cancelError}</p>
+                  )}
+                  <motion.button
+                    onClick={handleCancel}
+                    disabled={cancelling}
+                    whileTap={reduced ? undefined : { scale: 0.97 }}
+                    style={{
+                      width: '100%',
+                      minHeight: 44,
+                      padding: '12px 20px',
+                      borderRadius: 12,
+                      border: '1px solid rgba(239,68,68,0.35)',
+                      background: 'rgba(239,68,68,0.08)',
+                      color: '#EF4444',
+                      fontWeight: 800,
+                      fontSize: 15,
+                      cursor: cancelling ? 'not-allowed' : 'pointer',
+                      fontFamily: 'Outfit, sans-serif',
+                      opacity: cancelling ? 0.6 : 1,
+                    }}
+                  >
+                    {cancelling ? 'Annuleren...' : 'Bestelling annuleren'}
+                  </motion.button>
                 </motion.div>
               )}
 
               {/* Order items */}
               <motion.div variants={itemVariants} style={{ background: 'var(--bg-card)', borderRadius: 20, border: '1px solid var(--border)', padding: '24px 28px' }}>
-                <h3 style={{ fontSize: 18, fontWeight: 800, marginBottom: 16 }}>Order summary</h3>
+                <h3 style={{ fontSize: 18, fontWeight: 800, marginBottom: 16 }}>Samenvatting</h3>
                 {order.items.map((item, i) => (
                   <motion.div
                     key={i}
-                    initial={{ opacity: 0, x: -12 }}
+                    initial={reduced ? false : { opacity: 0, x: -12 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.6 + i * 0.06, duration: 0.35 }}
                     style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 0', borderBottom: i < order.items.length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none' }}
@@ -431,7 +570,7 @@ export default function OrderTrackingPage() {
                   </motion.div>
                 ))}
                 <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: 16, marginTop: 4 }}>
-                  <span style={{ fontWeight: 800, fontSize: 16 }}>Total</span>
+                  <span style={{ fontWeight: 800, fontSize: 16 }}>Totaal</span>
                   <span style={{ fontWeight: 900, fontSize: 16 }}>€{(order.total / 100).toFixed(2)}</span>
                 </div>
               </motion.div>
