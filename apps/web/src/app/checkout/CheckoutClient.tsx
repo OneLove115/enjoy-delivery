@@ -180,11 +180,11 @@ export default function CheckoutClient() {
         },
         body: JSON.stringify({
           items: items.map(i => ({
-            menuItemId: i.id,
+            menuItemId: i.menuItemId || i.id.split('::')[0],
             quantity: i.qty,
             modifiers: (i.modifiers || [])
-              .map((m: any) => m.modifierId)
-              .filter((id: unknown): id is string => typeof id === 'string'),
+              .filter((m: any) => m.modifierId && m.groupId)
+              .map((m: any) => ({ modifierId: m.modifierId, modifierGroupId: m.groupId })),
           })),
           restaurantSlug: restaurantSlug || undefined,
           orderType,

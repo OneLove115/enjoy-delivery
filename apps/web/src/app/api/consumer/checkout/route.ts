@@ -15,11 +15,16 @@ const VP_URL = process.env.VELOCIPIZZA_API_URL || process.env.NEXT_PUBLIC_VP_DOM
  * All pricing, discounts, and tenant/consumer resolution must happen server-side
  * in VP — never trust the client for those values.
  */
+const ModifierSchema = z.object({
+  modifierId: z.string().uuid(),
+  modifierGroupId: z.string().uuid(),
+});
+
 const CheckoutItemSchema = z
   .object({
     menuItemId: z.string().uuid(),
     quantity: z.number().int().positive(),
-    modifiers: z.array(z.string()).optional(),
+    modifiers: z.array(ModifierSchema).optional(),
   })
   .strict();
 
