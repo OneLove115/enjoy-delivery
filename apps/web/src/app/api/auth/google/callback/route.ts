@@ -5,10 +5,17 @@ export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const code = searchParams.get('code');
   const error = searchParams.get('error');
+  const state = searchParams.get('state');
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://enjoy.veloci.online';
 
   if (error || !code) {
     return NextResponse.redirect(`${appUrl}/login?error=google_cancelled`);
+  }
+
+  // CSRF protection: verify state matches the oauth_state cookie
+  const stateCookie = req.cookies.get('oauth_state')?.value;
+  if (!state || !stateCookie || state !== stateCookie) {
+    return NextResponse.json({ error: 'Invalid OAuth state' }, { status: 400 });
   }
 
   try {
@@ -54,6 +61,14 @@ export async function GET(req: NextRequest) {
     );
 
     const res = NextResponse.redirect(`${appUrl}/account`);
+    // Clear oauth_state cookie after successful verification
+    res.cookies.set('oauth_state', '', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/',
+      maxAge: 0,
+    });
     res.cookies.set('enjoy_session', data.token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',

@@ -61,6 +61,17 @@ export default function CheckoutClient() {
   const [voucherInputOpen, setVoucherInputOpen] = useState(false);
   const [voucherDraft, setVoucherDraft] = useState('');
   const pendingRedirect = useRef<() => void>(() => {});
+  // Idempotency key — generated once on mount and re-used across retries so
+  // double-clicks / network retries don't create a second order on the VP
+  // backend. Lazy init via useRef callback keeps the value stable for the
+  // lifetime of the component.
+  const idempotencyKeyRef = useRef<string>('');
+  if (!idempotencyKeyRef.current) {
+    idempotencyKeyRef.current =
+      typeof crypto !== 'undefined' && 'randomUUID' in crypto
+        ? crypto.randomUUID()
+        : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+  }
 
   // Auth check
   useEffect(() => {
@@ -161,20 +172,19 @@ export default function CheckoutClient() {
     try {
       const res = await fetch('/api/consumer/checkout', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          // Re-used across retries — prevents duplicate order creation if the
+          // user double-clicks or the network retries the POST.
+          'Idempotency-Key': idempotencyKeyRef.current,
+        },
         body: JSON.stringify({
           items: items.map(i => ({
-            menuItemId: i.id, name: i.name, quantity: i.qty,
-            // unitPrice is the Veloci contract field (renamed from `price`)
-            unitPrice: i.basePrice,
-            depositAmount: i.depositAmount ?? 0,
-            note: i.note ?? '',
-            modifiers: (i.modifiers || []).map((m: any) => ({
-              modifierId: m.modifierId,
-              modifierGroupId: m.groupId,
-              name: m.name,
-              priceAdjustment: m.priceAdjustment,
-            })),
+            menuItemId: i.id,
+            quantity: i.qty,
+            modifiers: (i.modifiers || [])
+              .map((m: any) => m.modifierId)
+              .filter((id: unknown): id is string => typeof id === 'string'),
           })),
           restaurantSlug: restaurantSlug || undefined,
           orderType,
@@ -182,7 +192,6 @@ export default function CheckoutClient() {
             street: form.street,
             zip: form.postcode,
             city: form.city,
-            state: '',
           } : undefined,
           customerName: form.name,
           customerPhone: form.phone,
@@ -191,10 +200,10 @@ export default function CheckoutClient() {
           tip,
           voucherCode: voucherCode || undefined,
           scheduledFor: deliveryTime.kind === 'scheduled' ? deliveryTime.isoTime : undefined,
-          total: grandTotal.toFixed(2),
           paymentMethod: form.payment,
-          // Only include consumerId when logged in — guests omit it
-          ...(isLoggedIn ? { consumerId: undefined } : {}),
+          // NOTE: `total`, `consumerId`, `tenantId`, `discountAmount` are
+          // intentionally NOT sent — VP computes them server-side. The proxy
+          // schema rejects these fields via Zod `.strict()` to block mass-assignment.
         }),
       });
       const data = await res.json().catch(() => ({}));
