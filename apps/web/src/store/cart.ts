@@ -10,8 +10,8 @@ export type CartItemModifier = {
 };
 
 export type CartItem = {
-  id: string;         // composite cart-line key (uuid or uuid::modId1,modId2)
-  menuItemId: string; // original DB UUID — use this as menuItemId in checkout
+  id: string;
+  menuItemId: string;
   name: string;
   basePrice: string;
   imageUrl: string | null;
@@ -94,7 +94,7 @@ export const useCartStore = create<CartStore>()(
       addItem: (restaurantSlug, restaurantName, item, currency, locale) => {
         const { restaurantSlug: current } = get();
         const lineKey = cartLineKey(item);
-        const originalId = item.id; // DB UUID — preserved for checkout
+        const originalId = item.id;
 
         if (current && current !== restaurantSlug) {
           set({ restaurantSlug, restaurantName, currency: currency || 'EUR', locale: locale || 'nl-NL', items: [{ ...item, id: lineKey, menuItemId: originalId, qty: 1 }] });
