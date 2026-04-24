@@ -40,8 +40,11 @@ export function Nav() {
         borderBottom: '1px solid rgba(255,255,255,0.08)',
       }}>
         {/* Logo */}
-        <Link href="/" style={{ textDecoration: 'none', flexShrink: 0 }}>
-          <img src="/logo-enjoy.png" alt="EnJoy" style={{ height: 44, width: 'auto' }} width={140} height={44} />
+        <Link href="/" style={{ textDecoration: 'none', flexShrink: 0, display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div style={{ width: 52, height: 52, borderRadius: '50%', overflow: 'hidden', flexShrink: 0 }}>
+            <img src="/logo-enjoy.png" alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          </div>
+          <span style={{ color: 'white', fontSize: 22, fontWeight: 800, letterSpacing: '-0.5px' }}>EnJoy</span>
         </Link>
 
         {/* Center links — hidden on mobile via CSS */}
@@ -110,7 +113,12 @@ export function Nav() {
             padding: '20px', gap: 4, boxShadow: '-8px 0 32px rgba(0,0,0,0.5)',
           }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-              <img src="/logo-enjoy.png" alt="EnJoy" style={{ height: 44, width: 'auto' }} width={140} height={44} />
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <div style={{ width: 44, height: 44, borderRadius: '50%', overflow: 'hidden', flexShrink: 0 }}>
+                  <img src="/logo-enjoy.png" alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                </div>
+                <span style={{ color: 'var(--text-primary)', fontSize: 20, fontWeight: 800, letterSpacing: '-0.5px' }}>EnJoy</span>
+              </div>
               <button onClick={() => setDrawerOpen(false)} style={{ background: 'none', border: 'none', fontSize: 24, cursor: 'pointer', color: 'var(--text-primary)' }}>✕</button>
             </div>
 
