@@ -52,7 +52,9 @@ export default function SignupPage() {
       <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} className="auth-signup-card"
         style={{ width: '100%', maxWidth: 440, background: 'var(--bg-elevated)', border: '1px solid var(--border-strong)', borderRadius: 24, padding: '48px 40px', position: 'relative', zIndex: 1 }}>
         <Link href="/" style={{ textDecoration: 'none', display: 'block', textAlign: 'center', marginBottom: 32 }}>
-          <img src="/logo-enjoy.png" alt="EnJoy" style={{ height: 64 }} />
+          <div style={{ width: 72, height: 72, borderRadius: '50%', overflow: 'hidden', margin: '0 auto' }}>
+            <img src="/logo-enjoy.png" alt="EnJoy" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          </div>
         </Link>
         <h1 style={{ fontSize: 26, fontWeight: 900, textAlign: 'center', marginBottom: 8 }}>Start your royal journey</h1>
         <p style={{ color: 'var(--text-muted)', textAlign: 'center', fontSize: 14, marginBottom: 32 }}>Create your free EnJoy account</p>

@@ -239,7 +239,9 @@ export default function ReservePage() {
           <span>←</span><span>Menu</span>
         </Link>
         <Link href="/" style={{ textDecoration: 'none' }}>
-          <img src="/logo-enjoy.png" alt="EnJoy" style={{ height: 40 }} />
+          <div style={{ width: 40, height: 40, borderRadius: '50%', overflow: 'hidden', flexShrink: 0 }}>
+            <img src="/logo-enjoy.png" alt="EnJoy" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          </div>
         </Link>
         <div style={{ width: 60 }} />
       </nav>

@@ -53,7 +53,9 @@ export function Footer() {
           {/* Brand */}
           <div style={{ maxWidth: 260, marginBottom: 8 }}>
             <Link href="/" style={{ textDecoration: 'none' }}>
-              <img src="/logo-enjoy.png" alt="EnJoy" style={{ height: 40, width: 'auto' }} width={128} height={40} />
+              <div style={{ width: 40, height: 40, borderRadius: '50%', overflow: 'hidden', flexShrink: 0 }}>
+                <img src="/logo-enjoy.png" alt="EnJoy" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              </div>
             </Link>
             <p style={{ color: 'var(--text-muted)', marginTop: 12, fontSize: 14, lineHeight: 1.6 }}>
               {t('footer.tagline')}
