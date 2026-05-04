@@ -18,12 +18,18 @@ const VP_URL = process.env.VELOCIPIZZA_API_URL || process.env.NEXT_PUBLIC_VP_DOM
 const ModifierSchema = z.object({
   modifierId: z.string().uuid(),
   modifierGroupId: z.string().uuid(),
+  name: z.string().optional(),
+  priceAdjustment: z.number().optional(),
 });
 
 const CheckoutItemSchema = z
   .object({
     menuItemId: z.string().uuid(),
+    name: z.string().optional(),
     quantity: z.number().int().positive(),
+    unitPrice: z.string().optional(),
+    depositAmount: z.number().min(0).optional(),
+    note: z.string().max(500).optional(),
     modifiers: z.array(ModifierSchema).optional(),
   })
   .strict();

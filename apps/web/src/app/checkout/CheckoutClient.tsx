@@ -179,13 +179,21 @@ export default function CheckoutClient() {
           'Idempotency-Key': idempotencyKeyRef.current,
         },
         body: JSON.stringify({
-          items: items.map(i => ({
-            menuItemId: i.menuItemId || i.id.split('::')[0],
-            quantity: i.qty,
-            modifiers: (i.modifiers || [])
-              .filter(m => m.modifierId && m.groupId)
-              .map(m => ({ modifierId: m.modifierId, modifierGroupId: m.groupId })),
-          })),
+          items: items.map(i => {
+            const modExtra = (i.modifiers || []).reduce((s, m) => s + (m.priceAdjustment || 0), 0);
+            const unitPrice = (parseFloat(i.basePrice) + modExtra).toFixed(2);
+            return {
+              menuItemId: i.menuItemId || i.id.split('::')[0],
+              name: i.name,
+              quantity: i.qty,
+              unitPrice,
+              depositAmount: i.depositAmount,
+              note: i.note,
+              modifiers: (i.modifiers || [])
+                .filter(m => m.modifierId && m.groupId)
+                .map(m => ({ modifierId: m.modifierId, modifierGroupId: m.groupId, name: m.name, priceAdjustment: m.priceAdjustment })),
+            };
+          }),
           restaurantSlug: restaurantSlug || undefined,
           orderType,
           deliveryAddress: orderType === 'delivery' ? {
