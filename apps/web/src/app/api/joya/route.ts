@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { rateLimit, rateLimitKey } from '@/lib/rate-limit';
 
 /* ─── Knowledge Base (RAG source of truth) ─────────────────────────────── */
 interface RestaurantEntry {
@@ -238,7 +239,14 @@ interface ChatMessage {
   text: string;
 }
 
+const MAX_MESSAGE_LENGTH = 2000;
+const MAX_MESSAGES = 10;
+
 export async function POST(req: NextRequest) {
+  if (!rateLimit(rateLimitKey(req, 'joya'), 30, 60)) {
+    return NextResponse.json({ error: 'Too many requests. Try again later.' }, { status: 429 });
+  }
+
   try {
     const { messages } = await req.json() as { messages: ChatMessage[] };
     const apiKey = process.env.ANTHROPIC_API_KEY;
@@ -247,16 +255,23 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'No API key configured' }, { status: 503 });
     }
 
+    if (!Array.isArray(messages) || messages.length === 0) {
+      return NextResponse.json({ error: 'Invalid messages' }, { status: 400 });
+    }
+
+    // Enforce input length limits to prevent prompt injection / token exhaustion
+    const sanitizedMessages: ChatMessage[] = messages
+      .slice(-MAX_MESSAGES)
+      .map(m => ({ role: m.role, text: String(m.text ?? '').slice(0, MAX_MESSAGE_LENGTH) }));
+
     // RAG: retrieve relevant context based on conversation
-    const relevantRestaurants = retrieveContext(messages);
+    const relevantRestaurants = retrieveContext(sanitizedMessages);
     const context = formatContext(relevantRestaurants);
     const systemPrompt = buildSystemPrompt(context);
 
     // Anthropic requires conversation to start with a 'user' message.
     // Strip the welcome assistant message that leads the history.
-    const filtered = messages
-      .filter(m => m.role === 'user' || m.role === 'assistant')
-      .slice(-10);
+    const filtered = sanitizedMessages.filter(m => m.role === 'user' || m.role === 'assistant');
     const firstUserIdx = filtered.findIndex(m => m.role === 'user');
     const anthropicMessages = (firstUserIdx >= 0 ? filtered.slice(firstUserIdx) : filtered)
       .map(m => ({ role: m.role, content: m.text }));

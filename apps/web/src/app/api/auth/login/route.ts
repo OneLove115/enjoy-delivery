@@ -1,7 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { vpFetch } from '@/lib/velocipizza';
+import { rateLimit, rateLimitKey } from '@/lib/rate-limit';
 
 export async function POST(req: NextRequest) {
+  if (!rateLimit(rateLimitKey(req, 'auth:login'), 5, 60)) {
+    return NextResponse.json({ error: 'Too many attempts. Try again later.' }, { status: 429 });
+  }
+
   try {
     const { email, password } = await req.json();
     if (!email || !password) {
