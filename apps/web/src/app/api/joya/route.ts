@@ -270,10 +270,8 @@ export async function POST(req: NextRequest) {
     const systemPrompt = buildSystemPrompt(context);
 
     // Anthropic requires conversation to start with a 'user' message.
-    // Strip the welcome assistant message that leads the history.
-    const filtered = sanitizedMessages.filter(m => m.role === 'user' || m.role === 'assistant');
-    const firstUserIdx = filtered.findIndex(m => m.role === 'user');
-    const anthropicMessages = (firstUserIdx >= 0 ? filtered.slice(firstUserIdx) : filtered)
+    const firstUserIdx = sanitizedMessages.findIndex(m => m.role === 'user');
+    const anthropicMessages = (firstUserIdx >= 0 ? sanitizedMessages.slice(firstUserIdx) : sanitizedMessages)
       .map(m => ({ role: m.role, content: m.text }));
 
     const response = await fetch('https://api.anthropic.com/v1/messages', {
