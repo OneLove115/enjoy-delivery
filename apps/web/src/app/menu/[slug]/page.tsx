@@ -33,6 +33,7 @@ type Restaurant = {
   deliveryTimeMin: number; deliveryTimeMax: number;
   businessHours: BusinessHours | null; timezone: string; currency: string; locale: string;
   acceptOrders?: boolean;
+  averageRating?: number | null; reviewCount?: number; googlePlaceId?: string | null;
 };
 
 /* ─── Helpers ─── */
@@ -546,6 +547,7 @@ export default function MenuPage() {
         <div style={{ background: 'var(--bg-elevated)', borderBottom: '1px solid var(--border)', padding: '0 32px' }}>
           <div className="scroll-x" style={{ maxWidth: 1200, margin: '0 auto', display: 'flex', alignItems: 'center', gap: 0 }}>
             {[
+              ...(restaurant.averageRating && restaurant.averageRating > 0 ? [{ icon: '⭐', label: `${restaurant.averageRating.toFixed(1)}${restaurant.reviewCount ? ` (${restaurant.reviewCount})` : ''}` }] : []),
               { icon: '🕐', label: `${restaurant.deliveryTimeMin}–${restaurant.deliveryTimeMax} min` },
               { icon: '🚴', label: 'Gratis bezorgd' },
               { icon: '🛍️', label: `Min. ${fmt(0, currency, locale)}` },

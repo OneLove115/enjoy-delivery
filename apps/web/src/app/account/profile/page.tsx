@@ -10,7 +10,7 @@ const PURPLE = '#5A31F4';
 const PINK = '#FF0080';
 const ORANGE = '#FF6B35';
 
-type Profile = { id: string; name: string; email: string; phone?: string };
+type Profile = { id: string; name: string; email: string; phone?: string; dateOfBirth?: string | null };
 
 function ProfileSkeleton() {
   const shimmerStyle: React.CSSProperties = {
@@ -93,9 +93,10 @@ export default function ProfilePage() {
   });
 
   const fields: { key: keyof Profile; label: string; type?: string; placeholder?: string }[] = [
-    { key: 'name',  label: 'Volledige naam',  type: 'text',  placeholder: 'Jouw naam' },
-    { key: 'email', label: 'E-mailadres',      type: 'email', placeholder: 'jouw@email.nl' },
-    { key: 'phone', label: 'Telefoonnummer',   type: 'tel',   placeholder: '+31 6 00 00 00 00' },
+    { key: 'name',        label: 'Volledige naam',  type: 'text',  placeholder: 'Jouw naam' },
+    { key: 'email',       label: 'E-mailadres',      type: 'email', placeholder: 'jouw@email.nl' },
+    { key: 'phone',       label: 'Telefoonnummer',   type: 'tel',   placeholder: '+31 6 00 00 00 00' },
+    { key: 'dateOfBirth', label: 'Geboortedatum 🎂', type: 'date',  placeholder: '' },
   ];
 
   return (
@@ -185,7 +186,7 @@ export default function ProfilePage() {
                   <input
                     type={type ?? 'text'}
                     value={(profile[key] as string) ?? ''}
-                    onChange={e => setProfile({ ...profile, [key]: e.target.value })}
+                    onChange={e => setProfile({ ...profile, [key]: key === 'dateOfBirth' ? (e.target.value || null) : e.target.value })}
                     onFocus={() => setFocusedField(key)}
                     onBlur={() => setFocusedField(null)}
                     placeholder={placeholder}

@@ -15,7 +15,7 @@ const LOGO   = `linear-gradient(135deg, ${PURPLE}, ${PINK})`;
 
 /* ─── Types ─── */
 type RestaurantRow = {
-  name: string; slug: string; cuisine: string; rating: number;
+  name: string; slug: string; cuisine: string; rating: number; reviewCount?: number;
   time: string; img: string; delivery: string; min: number;
   open: boolean; category: string; openTime?: string;
   cuisineCategories?: string[];
@@ -313,7 +313,7 @@ function RestaurantCard({ r, hasOrdered }: { r: RestaurantRow; hasOrdered?: bool
             fontSize: 28,
           }}>{emo}</div>
           {r.rating > 0 && (
-            <div style={{ position: 'absolute', top: 10, right: 10, background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(8px)', borderRadius: 8, padding: '3px 9px', fontSize: 12, fontWeight: 800, color: '#FFD700' }}>⭐ {r.rating}</div>
+            <div style={{ position: 'absolute', top: 10, right: 10, background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(8px)', borderRadius: 8, padding: '3px 9px', fontSize: 12, fontWeight: 800, color: '#FFD700' }}>⭐ {r.rating.toFixed(1)}{r.reviewCount ? ` · ${r.reviewCount}` : ''}</div>
           )}
           {r.delivery === 'Gratis' && r.open && (
             <div style={{ position: 'absolute', top: 10, left: 10, background: '#27AE60', borderRadius: 8, padding: '3px 10px', fontSize: 11, fontWeight: 800, color: 'white' }}>Gratis</div>
@@ -381,7 +381,7 @@ function DesktopRestaurantCard({ r, emo, hasOrdered, index }: { r: RestaurantRow
             </div>
           )}
           {r.rating > 0 && (
-            <div style={{ position: 'absolute', top: 10, right: 10, background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(8px)', borderRadius: 8, padding: '3px 9px', fontSize: 12, fontWeight: 800, color: '#FFD700' }}>⭐ {r.rating}</div>
+            <div style={{ position: 'absolute', top: 10, right: 10, background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(8px)', borderRadius: 8, padding: '3px 9px', fontSize: 12, fontWeight: 800, color: '#FFD700' }}>⭐ {r.rating.toFixed(1)}{r.reviewCount ? ` · ${r.reviewCount}` : ''}</div>
           )}
           {r.delivery === 'Gratis' && r.open && (
             <div style={{ position: 'absolute', top: 10, left: 10, background: '#27AE60', borderRadius: 8, padding: '3px 10px', fontSize: 11, fontWeight: 800, color: 'white' }}>Gratis</div>
@@ -535,7 +535,7 @@ function DiscoverContent() {
       .then(data => {
         const real: RestaurantRow[] = (data.restaurants || []).map((t: any) => ({
           name: t.name, slug: t.slug || '', cuisine: t.tagline || 'Restaurant',
-          rating: 0, time: '30–45', img: t.logo || '',
+          rating: t.averageRating || 0, reviewCount: t.reviewCount || 0, time: '30–45', img: t.logo || '',
           delivery: 'Gratis', min: 0,
           open: t.acceptOrders !== false, // respect Veloci close toggle
           category: 'restaurant',

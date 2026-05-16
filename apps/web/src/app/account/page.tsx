@@ -122,14 +122,29 @@ export default function AccountPage() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [hoveredTile, setHoveredTile] = useState<string | null>(null);
-  const [totalOrders] = useState(12);
-  const [loyaltyPoints] = useState(7);
-  const [savedAddresses] = useState(2);
+  const [totalOrders, setTotalOrders] = useState<number | null>(null);
+  const [loyaltyPoints, setLoyaltyPoints] = useState<number | null>(null);
+  const [savedAddresses, setSavedAddresses] = useState<number | null>(null);
 
   useEffect(() => {
     fetch('/api/auth/me')
       .then(r => r.ok ? r.json() : null)
-      .then(u => { setUser(u); setLoading(false); })
+      .then(u => {
+        setUser(u);
+        setLoading(false);
+        if (u) {
+          // Load real stats in parallel
+          Promise.all([
+            fetch('/api/account/loyalty').then(r => r.ok ? r.json() : null),
+            fetch('/api/account/orders').then(r => r.ok ? r.json() : null),
+            fetch('/api/account/addresses').then(r => r.ok ? r.json() : null),
+          ]).then(([loyalty, orders, addresses]) => {
+            if (loyalty && !loyalty.error) setLoyaltyPoints(loyalty.stampCount ?? 0);
+            if (Array.isArray(orders)) setTotalOrders(orders.length);
+            if (Array.isArray(addresses)) setSavedAddresses(addresses.length);
+          }).catch(() => {});
+        }
+      })
       .catch(() => setLoading(false));
   }, []);
 
@@ -284,9 +299,9 @@ export default function AccountPage() {
             style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 28 }}
           >
             {[
-              { label: 'Bestellingen', value: totalOrders, icon: '🛍️', accent: PURPLE },
-              { label: 'Stempels', value: loyaltyPoints, icon: '⭐', accent: PINK },
-              { label: 'Adressen', value: savedAddresses, icon: '📍', accent: ORANGE },
+              { label: 'Bestellingen', value: totalOrders  ?? '—', icon: '🛍️', accent: PURPLE },
+              { label: 'Stempels', value: loyaltyPoints ?? '—', icon: '⭐', accent: PINK },
+              { label: 'Adressen', value: savedAddresses ?? '—', icon: '📍', accent: ORANGE },
             ].map((stat, i) => (
               <motion.div
                 key={stat.label}
