@@ -41,9 +41,10 @@ export async function GET(req: NextRequest) {
       return NextResponse.redirect(`${appUrl}/login?error=google_failed`);
     }
 
-    const { access_token } = await tokenRes.json() as { access_token: string };
+    const tokenJson = await tokenRes.json() as { access_token: string; id_token?: string };
+    const { access_token, id_token } = tokenJson;
 
-    // Get user profile from Google
+    // Get user profile from Google (for name + avatar)
     const profileRes = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
       headers: { Authorization: `Bearer ${access_token}` },
     });
@@ -54,10 +55,15 @@ export async function GET(req: NextRequest) {
 
     const profile = await profileRes.json() as { id: string; email: string; name: string; picture?: string };
 
-    // Create or find user in VelociPizza backend
+    if (!id_token) {
+      console.error('[google/callback] no id_token in token response');
+      return NextResponse.redirect(`${appUrl}/login?error=google_failed`);
+    }
+
+    // Create or find user in VelociPizza backend — pass id_token for server-side JWKS verification
     const data = await vpFetch<{ token: string; user: { id: string; name: string; email: string; avatarUrl?: string } }>(
       '/api/consumer/auth/google-login',
-      { method: 'POST', body: { email: profile.email, name: profile.name, googleId: profile.id, avatarUrl: profile.picture ?? null } }
+      { method: 'POST', body: { idToken: id_token, name: profile.name, avatarUrl: profile.picture ?? null } }
     );
 
     const res = NextResponse.redirect(`${appUrl}/account`);
