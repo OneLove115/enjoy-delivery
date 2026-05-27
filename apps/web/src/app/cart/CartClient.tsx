@@ -1,20 +1,46 @@
 'use client';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useRef } from 'react';
+import { gsap } from 'gsap';
+import { useGSAP } from '@gsap/react';
 import { useCartStore } from '@/store/cart';
 import { calculateServiceFee, calculateStatiegeld, SERVICE_FEE_CAP, SERVICE_FEE_PERCENT } from '@/lib/service-fee';
+
+gsap.registerPlugin(useGSAP);
 
 const ORANGE = '#FF6B35';
 const DELIVERY_FEE = 2.0; // Gratis for now in some accounts; kept visible per screenshot
 
 export default function CartClient() {
   const router = useRouter();
+  const containerRef = useRef<HTMLDivElement>(null);
+  const ctaRef = useRef<HTMLButtonElement>(null);
   const {
     items, restaurantSlug, restaurantName, currency, locale,
     orderType, setOrderType,
     updateQty, removeItem, updateNote,
     total, itemCount,
   } = useCartStore();
+
+  // Stagger cart items on mount
+  useGSAP(() => {
+    if (!containerRef.current) return;
+    const cards = containerRef.current.querySelectorAll('[data-cart-item]');
+    gsap.fromTo(cards,
+      { opacity: 0, y: 20 },
+      { opacity: 1, y: 0, duration: 0.3, stagger: 0.07, ease: 'power2.out' }
+    );
+  }, { scope: containerRef, dependencies: [] });
+
+  // CTA pop-in
+  useGSAP(() => {
+    if (!ctaRef.current) return;
+    gsap.fromTo(ctaRef.current,
+      { scale: 0.92, opacity: 0 },
+      { scale: 1, opacity: 1, duration: 0.4, ease: 'back.out(1.4)', delay: 0.2 }
+    );
+  }, { dependencies: [] });
 
   const subtotal = total();
   const serviceFee = calculateServiceFee(subtotal, currency || 'EUR');
@@ -74,13 +100,13 @@ export default function CartClient() {
       </div>
 
       {/* Items */}
-      <div style={{ padding: '0 20px', display: 'flex', flexDirection: 'column', gap: 14 }}>
+      <div ref={containerRef} style={{ padding: '0 20px', display: 'flex', flexDirection: 'column', gap: 14 }}>
         {items.map(item => {
           const modExtra = (item.modifiers || []).reduce((s, m) => s + (m.priceAdjustment || 0), 0);
           const linePrice = (parseFloat(item.basePrice) + modExtra) * item.qty;
           const modSummary = (item.modifiers || []).map(m => m.name).join(', ');
           return (
-            <div key={item.id} style={{ paddingBottom: 14, borderBottom: '1px solid var(--border, rgba(255,255,255,0.06))' }}>
+            <div key={item.id} data-cart-item style={{ paddingBottom: 14, borderBottom: '1px solid var(--border, rgba(255,255,255,0.06))' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
                 <h3 style={{ fontSize: 16, fontWeight: 800, flex: 1, paddingRight: 12 }}>{item.name}</h3>
                 <span style={{ fontSize: 15, fontWeight: 700 }}>{fmt(linePrice)}</span>
@@ -129,6 +155,7 @@ export default function CartClient() {
       {/* Sticky CTA */}
       <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, background: 'var(--bg-page, #0A0A0F)', borderTop: '1px solid var(--border, rgba(255,255,255,0.06))', padding: '14px 20px 22px', zIndex: 50 }}>
         <button
+          ref={ctaRef}
           onClick={() => router.push('/checkout')}
           disabled={!items.length}
           style={{ width: '100%', padding: '16px 20px', background: ORANGE, color: '#fff', border: 'none', borderRadius: 999, fontSize: 16, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit', letterSpacing: '-0.01em', boxShadow: '0 6px 18px rgba(255,107,53,0.28)' }}
