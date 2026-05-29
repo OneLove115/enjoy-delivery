@@ -432,6 +432,11 @@ export default function AccountPage() {
             >
               Uitloggen
             </button>
+            <div style={{ marginTop: 16 }}>
+              <Link href="/account/delete" style={{ fontSize: 12, color: 'rgba(255,255,255,0.25)', textDecoration: 'none' }}>
+                Account verwijderen
+              </Link>
+            </div>
           </div>
         )}
       </div>
