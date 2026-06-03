@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
 import { useCartStore } from '../../../store/cart';
 import { MenuItemModal } from '../../../components/menu/MenuItemModal';
 import type { MenuItemForModal, MenuModifierGroup } from '../../../components/menu/MenuItemModal';
@@ -39,6 +39,211 @@ type Restaurant = {
 /* ─── Helpers ─── */
 function fmt(amount: number, currency = 'EUR', locale = 'nl-NL') {
   return new Intl.NumberFormat(locale, { style: 'currency', currency }).format(amount);
+}
+
+/* ─── Menu Hero ─── */
+const ORB_CONFIGS = [
+  { size: 320, left: '8%',  top: '15%', delay: 0,   dur: 9,  purple: true  },
+  { size: 240, left: '72%', top: '8%',  delay: 1.5, dur: 11, purple: false },
+  { size: 180, left: '48%', top: '62%', delay: 0.7, dur: 13, purple: true  },
+  { size: 130, left: '88%', top: '55%', delay: 2.1, dur: 8,  purple: false },
+  { size: 100, left: '22%', top: '78%', delay: 0.9, dur: 7,  purple: true  },
+  { size: 80,  left: '62%', top: '30%', delay: 2.8, dur: 10, purple: false },
+];
+
+function MenuHero({ restaurant, accent, initials }: {
+  restaurant: Restaurant; accent: string; initials: string;
+}) {
+  const { scrollY } = useScroll();
+  const y       = useTransform(scrollY, [0, 500], [0, 130]);
+  const opacity = useTransform(scrollY, [0, 300], [1, 0]);
+  const scale   = useTransform(scrollY, [0, 300], [1, 0.82]);
+
+  return (
+    <div style={{
+      position: 'relative',
+      minHeight: 'clamp(460px, 72svh, 640px)',
+      display: 'flex', flexDirection: 'column',
+      alignItems: 'center', justifyContent: 'center',
+      overflow: 'hidden',
+      background: 'linear-gradient(160deg, #07000f 0%, #0d001c 55%, #07000f 100%)',
+    }}>
+      {/* Aurora pulse */}
+      <motion.div
+        style={{
+          position: 'absolute', inset: 0, zIndex: 0, pointerEvents: 'none',
+          background: `radial-gradient(ellipse 80% 55% at 28% 40%, ${PURPLE}28 0%, transparent 68%),
+                       radial-gradient(ellipse 65% 50% at 78% 65%, ${PINK}1e 0%, transparent 62%)`,
+        }}
+        animate={{ opacity: [0.7, 1, 0.7] }}
+        transition={{ duration: 7, repeat: Infinity, ease: 'easeInOut' }}
+      />
+      {/* Accent glow tied to tenant color */}
+      <motion.div
+        style={{
+          position: 'absolute', inset: 0, zIndex: 0, pointerEvents: 'none',
+          background: `radial-gradient(ellipse 60% 40% at 50% 60%, ${accent}1a 0%, transparent 70%)`,
+        }}
+        animate={{ opacity: [0.5, 0.9, 0.5] }}
+        transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
+      />
+
+      {/* Floating orbs */}
+      {ORB_CONFIGS.map((orb, i) => (
+        <motion.div key={i} style={{
+          position: 'absolute', zIndex: 0, pointerEvents: 'none',
+          width: orb.size, height: orb.size, left: orb.left, top: orb.top,
+          transform: 'translate(-50%,-50%)', borderRadius: '50%',
+          background: orb.purple
+            ? `radial-gradient(circle, ${PURPLE}1c 0%, transparent 68%)`
+            : `radial-gradient(circle, ${PINK}14 0%, transparent 68%)`,
+        }}
+          animate={{ y: [-14, 14, -14], x: [-7, 7, -7], scale: [1, 1.07, 1] }}
+          transition={{ duration: orb.dur, repeat: Infinity, ease: 'easeInOut', delay: orb.delay }}
+        />
+      ))}
+
+      {/* Subtle grid */}
+      <div style={{
+        position: 'absolute', inset: 0, zIndex: 1, pointerEvents: 'none', opacity: 0.022,
+        backgroundImage: 'linear-gradient(rgba(255,255,255,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.5) 1px, transparent 1px)',
+        backgroundSize: '44px 44px',
+      }} />
+
+      {/* Parallax logo — only element in the hero */}
+      <motion.div style={{
+        y, opacity, scale,
+        position: 'relative', zIndex: 2,
+        display: 'flex', flexDirection: 'column', alignItems: 'center',
+      }}>
+        {/* Pulsing glow ring */}
+        <motion.div
+          style={{
+            position: 'absolute', width: 240, height: 240,
+            borderRadius: '50%', top: '50%', left: '50%',
+            transform: 'translate(-50%, -56%)',
+            background: `radial-gradient(circle, ${accent}32 0%, transparent 70%)`,
+            pointerEvents: 'none',
+          }}
+          animate={{ scale: [1, 1.22, 1], opacity: [0.5, 1, 0.5] }}
+          transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+        />
+
+        <motion.div
+          initial={{ scale: 0.4, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ type: 'spring', stiffness: 200, damping: 18, delay: 0.1 }}
+        >
+          <div style={{
+            width: 144, height: 144, borderRadius: 34, overflow: 'hidden', flexShrink: 0,
+            background: `linear-gradient(135deg, ${accent}, ${PINK})`,
+            border: '3px solid rgba(255,255,255,0.15)',
+            boxShadow: `0 0 0 1px rgba(255,255,255,0.06),
+                        0 32px 80px rgba(0,0,0,0.75),
+                        0 0 70px ${accent}45,
+                        0 0 140px ${accent}20`,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}>
+            {restaurant.logo
+              ? <img src={restaurant.logo} alt={restaurant.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              : <span style={{ fontSize: 52, fontWeight: 900, color: 'white', letterSpacing: '-0.02em' }}>{initials}</span>
+            }
+          </div>
+        </motion.div>
+
+        <motion.div
+          style={{ marginTop: 44, fontSize: 20, color: 'rgba(255,255,255,0.2)', lineHeight: 1, userSelect: 'none' }}
+          animate={{ y: [0, 8, 0] }}
+          transition={{ duration: 2.2, repeat: Infinity, ease: 'easeInOut', delay: 2 }}
+        >↓</motion.div>
+      </motion.div>
+    </div>
+  );
+}
+
+/* ─── Restaurant Info Section (bottom of menu) ─── */
+function RestaurantInfoSection({ restaurant, accent, initials, slug, onGroupOrder, onInfo }: {
+  restaurant: Restaurant; accent: string; initials: string;
+  slug: string; onGroupOrder: () => void; onInfo: () => void;
+}) {
+  return (
+    <div style={{
+      margin: '56px 0 0',
+      padding: '32px 20px 28px',
+      background: `linear-gradient(160deg, ${PURPLE}08 0%, ${PINK}06 100%)`,
+      border: '1px solid rgba(255,255,255,0.07)',
+      borderRadius: 20,
+      display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: 14,
+    }}>
+      <div style={{
+        width: 68, height: 68, borderRadius: 18, overflow: 'hidden',
+        background: `linear-gradient(135deg, ${accent}, ${PINK})`,
+        border: '2px solid rgba(255,255,255,0.12)',
+        boxShadow: `0 12px 32px rgba(0,0,0,0.45), 0 0 28px ${accent}30`,
+        display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+      }}>
+        {restaurant.logo
+          ? <img src={restaurant.logo} alt={restaurant.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          : <span style={{ fontSize: 24, fontWeight: 900, color: 'white' }}>{initials}</span>
+        }
+      </div>
+
+      <div>
+        <h3 style={{ fontSize: 20, fontWeight: 900, color: 'var(--text-primary)', margin: 0, lineHeight: 1.2 }}>{restaurant.name}</h3>
+        {restaurant.tagline && (
+          <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: '5px 0 0', fontWeight: 500 }}>{restaurant.tagline}</p>
+        )}
+      </div>
+
+      {(restaurant.address || restaurant.phone) && (
+        <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 8 }}>
+          {restaurant.address && (
+            <span style={{
+              display: 'flex', alignItems: 'center', gap: 5, padding: '6px 14px', borderRadius: 20,
+              background: 'var(--bg-elevated)', border: '1px solid var(--border)',
+              color: 'var(--text-secondary)', fontSize: 12, fontWeight: 600,
+            }}>📍 {restaurant.address}</span>
+          )}
+          {restaurant.phone && (
+            <a href={`tel:${restaurant.phone}`} style={{
+              display: 'flex', alignItems: 'center', gap: 5, padding: '6px 14px', borderRadius: 20,
+              background: 'var(--bg-elevated)', border: '1px solid var(--border)',
+              color: 'var(--text-secondary)', fontSize: 12, fontWeight: 600, textDecoration: 'none',
+            }}>📞 {restaurant.phone}</a>
+          )}
+        </div>
+      )}
+
+      {restaurant.cuisineCategories.length > 0 && (
+        <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 6 }}>
+          {restaurant.cuisineCategories.slice(0, 5).map(cat => (
+            <span key={cat} style={{
+              background: 'var(--bg-elevated)', border: '1px solid var(--border)',
+              color: 'var(--text-muted)', padding: '4px 12px', borderRadius: 20, fontSize: 12, fontWeight: 600,
+            }}>{cat}</span>
+          ))}
+        </div>
+      )}
+
+      <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 8 }}>
+        <button onClick={onGroupOrder} style={{
+          display: 'flex', alignItems: 'center', gap: 6, padding: '8px 16px', borderRadius: 20,
+          border: `1px solid ${PURPLE}55`, background: `${PURPLE}1c`,
+          color: 'var(--text-primary)', fontSize: 13, fontWeight: 700, cursor: 'pointer',
+        }}>👥 Groepsbestelling</button>
+        <Link href={`/reserve/${slug}`} style={{
+          display: 'flex', alignItems: 'center', gap: 6, padding: '8px 16px', borderRadius: 20,
+          border: `1px solid ${PINK}45`, background: `${PINK}15`,
+          color: 'var(--text-primary)', fontSize: 13, fontWeight: 700, textDecoration: 'none',
+        }}>🍽️ Reserveer een tafel</Link>
+        <button onClick={onInfo} style={{
+          display: 'flex', alignItems: 'center', gap: 6, padding: '8px 16px', borderRadius: 20,
+          border: '1px solid var(--border)', background: 'var(--bg-elevated)',
+          color: 'var(--text-muted)', fontSize: 13, fontWeight: 700, cursor: 'pointer',
+        }}>ℹ️ Info</button>
+      </div>
+    </div>
+  );
 }
 
 /* ─── Qty Control ─── */
@@ -210,8 +415,8 @@ function CartContent({ cart, currency, locale, totalCart, onCheckout, menu, onAd
   if (cart.length === 0) {
     return (
       <div style={{ padding: '40px 20px', textAlign: 'center' }}>
-        <div style={{ fontSize: 36, marginBottom: 12 }}>🛒</div>
-        <div style={{ fontSize: 14, color: 'var(--text-muted)' }}>Je winkelwagen is leeg</div>
+        <div style={{ fontSize: 36, marginBottom: 12 }}>🧺</div>
+        <div style={{ fontSize: 14, color: 'var(--text-muted)' }}>Je mand is leeg</div>
         <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 6 }}>Voeg gerechten toe om te beginnen</div>
       </div>
     );
@@ -425,7 +630,7 @@ export default function MenuPage() {
           background: 'var(--b8)', border: '1px solid var(--border)', cursor: 'pointer',
           fontSize: 18, display: 'flex', alignItems: 'center', justifyContent: 'center',
         }}>
-          🛒
+          🧺
           {itemCount() > 0 && (
             <span style={{
               position: 'absolute', top: -6, right: -6,
@@ -453,95 +658,11 @@ export default function MenuPage() {
 
       {/* ─── Hero ─── */}
       <div>
-        <div style={{
-          position: 'relative',
-          background: restaurant.heroImage
-            ? 'var(--bg-page)'
-            : `linear-gradient(135deg, ${accent}28 0%, ${accent}18 50%, ${PINK}14 100%)`,
-          borderBottom: '1px solid var(--border)',
-        }}>
-          {/* Hero image */}
-          {restaurant.heroImage && (
-            <div style={{ position: 'relative', height: 220, overflow: 'hidden' }}>
-              <img src={restaurant.heroImage} alt={restaurant.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-              <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, transparent 30%, rgba(10,10,15,0.92) 100%)' }} />
-            </div>
-          )}
-
-          {/* Restaurant info card */}
-          <div style={{
-            position: restaurant.heroImage ? 'absolute' : 'relative',
-            bottom: restaurant.heroImage ? 0 : undefined,
-            left: 0, right: 0,
-            padding: restaurant.heroImage ? '0 32px 28px' : '36px 32px 28px',
-          }}>
-            {!restaurant.heroImage && (
-              <div style={{ position: 'absolute', inset: 0, opacity: 0.04, backgroundImage: 'radial-gradient(circle, currentColor 1px, transparent 1px)', backgroundSize: '22px 22px', pointerEvents: 'none' }} />
-            )}
-            <div style={{ position: 'relative', maxWidth: 1200, margin: '0 auto', display: 'flex', alignItems: 'flex-end', gap: 20 }}>
-              {/* Logo */}
-              <div style={{
-                width: 80, height: 80, borderRadius: 16, flexShrink: 0, overflow: 'hidden',
-                background: `linear-gradient(135deg,${accent},${PINK})`,
-                border: '3px solid var(--bg-page)', boxShadow: '0 8px 24px rgba(0,0,0,0.3)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-              }}>
-                {restaurant.logo
-                  ? <img src={restaurant.logo} alt={restaurant.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                  : <span style={{ fontSize: 28, fontWeight: 900, color: 'white' }}>{initials}</span>
-                }
-              </div>
-
-              {/* Name + tags + info button */}
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <h1 style={{ fontSize: 24, fontWeight: 950, marginBottom: 4, lineHeight: 1.2 }}>{restaurant.name}</h1>
-                {restaurant.tagline && (
-                  <p style={{ fontSize: 13, color: restaurant.heroImage ? 'rgba(255,255,255,0.7)' : 'var(--text-secondary)', marginBottom: 8 }}>{restaurant.tagline}</p>
-                )}
-                <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 6 }}>
-                  {restaurant.cuisineCategories.slice(0, 4).map(cat => (
-                    <span key={cat} style={{
-                      background: restaurant.heroImage ? 'rgba(255,255,255,0.15)' : `${accent}1a`,
-                      border: `1px solid ${restaurant.heroImage ? 'rgba(255,255,255,0.25)' : `${accent}40`}`,
-                      color: restaurant.heroImage ? 'rgba(255,255,255,0.9)' : 'var(--text-secondary)',
-                      padding: '3px 10px', borderRadius: 20, fontSize: 12, fontWeight: 600,
-                    }}>{cat}</span>
-                  ))}
-                  {/* Group order button */}
-                  <button onClick={() => setGroupOrderOpen(true)} style={{
-                    display: 'flex', alignItems: 'center', gap: 5, padding: '4px 12px', borderRadius: 20,
-                    border: `1px solid ${PURPLE}60`,
-                    background: `${PURPLE}18`,
-                    color: PURPLE,
-                    fontSize: 12, fontWeight: 700, cursor: 'pointer',
-                  }}>
-                    <span>👥</span><span>Groepsbestelling</span>
-                  </button>
-                  {/* Reserve button */}
-                  <Link href={`/reserve/${slug}`} style={{
-                    display: 'flex', alignItems: 'center', gap: 5, padding: '4px 12px', borderRadius: 20,
-                    border: `1px solid ${PINK}60`,
-                    background: `${PINK}18`,
-                    color: restaurant.heroImage ? 'rgba(255,255,255,0.9)' : PINK,
-                    fontSize: 12, fontWeight: 700, textDecoration: 'none',
-                  }}>
-                    <span>🍽️</span><span>Reserveer een tafel</span>
-                  </Link>
-                  {/* Info button */}
-                  <button onClick={() => setInfoOpen(true)} style={{
-                    display: 'flex', alignItems: 'center', gap: 5, padding: '4px 12px', borderRadius: 20,
-                    border: `1px solid ${restaurant.heroImage ? 'rgba(255,255,255,0.3)' : 'var(--border-strong)'}`,
-                    background: restaurant.heroImage ? 'rgba(255,255,255,0.12)' : 'var(--b8)',
-                    color: restaurant.heroImage ? 'rgba(255,255,255,0.9)' : 'var(--text-secondary)',
-                    fontSize: 12, fontWeight: 700, cursor: 'pointer',
-                  }}>
-                    <span>ℹ️</span><span>Info</span>
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        <MenuHero
+          restaurant={restaurant}
+          accent={accent}
+          initials={initials}
+        />
 
         {/* ─── Delivery Info Bar ─── */}
         <div style={{ background: 'var(--bg-elevated)', borderBottom: '1px solid var(--border)', padding: '0 32px' }}>
@@ -704,6 +825,15 @@ export default function MenuPage() {
                 </div>
               );})
             )}
+
+            <RestaurantInfoSection
+              restaurant={restaurant}
+              accent={accent}
+              initials={initials}
+              slug={slug}
+              onGroupOrder={() => setGroupOrderOpen(true)}
+              onInfo={() => setInfoOpen(true)}
+            />
           </div>
 
           {/* ─── Cart Sidebar (desktop) ─── */}
