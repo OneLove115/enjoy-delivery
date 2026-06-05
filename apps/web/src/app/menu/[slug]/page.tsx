@@ -524,9 +524,9 @@ export default function MenuPage() {
     <div style={{ background: 'var(--bg-page)', minHeight: '100vh', color: 'var(--text-primary)', fontFamily: 'Outfit, sans-serif' }}>
       <style>{`@keyframes skeletonPulse{0%{background-position:200% 0}100%{background-position:-200% 0}}`}</style>
 
-      {/* ─── Sticky Nav ─── */}
+      {/* ─── Nav ─── */}
       <nav style={{
-        position: 'sticky', top: 0, left: 0, right: 0, zIndex: 200,
+        position: 'relative', top: 0, left: 0, right: 0, zIndex: 200,
         height: NAV_H, display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         padding: '0 20px',
         background: 'rgba(var(--bg-page-rgb, 17,17,17),0.88)',
@@ -572,8 +572,27 @@ export default function MenuPage() {
       {/* ─── Hero ─── */}
       <MenuHero restaurant={restaurant} accent={accent} initials={initials} currency={currency} locale={locale} />
 
+      {/* ─── Hero action row ─── */}
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, padding: '16px clamp(16px,4vw,32px)' }}>
+        <button onClick={() => setGroupOrderOpen(true)} style={{
+          display: 'flex', alignItems: 'center', gap: 6, padding: '10px 18px', borderRadius: 20,
+          border: '1px solid var(--border)', background: 'var(--bg-elevated)',
+          color: 'var(--text-secondary)', fontSize: 13, fontWeight: 700, cursor: 'pointer',
+        }}>👥 Groepsbestelling</button>
+        <Link href={`/reserve/${slug}`} style={{
+          display: 'flex', alignItems: 'center', gap: 6, padding: '10px 18px', borderRadius: 20,
+          border: '1px solid var(--border)', background: 'var(--bg-elevated)',
+          color: 'var(--text-secondary)', fontSize: 13, fontWeight: 700, textDecoration: 'none',
+        }}>🍽️ Reserveer een tafel</Link>
+        <button onClick={() => setInfoOpen(true)} style={{
+          display: 'flex', alignItems: 'center', gap: 6, padding: '10px 18px', borderRadius: 20,
+          border: '1px solid var(--border)', background: 'var(--bg-elevated)',
+          color: 'var(--text-muted)', fontSize: 13, fontWeight: 700, cursor: 'pointer',
+        }}>ℹ️ Info</button>
+      </div>
+
       {/* ─── Sticky Search + Category Tabs ─── */}
-      <div style={{ position: 'sticky', top: NAV_H, zIndex: 100, background: 'var(--bg-page)', borderBottom: '1px solid var(--border)' }}>
+      <div style={{ position: 'sticky', top: 0, zIndex: 100, background: 'var(--bg-page)', borderBottom: '1px solid var(--border)' }}>
         <div style={{ maxWidth: 1200, margin: '0 auto', padding: '12px 24px 0' }}>
           <div style={{ position: 'relative' }}>
             <span style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', fontSize: 16, color: 'var(--text-muted)' }}>🔍</span>
@@ -680,24 +699,6 @@ export default function MenuPage() {
             })
           )}
 
-          {/* Bottom action row */}
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 40, justifyContent: 'center' }}>
-            <button onClick={() => setGroupOrderOpen(true)} style={{
-              display: 'flex', alignItems: 'center', gap: 6, padding: '10px 18px', borderRadius: 20,
-              border: '1px solid var(--border)', background: 'var(--bg-elevated)',
-              color: 'var(--text-secondary)', fontSize: 13, fontWeight: 700, cursor: 'pointer',
-            }}>👥 Groepsbestelling</button>
-            <Link href={`/reserve/${slug}`} style={{
-              display: 'flex', alignItems: 'center', gap: 6, padding: '10px 18px', borderRadius: 20,
-              border: '1px solid var(--border)', background: 'var(--bg-elevated)',
-              color: 'var(--text-secondary)', fontSize: 13, fontWeight: 700, textDecoration: 'none',
-            }}>🍽️ Reserveer een tafel</Link>
-            <button onClick={() => setInfoOpen(true)} style={{
-              display: 'flex', alignItems: 'center', gap: 6, padding: '10px 18px', borderRadius: 20,
-              border: '1px solid var(--border)', background: 'var(--bg-elevated)',
-              color: 'var(--text-muted)', fontSize: 13, fontWeight: 700, cursor: 'pointer',
-            }}>ℹ️ Info</button>
-          </div>
         </div>
 
         {/* ─── Winkelmandje Sidebar (desktop) ─── */}
